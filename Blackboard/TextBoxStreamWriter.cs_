@@ -1,0 +1,132 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Threading;
+using Timer = System.Threading.Timer;
+
+namespace BlackboardApi
+{
+	public class TextBoxStreamWriter : TextWriter
+	{
+		private StreamWriter logFile;
+		private Queue<string> pending;
+		private int maxLines;
+		private bool busy = false;
+		private bool flushing = false;
+		private TextBox output = null;
+		private delegate void AppendStringDelegate(string s);
+		private AppendStringDelegate AppendStringEH;
+		//private Timer tmrFlush;
+
+		public TextBoxStreamWriter(TextBox output, string logFile, int maxLines)
+		{
+			this.maxLines = maxLines;
+			this.output = output;
+			pending = new Queue<string>();
+			//tmrFlush = new Timer(new TimerCallback(TmrFlush_Tick), null, 50, 25);
+			AppendStringEH = new AppendStringDelegate(AppendString);
+			try
+			{
+				this.logFile = new StreamWriter(logFile, true);
+				this.logFile.WriteLine(this.logFile.NewLine);
+				this.logFile.WriteLine(DateTime.Now);
+			}
+			catch
+			{
+				this.logFile = null;
+			}
+		}
+
+		public TextBoxStreamWriter(TextBox output, int maxLines) : this(output, "", maxLines) { }
+
+		public TextBoxStreamWriter(TextBox output) : this(output, 512) { }
+
+		~TextBoxStreamWriter()
+		{
+			if (logFile != null)
+			{
+				try
+				{
+					logFile.Flush();
+					logFile.Close();
+					logFile.Dispose();
+				}
+				catch { }
+			}
+		}
+
+		public override void WriteLine(string value)
+		{
+			if (busy || flushing)
+			{
+				pending.Enqueue(value + NewLine);
+				return;
+			}
+			Flush();
+			busy = true;
+			base.Write(value + NewLine);
+			busy = false;
+		}
+
+		public override void Write(string value)
+		{
+			
+			if (busy || flushing)
+			{
+				pending.Enqueue(value);
+				return;
+			}
+			Flush();
+			busy = true;
+			base.Write(value);
+			busy = false;
+			
+		}
+
+		public override void Write(char value)
+		{
+			base.Write(value);
+			if (logFile != null) logFile.Write(value);
+			output.Invoke(AppendStringEH, new string[] { value.ToString() });
+		}
+
+		public override void Flush()
+		{
+			int n;
+			if ((flushing) || (pending.Count <= 0)) return;
+			flushing = true;
+			n = 100;
+			while (busy && (--n > 0))
+				System.Threading.Thread.Sleep(0);
+			if (busy)
+			{
+				flushing = false;
+				return;
+			}
+			
+			while (pending.Count > 0)
+			{
+				output.Invoke(AppendStringEH, new string[] { pending.Dequeue() });
+			}
+			base.Flush();
+			if(logFile != null)logFile.Flush();
+			flushing = false;
+		}
+
+		public override System.Text.Encoding Encoding
+		{
+			get { return System.Text.Encoding.UTF8; }
+		}
+
+		private void AppendString(string s)
+		{
+			try
+			{
+				if ((output.Text.Length > output.MaxLength) || (output.Lines.Length > maxLines)) output.Text = s;
+				output.AppendText(s);
+			}
+			catch { }
+		}
+	}
+}

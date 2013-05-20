@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+<module name="">
+	<programPath></programPath>
+	<programArgs></programArgs>
+	<startupCommand></startupCommand>
+	<ip>192.168.1.x</ip>
+	<port>2000</port>
+	<commands>
+		<command name="" answer="True" timeout="100" />
+		<command name="" answer="True" timeout="100" />
+		<command name="" answer="True" timeout="100" />
+	</commands>
+</module>
+
+-->
+<blackboard version="1.0">
+	
+	<configuration>
+		<port>2300</port>
+		<commands>
+			<!--
+			<command name="" answer="" timeout="" />
+			<command name="" answer="" timeout="" />
+			<command name="" answer="" timeout="" />
+			-->
+		</commands>
+	</configuration>
+
+	<modules>
+
+		<module name="ACN-PLN">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<ip>192.168.1.1</ip>
+			<port>2025</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="none" answer="False" parameters="False" timeout="100" />
+			</commands>
+		</module>
+		
+		<module name="MVN-PLN">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2011</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="go_to_room" answer="True" timeout="120000" />
+				<command name="mv" answer="True" timeout="60000" />
+				<command name="move" answer="True" timeout="60000" />
+				<command name="ic" answer="True" timeout="500" />
+				<command name="stop" answer="True" timeout="500" parameters="false" priority="True"/>
+			</commands>
+		</module>
+
+		<module name="FACE">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<ip>192.168.1.3</ip>
+			<port>2052</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="show" answer="True" timeout="30000" />
+				<command name="lookat" answer="True" timeout="5000" />
+			</commands>
+		</module>
+
+		<module name="SP-GEN">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="say" answer="True" timeout="60000" />
+				<command name="read" answer="True" timeout="60000" />
+				<command name="voice" answer="True" timeout="500" />
+				<command name="speech_mode" answer="True" timeout="500" />
+			</commands>
+		</module>
+
+		<module name="SP-REC">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<ip>192.168.1.3</ip>
+			<port>0</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+			</commands>
+		</module>
+
+		<module name="VISION">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2070</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="find_object" answer="True" timeout="60000" />
+				<command name="find_human" answer="True" timeout="60000" />
+				<command name="look_object" answer="True" timeout="3000" />
+				<command name="look_human" answer="True" timeout="3000" />
+				<command name="remember_human" answer="True" timeout="3000" />
+				<command name="auto_find_human" answer="True" timeout="3000" />
+			</commands>
+		</module>
+
+		<module name="MANIPULATOR">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2080</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="grab" answer="True" timeout="20000" />
+				<command name="release" answer="True" timeout="5000" />
+				<command name="take" answer="True" timeout="30000" />
+				<command name="drop" answer="True" timeout="10000" />
+			</commands>
+		</module>
+
+		<module />
+		
+	</modules>
+
+</blackboard>
+
+

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+<module name="">
+	<ip>192.168.1.x</ip>
+	<port>2000</port>
+	<aliveCheck>false</aliveCheck>
+	<requirePrefix>true</requirePrefix>
+	<onStart>
+		<killProcess name="" timeout="100" />
+		<checkProcess processName="" programPath="" programArgs=""/>
+		<run cmdLine="" />
+		<send command="" />
+	</onStart>
+	<onStop>
+		<killProcess name="" timeout="100" />
+		<checkProcess processName="" programPath="" programArgs=""/>
+		<run cmdLine="" />
+		<send command="" />
+	</onStop>
+	<commands>
+		<command name="" answer="True" timeout="100" />
+		<command name="" answer="True" timeout="100" />
+		<command name="" answer="True" timeout="100" />
+	</commands>
+</module>
+
+-->
+<blackboard version="1.0">
+	
+	<configuration>
+		<name>BLACKBOARD</name>
+		<port>2300</port>
+		<autoStopTime>300</autoStopTime>
+		<testTimeOut>270</testTimeOut>
+		<commands>
+			<command name="alive" answer="true" timeout="100" />
+			<command name="busy" answer="true" timeout="100" />
+		</commands>
+	</configuration>
+
+	<modules>
+
+		<module name="ACT-PLN">
+			<ip>127.0.0.1</ip>
+			<!--<ip>192.168.1.1</ip>//-->
+			<port>2025</port>
+			<aliveCheck>false</aliveCheck>
+			<requirePrefix>true</requirePrefix>
+			<commands>
+				<command name="recognized" answer="False" parameters="True" timeout="100"  priority="True" />
+			</commands>
+		</module>
+
+		<module name="SP-REC">
+			<ip>127.0.0.1</ip>
+			<port>2020</port>
+			<aliveCheck>false</aliveCheck>
+			<requirePrefix>false</requirePrefix>
+			<onStart>
+				<checkProcess processName="SpRec" programPath="..\SpRec\SpRec.exe" programArgs="-a 192.168.190.201 -w 2025 -r 2020 -g who_is_who.xml"/>
+				<send command="sprec_status" params="enable" id="1" />
+			</onStart>
+			<onStop>
+				<!--
+				<killProcess processName="SpRec" timeout="100" />
+				//-->
+				<send command="sprec_status" params="disable" id="1" />
+			</onStop>
+
+			<commands>
+				<command name="sprec_na" answer="False" parameters="True" priority="True" />
+				<command name="sprec_status" answer="True" timeout="500" />
+				<command name="load_grammar" answer="True" timeout="2000" />
+				<command name="recognized" answer="False" parameters="True" timeout="100" priority="True" />
+			</commands>
+		</module>
+
+		<module name="MVN-PLN">
+			<!--<ip>192.168.190.101</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2011</port>
+			<aliveCheck>false</aliveCheck>
+			<simulate>true</simulate>
+			<!-- <onStart>//-->
+			<!-- <killProcess name="" timeout="100" /> //-->
+			<!-- <checkProcess processName="MotionPlanner" programPath="D:\Robocup App\Motion Planner Tcp Threads\MotionPlanner\MotionPlanner\bin\Release\MotionPlanner.exe" programArgs=""/> //-->
+			<!-- <run cmdLine="" /> //-->
+			<!-- <send command="ic" params="45.9 65.0 1.5708" id="1"/> //-->
+			<!-- </onStart> //-->
+			<!-- <onStop>
+				<killProcess processName="MotionPlanner" timeout="100" />
+			</onStop> //-->
+			<commands>
+				<command name="go_to_room" answer="True" timeout="120000" />
+				<command name="mv" answer="True" timeout="60000" />
+				<command name="move" answer="True" timeout="60000" />
+				<command name="ic" answer="True" timeout="500" />
+				<command name="stop" answer="True" timeout="500" parameters="false"/>
+			</commands>
+		</module>
+
+		<module name="FACE">
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>false</aliveCheck>
+			<simulate>true</simulate>
+			<commands>
+				<command name="show" answer="True" timeout="30000"  priority="True" />
+				<command name="lookat" answer="True" timeout="5000" />
+			</commands>
+		</module>
+
+		<module name="SP-GEN">
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>false</aliveCheck>
+			<!-- <onStart>
+				<checkProcess processName="SocketSpeech" programPath="C:\Documents and Settings\Mau\Desktop\SocketSpeech\SocketSpeech\bin\Release\SocketSpeech.exe" programArgs=""/>
+				<send command="say" params="Blackboard is ready" id="1"/>
+			</onStart> //-->
+			<onRestartTest>
+				<checkProcess processName="Notepad" programPath="C:\Windows\System32\Notepad.exe" programArgs=""/>
+			</onRestartTest>
+			<onRestart>
+				<checkProcess processName="SocketSpeech" programPath="C:\Documents and Settings\Mau\Desktop\SocketSpeech\SocketSpeech\bin\Release\SocketSpeech.exe" programArgs=""/>
+				<send command="say" params="Blackboard is ready" id="1"/>
+			</onRestart>
+			<onTestTimeOut>
+				<send command="say" params="La prueba ha terminado. Ire afuera" id="1" />
+			</onTestTimeOut>
+			<onStop>
+				<send command="say" params="El Blackboard se ha detenido" id="1" />
+			</onStop>
+			<commands>
+				<command name="say" answer="True" timeout="60000" />
+				<command name="read" answer="True" timeout="60000" />
+				<command name="voice" answer="True" timeout="500" />
+				<command name="speech_mode" answer="True" timeout="500" />
+			</commands>
+		</module>
+
+		<module name="SP-REC">
+			<ip>192.168.1.3</ip>
+			<port>0</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+			</commands>
+		</module>
+
+		<module name="VISION">
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2070</port>
+			<commands>
+				<command name="find_object" answer="True" timeout="60000" />
+				<command name="find_human" answer="True" timeout="60000" />
+				<command name="locate_human" answer="True" timeout="3000" />
+			</commands>
+		</module>
+		
+		<module name="PRS-FND">
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2071</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="pf_find" answer="True" timeout="1000" parameters="true" priority="false" />
+			</commands>
+		</module>
+		
+		<module name="OBJ-FND">
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2072</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="of_find" answer="True" timeout="1000" parameters="true" priority="false" />
+				<command name="of_locate" answer="True" timeout="1000" parameters="true" priority="false" />
+			</commands>
+		</module>
+
+		<module name="PRS-REC">
+			<!--<ip>192.168.1.3</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2075</port>
+			<aliveCheck>false</aliveCheck>
+			<!--
+			<onStart>
+				<checkProcess processName="RostroID" programPath="..\VisionHuman\RostroID.exe" programArgs="" />
+				<checkProcess processName="VisionHuman" programPath="..\VisionHuman\VisionHuman.exe" programArgs="-a 127.0.0.1 -r 2075 -w 2300" />
+			</onStart>
+			<onStop>
+				<killProcess processName="VisionHuman" timeout="100" />
+				<killProcess processName="RostroID" timeout="100" />
+			</onStop>
+			//-->
+			<commands>
+				<command name="pr_auto" answer="True" timeout="500" parameters="true" priority="false" />
+				<command name="pr_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="pr_lookfor" answer="True" timeout="25000" parameters="true" priority="false" />
+				<command name="pr_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+			</commands>
+		</module>
+		
+		<module name="MANIPULATOR">
+
+			<ip>127.0.0.1</ip>
+			<port>2080</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="grab" answer="True" timeout="20000" />
+				<command name="release" answer="True" timeout="5000" />
+				<command name="take" answer="True" timeout="30000" />
+				<command name="drop" answer="True" timeout="10000" />
+			</commands>
+		</module>
+
+		<module />
+		
+	</modules>
+
+</blackboard>
+
+

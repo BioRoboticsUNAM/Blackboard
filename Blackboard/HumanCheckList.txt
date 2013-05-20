@@ -1,0 +1,3 @@
+﻿Todos los módulos fueron cargados
+Suficiente batería
+No hay zombies

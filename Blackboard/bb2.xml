@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<blackboard version="1.0">
+
+	<configuration>
+		<name>BLACKBOARD</name>
+		<port>2300</port>
+		<sendAttemps>0</sendAttemps>
+		<!--
+		<autoStopTime>480</autoStopTime>
+		<testTimeOut>450</testTimeOut>
+		//-->
+		<commands>
+		</commands>
+	</configuration>
+
+	<sharedVariables>
+		<var name="var1" />
+		<var name="var2" value="hello"/>
+		<var name="var3">
+			<writers>
+				<writer>*</writer>
+			</writers>
+		</var>
+	</sharedVariables>
+
+	<modules>
+
+		<module name="ACT-PLN">
+			<!--
+			<programPath></programPath>
+			<programArgs></programArgs>
+			<startupCommand></startupCommand>
+			-->
+			<!--<ip>192.168.190.121</ip>//-->
+			<!--<ip>192.168.1.1</ip>-->
+			<ip>192.168.190.112</ip>
+			<port>2025</port>
+			<sendDelay>1</sendDelay>
+			<aliveCheck>false</aliveCheck>
+			<requirePrefix>true</requirePrefix>
+			<onTestTimeOut>
+				<send command="timeout" params="%AutoStopTimeLeft%" id="1" />
+			</onTestTimeOut>
+			<commands>
+				<command name="addFact" answer="False" parameters="True" timeout="500"  priority="True" />
+				<command name="timeout" answer="False" parameters="True" />
+				<command name="recognized" answer="False" parameters="True" />
+			</commands>
+		</module>
+
+
+		<module name="MVN-PLN1" author="Marco Negrete" enabled="True" alias="MVN-PLN">
+
+			<ip>127.0.0.1</ip>
+			<port>2011</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="mp_move" answer="True" timeout="60000" />
+				<command name="mp_goto" answer="True" timeout="60000" />
+				<command name="mp_addobject" answer="True" timeout="2000" />
+				<command name="mp_obstacle" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_position" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_enablelaser" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_disablelaser" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_getclose" answer="True" timeout="60000" />
+				<command name="go_to_room" answer="True" timeout="120000" />
+				<command name="go_to_region" answer="True" timeout="120000" />
+				<command name="mv" answer="True" timeout="60000" />
+				<command name="ic" answer="True" timeout="10000" />
+				<command name="stop" answer="True" timeout="500" parameters="false" priority="True" />
+				<command name="report" answer="True" timeout="10000" />
+				<command name="getpos" answer="True" timeout="10000" />
+				<command name="mp_lectures" answer="True" timeout="2000" parameters="false" />
+
+			</commands>
+		</module>
+
+		<!--
+		<module name="MVN-PLN1" author="Marco Negrete" enabled="True" alias="MVN-PLN">
+			<onStart>
+				<send command="mp_position" params="4.59 6.50 1.5708" id="1" />
+			</onStart>
+			<onRestartTest>
+				<send command="mp_position" params="4.59 6.50 1.5708" id="1" />
+			</onRestartTest>
+			<onTestTimeOut>
+				<send command="mp_goto" params="outside" id="2"/>
+			</onTestTimeOut>
+			<ip>192.168.190.111</ip>
+			<port>2011</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>true</simulate>
+			<commands>
+				<command name="mp_move" answer="True" timeout="60000" />
+				<command name="mp_goto" answer="True" timeout="60000" />
+				<command name="mp_addobject" answer="True" timeout="2000" />
+				<command name="mp_obstacle" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_position" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_enablelaser" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_disablelaser" answer="True" timeout="2000" parameters="false" />
+				<command name="mp_getclose" answer="True" timeout="60000" />
+				<command name="go_to_room" answer="True" timeout="120000" />
+				<command name="go_to_region" answer="True" timeout="120000" />
+				<command name="mv" answer="True" timeout="60000" />
+				<command name="ic" answer="True" timeout="10000" />
+				<command name="stop" answer="True" timeout="500" parameters="false" priority="True" />
+				<command name="report" answer="True" timeout="10000" />
+				<command name="getpos" answer="True" timeout="10000" />
+				<command name="mp_lectures" answer="True" timeout="2000" parameters="false" />
+
+			</commands>
+		</module>
+		-->
+
+		<module name="MVN-PLN2" author="Marco Becerra" enabled="True" alias="MVN-PLN">
+			<!-- Ubuntu MABP -->
+			<!--<ip>192.168.190.116</ip> -->
+			<!-- <Robocup II> -->
+			<ip>192.168.1.1</ip>
+			<port>2011</port>
+			<aliveCheck>false</aliveCheck>
+			<simulate>true</simulate>
+			<commands>
+				<!-- Follow Human Commands -->
+				<command name="mp_findhuman" answer="true" timeout="10000" parameters="false" />
+				<command name="mp_calibratehuman" answer="true" timeout="5000" parameters="false" />
+				<command name="follow" answer="True" timeout="1000" parameters="true" />
+				<command name="mp_stop" answer="True" timeout="1000" parameters="true" />
+				<command name="mp_kill" answer="true" timeout="1000" parameters="false" />
+				<command name="mp_stoptrack" answer="true" timeout="1000" parameters="false" />
+				<command name="mp_move" answer="True" timeout="60000" />
+			</commands>
+		</module>
+
+		<module name="ARMS">
+			<onStart>
+				<send command="ra_torque" params="enable" id="1" />
+			</onStart>
+			<onRestartTest>
+				<send command="ra_torque" params="enable" id="1" />
+			</onRestartTest>
+			<ip>192.168.190.111</ip>
+			<port>2080</port>
+			<simulate>false</simulate>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="ra_goto" answer="True" timeout="20000" />
+				<command name="ra_abspos" answer="True" timeout="15000" parameters="false" />
+				<command name="ra_orientation" answer="True" timeout="10000" parameters="false" />
+				<command name="ra_opengrip" answer="True" timeout="10000" parameters="false" />
+				<command name="ra_closegrip" answer="True" timeout="10000" parameters="false" />
+				<command name="ra_getgripstatus" answer="True" timeout="1000" parameters="false" />
+				<command name="ra_torque" answer="True" timeout="1000" />
+				<command name="ra_relpos" answer="True" timeout="15000" />
+				<command name="ra_move" answer="True" timeout="25000" />
+			</commands>
+		</module>
+
+		<module name="MANIPULATOR">
+			<ip>127.0.0.1</ip>
+			<port>2081</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>True</simulate>
+			<commands>
+				<command name="man_grab" answer="True" timeout="10000" parameters="false" />
+				<command name="man_drop" answer="True" timeout="10000" parameters="false" />
+				<command name="man_open" answer="True" timeout="5000" parameters="false" />
+				<command name="man_close" answer="True" timeout="5000" parameters="false" />
+				<command name="man_tilt" answer="True" timeout="5000" parameters="true" />
+				<command name="man_status" answer="True" timeout="5000" parameters="false" />
+			</commands>
+		</module>
+
+		<module name="SENSORS">
+			<simulate>True</simulate>
+			<ip>127.0.0.1</ip>
+			<port>2015</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="sle_godown" answer="True" timeout="60000" parameters="false" />
+				<command name="sle_goup" answer="True" timeout="60000" parameters="false" />
+				<command name="sle_stop" answer="True" timeout="3000" parameters="false" />
+				<command name="sle_abspos" answer="True" timeout="60000" parameters="false" />
+				<command name="sle_relpos" answer="True" timeout="60000" parameters="true" />
+				<command name="sle_check" answer="True" timeout="3000" parameters="false" />
+				<command name="sle_restart" answer="True" timeout="60000" parameters="false" />
+
+			</commands>
+		</module>
+
+		<module name="SP-GEN">
+			<onTestTimeOut>
+				<send command="spg_say" params="I have ran out of time. It is time to leave the arena" id="1" />
+			</onTestTimeOut>
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="spg_say" answer="true" timeout="20000" priority="True" />
+				<command name="say" answer="true" timeout="20000" priority="True" />
+				<command name="spg_asay" answer="true" timeout="500" priority="True" />
+				<command name="spg_read" answer="true" timeout="120000" priority="True" />
+				<command name="read" answer="true" timeout="120000" priority="True" />
+				<command name="spg_aread" answer="true" timeout="500" priority="True" />
+				<command name="spg_aplay" answer="true" timeout="500" priority="True" />
+				<command name="spg_playloop" answer="true" timeout="500" priority="True" />
+				<command name="spg_shutup" answer="true" timeout="500"  parameters="False" />
+				<command name="spg_play" answer="true" timeout="120000" priority="True" />
+				<command name="spg_voice" answer="True" timeout="500" parameters="True" />
+			</commands>
+		</module>
+
+		<module name="SP-REC">
+			<ip>127.0.0.1</ip>
+			<port>2020</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<!--
+				<command name="sprec_na" answer="False" parameters="True" priority="True" />
+				<command name="sprec_status" answer="True" timeout="500" />
+			//-->
+				<command name="sprec_na" answer="False" parameters="True" priority="True" />
+				<command name="spr_status" answer="True" timeout="2000" priority="True" />
+				<command name="spr_grammar" answer="True" parameters="False" timeout="5000" priority="True" />
+				<command name="spr_words" answer="True" timeout="2000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="PRS-FND">
+			<ip>127.0.0.1</ip>
+			<!--<ip>192.168.1.5</ip>-->
+			<port>2075</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="pf_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="pf_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+				<command name="pf_auto" answer="True" timeout="500" parameters="true" priority="true" />
+				<command name="pf_sleep" answer="True" timeout="500" parameters="true" priority="true" />
+				<command name="pf_shutdown" answer="True" timeout="500" parameters="true" priority="true" />
+			</commands>
+		</module>
+
+		<module name="OBJ-FNDT">
+			<!--
+			<ip>127.0.0.1</ip>
+			//-->
+			<ip>192.168.190.102</ip>
+			<port>2070</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>False</simulate>
+
+			<onStop>
+				<send command="oft_kill" params="" id="1" />
+			</onStop>
+
+			<commands>
+				<command name="oft_find" answer="True" timeout="60000" parameters="true" priority="false" />
+				<command name="oft_height" answer="True" timeout="10000" parameters="false" priority="false" />
+				<command name="oft_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+				<command name="oft_removetable" answer="True" timeout="30000" parameters="false" priority="false" />
+				<command name="oft_findontable" answer="True" timeout="60000" parameters="false" priority="false" />
+			</commands>
+		</module>
+
+		<module name="OBJ-FNDM">
+			<!--
+			<ip>127.0.0.1</ip>
+			//-->
+			<ip>192.168.190.111</ip>
+			<port>2071</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>True</simulate>
+
+			<onStop>
+				<send command="ofm_kill" params="" id="1" />
+			</onStop>
+
+			<commands>
+				<command name="ofm_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="ofm_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+			</commands>
+		</module>
+
+		<module name="OBJ-FNDB">
+			<!--
+			<ip>127.0.0.1</ip>
+			//-->
+			<ip>192.168.190.111</ip>
+			<port>2072</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>True</simulate>
+
+			<onStop>
+				<send command="ofb_kill" params="" id="1" />
+			</onStop>
+
+			<commands>
+				<command name="ofb_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="ofb_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+			</commands>
+		</module>
+
+		<module name="KNT-TRK">
+			<ip>192.168.1.2</ip>
+			<port>2074</port>
+			<aliveCheck>false</aliveCheck>
+			<requirePrefix>false</requirePrefix>
+			<simulate>True</simulate>
+
+			<commands>
+				<command name="kt_find" answer="True" timeout="2000" />
+				<command name="kt_snapshot" answer="True" timeout="2000" />
+				<command name="kt_remember" answer="True" timeout="130000" />
+			</commands>
+		</module>
+
+		<module name="HEAD">
+			<onStart>
+				<send command="hd_show" params="normal" id="1" />
+			</onStart>
+			<onRestart>
+				<send command="hd_show" params="normal" id="1" />
+			</onRestart>
+			<onRestartTest>
+				<send command="hd_show" params="normal" id="1" />
+			</onRestartTest>
+			<ip>192.168.190.111</ip>
+			<port>2090</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>false</simulate>
+			<commands>
+				<command name="hd_show" answer="True" timeout="60000" />
+				<command name="hd_stop" answer="True" timeout="5000" parameters="false" priority="True" />
+				<command name="hd_lookat" answer="True" timeout="10000" />
+				<command name="hd_lookatrel" answer="True" timeout="10000" />
+				<command name="hd_lookatobject" answer="True" timeout="10000" />
+			</commands>
+		</module>
+
+		<module name="ST-PLN">
+			<onStart>
+				<send command="check_systems" params="quickloop" id="1" />
+			</onStart>
+			<ip>192.168.190.111</ip>
+			<port>2400</port>
+			<aliveCheck>false</aliveCheck>
+			<commands>
+				<command name="check_systems" answer="True" timeout="60000" priority="True" />
+				<command name="dopresentation" answer="True" timeout="120000" parameters ="false" priority="True" />
+				<command name="drop" answer="True" timeout="30000" parameters ="True" priority="True" />
+				<command name="see_hand" answer="True" timeout="60000" parameters ="false" priority="True" />
+				<command name="greethuman" answer="True" timeout="15000" priority="True" />
+				<command name="music" answer="True" timeout="15000" priority="True" />
+				<command name="align_human" answer="True" timeout="15000" priority="True" />
+				<command name="find_human" answer="True" timeout="45000"  priority="True" />
+				<command name="remember_human" answer="True" timeout="60000"  priority="True" />
+				<command name="find_object" answer="True"  timeout="45000" priority="True" />
+				<command name="grab" answer="True" timeout="5000" parameters ="false" priority="True" />
+				<command name="release" answer="True" timeout="5000" parameters ="false" priority="True" />
+				<command name="detected" answer="True" timeout="5000" parameters ="false" priority="True" />
+				<command name="search_object" answer="True" timeout="45000"  priority="True" />
+				<command name="see_object" answer="True" timeout="45000" parameters ="false" priority="True" />
+				<command name="take" answer="True" timeout="45000" parameters ="false" priority="True" />
+				<command name="wait_sec" answer="True" timeout="120000"  priority="True" />
+				<command name="shutdown" answer="True" timeout="30000" parameters="false" priority="True" />
+				<command name="begin_follow" answer="True" timeout="180000" parameters ="false" priority="True" />
+				<command name="stop_follow" answer="True" timeout="5000" parameters ="false" priority="True" />
+				<command name="busca_persona" answer="True" timeout="60000" parameters ="false" priority="True" />
+				<command name="find_table" answer="True" timeout="180000" parameters ="false" priority="True" />
+			</commands>
+		</module>
+	</modules>
+
+</blackboard>

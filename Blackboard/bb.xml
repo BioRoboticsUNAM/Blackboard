@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blackboard version="1.0">
+
+	<configuration>
+		<name>BLACKBOARD</name>
+		<port>2300</port>
+		<sendAttemps>0</sendAttemps>
+		<!--
+		<autoStopTime>480</autoStopTime>
+		<testTimeOut>450</testTimeOut>
+		//-->
+		<commands>
+		</commands>
+
+		<startupSequence>
+			<module>ACT-PLN</module>
+			<module>MVN-PLN</module>
+		</startupSequence>
+	</configuration>
+
+	<!--
+	//-->
+	<sharedVariables>
+		<var name="var1" type="var"/>
+		<var name="var2" type="string" value="hello"/>
+		<var name="var3" type="double[]">
+			<writers>
+				<writer>*</writer>
+			</writers>
+		</var>
+		<var name="var4">
+			<writers>
+				<writer>MVN-PLN</writer>
+			</writers>
+		</var>
+	</sharedVariables>
+	
+	<modules>
+
+		<module name="ALEX">
+			<ip>192.168.190.100</ip>
+			<port>1500</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="kc_route" answer="true" timeout="20000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="FOO">
+			<ip>127.0.0.1</ip>
+			<port>2500</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="foo" answer="true" timeout="20000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="ACT-PLN" author="Jesus Savage" enabled="True" alias="ACT-PLN">
+			<!--<ip>192.168.190.102</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2025</port>
+			<program processName="ActionPlanner" path="../Program.exe" />
+			<commands>
+				<command name="add_fact" answer="True" timeout="300" />
+			</commands>
+		</module>
+
+		<module name="ACT-PLN" author="Dummy" enabled="True" alias="ACT-PLN">
+			<!--<ip>192.168.190.102</ip>//-->
+			<ip>127.0.0.1</ip>
+			<port>2025</port>
+			<program processName="ActionPlanner" path="../Program.exe" />
+			<commands>
+				<command name="add_fact" answer="True" timeout="300" />
+				<command name="foo" answer="True" timeout="300" />
+			</commands>
+		</module>
+		
+		<module name="MVN-PLN" author="Marco Negrete" enabled="True" alias="MVN-PLN">
+			<ip>127.0.0.1</ip>
+			<ip>192.168.190.205</ip>
+			<port>2011</port>
+			<program processName="MotionPlanner" path="../mvnpln.exe" />
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="mv" answer="True" timeout="60000" />
+				<command name="ic" answer="True" timeout="10000" />
+				<command name="stop" answer="True" timeout="500" parameters="false" priority="True" />
+				<command name="mp_lectures" answer="True" timeout="2000" parameters="false" />
+			</commands>
+		</module>
+
+		<module name="PRS-FND" enabled="false">
+			<ip>127.0.0.1</ip>
+			<!--<ip>192.168.1.5</ip>-->
+			<port>2075</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>true</simulate>
+			<commands>
+				<command name="pf_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="pf_remember" answer="True" timeout="25000" parameters="true" priority="false" />
+				<command name="pf_auto" answer="True" timeout="500" parameters="true" priority="true" />
+				<command name="pf_sleep" answer="True" timeout="500" parameters="true" priority="true" />
+				<command name="pf_shutdown" answer="True" timeout="500" parameters="true" priority="true" />
+			</commands>
+		</module>
+
+		<module name="SP-REC">
+			<ip>127.0.0.1</ip>
+			<port>2020</port>
+			<aliveCheck>true</aliveCheck>
+			<!--<simulate>true</simulate>//-->
+			<commands>
+				<command name="sprec_na" answer="False" parameters="True" priority="True" />
+				<command name="spr_status" answer="True" timeout="2000" priority="True" />
+				<command name="spr_grammar" answer="True" parameters="False" timeout="5000" priority="True" />
+				<command name="spr_words" answer="True" timeout="2000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="SP-GEN">
+			<onTestTimeOut>
+				<send command="spg_say" params="I have ran out of time. It is time to leave the arena" id="1" />
+			</onTestTimeOut>
+			<ip>127.0.0.1</ip>
+			<port>2052</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="spg_say" answer="true" timeout="20000" priority="True" />
+				<command name="say" answer="true" timeout="20000" priority="True" />
+				<command name="spg_asay" answer="true" timeout="500" priority="True" />
+				<command name="spg_read" answer="true" timeout="120000" priority="True" />
+				<command name="read" answer="true" timeout="120000" priority="True" />
+				<command name="spg_aread" answer="true" timeout="500" priority="True" />
+				<command name="spg_aplay" answer="true" timeout="500" priority="True" />
+				<command name="spg_playloop" answer="true" timeout="500" priority="True" />
+				<command name="spg_shutup" answer="true" timeout="500"  parameters="False" />
+				<command name="spg_play" answer="true" timeout="120000" priority="True" />
+				<command name="spg_voice" answer="True" timeout="500" parameters="True" />
+			</commands>
+		</module>
+
+		<module name="SENSORS">
+			<ip>127.0.0.1</ip>
+			<port>2015</port>
+			<aliveCheck>true</aliveCheck>
+			<simulate>false</simulate>
+			<commands>
+				<command name="jc_start" answer="False" timeout="300000" parameters="false" />
+				<command name="jc_stop" answer="True" timeout="1000" parameters="false" />
+
+			</commands>
+		</module>
+	
+	</modules>
+
+</blackboard>

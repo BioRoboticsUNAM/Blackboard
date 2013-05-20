@@ -1,0 +1,406 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Blk.Gui</RootNamespace>
+    <AssemblyName>Blackboard</AssemblyName>
+    <ApplicationIcon>Resources\star2_48.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Robotics, Version=0.10.24.28, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Robotics\Robotics\bin\Release\Robotics.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FrmBlackboardSecondaryScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBlackboardSecondaryScreen.Designer.cs">
+      <DependentUpon>FrmBlackboardSecondaryScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmHumanCheckList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmHumanCheckList.Designer.cs">
+      <DependentUpon>FrmHumanCheckList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmModuleActions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmModuleActions.Designer.cs">
+      <DependentUpon>FrmModuleActions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUISettings.cs" />
+    <Compile Include="InjectedString.cs" />
+    <Compile Include="InjectorTool.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="InjectorTool.Designer.cs">
+      <DependentUpon>InjectorTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InteractionTool.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="InteractionTool.Designer.cs">
+      <DependentUpon>InteractionTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MachineStatusControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MachineStatusControl.Designer.cs">
+      <DependentUpon>MachineStatusControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBlackboard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBlackboard.Designer.cs">
+      <DependentUpon>FrmBlackboard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PowerMeter.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PowerMeter.Designer.cs">
+      <DependentUpon>PowerMeter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FrmBlackboard.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FrmBlackboard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBlackboardSecondaryScreen.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FrmBlackboardSecondaryScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmHumanCheckList.resx">
+      <DependentUpon>FrmHumanCheckList.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmModuleActions.resx">
+      <DependentUpon>FrmModuleActions.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InjectorTool.resx">
+      <DependentUpon>InjectorTool.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InteractionTool.resx">
+      <DependentUpon>InteractionTool.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MachineStatusControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MachineStatusControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PowerMeter.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PowerMeter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BlackboardApi\BlackboardApi.csproj">
+      <Project>{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}</Project>
+      <Name>BlackboardApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BlackboardEngine\BlackboardEngine.csproj">
+      <Project>{0CA0E010-29CB-4160-811D-4554BA479669}</Project>
+      <Name>BlackboardEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\err48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\ok48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\ok32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\ok24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\ok16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\err32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\err24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\err16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\wrn16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\wrn24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\wrn32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\wrn48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\busy16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\busy24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\busy32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\busy48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ZoomHS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bb.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Images\BatteryIcons\ACPpow_24.png" />
+    <None Include="Images\BatteryIcons\ACPpow_32.png" />
+    <None Include="Images\BatteryIcons\ACPpow_48.png" />
+    <None Include="Images\BatteryIcons\ACPpow_16.png" />
+    <Content Include="bb2.xml" />
+    <None Include="Icons\Thunder_48.ico" />
+    <None Include="Icons\Thunder_16.ico" />
+    <None Include="Images\ArrowNext_16.png" />
+    <None Include="Images\ArrowNext_24.png" />
+    <None Include="Images\ArrowNext_32.png" />
+    <None Include="Images\ArrowNext_48.png" />
+    <Content Include="HumanCheckList.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\BatteryIcons\BatChr000_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr000_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr000_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr000_48.png" />
+    <Content Include="Images\BatteryIcons\BatChr020_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr020_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr020_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr020_48.png" />
+    <Content Include="Images\BatteryIcons\BatChr040_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr040_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr040_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr040_48.png" />
+    <Content Include="Images\BatteryIcons\BatChr060_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr060_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr060_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr060_48.png" />
+    <Content Include="Images\BatteryIcons\BatChr080_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr080_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr080_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr080_48.png" />
+    <Content Include="Images\BatteryIcons\BatChr100_16.png" />
+    <Content Include="Images\BatteryIcons\BatChr100_24.png" />
+    <Content Include="Images\BatteryIcons\BatChr100_32.png" />
+    <Content Include="Images\BatteryIcons\BatChr100_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis000_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis000_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis000_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis000_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis020_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis020_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis020_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis020_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis040_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis040_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis040_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis040_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis060_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis060_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis060_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis060_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis080_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis080_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis080_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis080_48.png" />
+    <Content Include="Images\BatteryIcons\BatDis100_16.png" />
+    <Content Include="Images\BatteryIcons\BatDis100_24.png" />
+    <Content Include="Images\BatteryIcons\BatDis100_32.png" />
+    <Content Include="Images\BatteryIcons\BatDis100_48.png" />
+    <Content Include="Images\BatteryIcons\BatUnknown_16.png" />
+    <Content Include="Images\BatteryIcons\BatUnknown_24.png" />
+    <Content Include="Images\BatteryIcons\BatUnknown_32.png" />
+    <Content Include="Images\BatteryIcons\BatUnknown_48.png" />
+    <None Include="Images\NoRed_32.png" />
+    <None Include="Images\NoRed_24.png" />
+    <None Include="Images\NoRed_16.png" />
+    <None Include="Images\NoRed_48.png" />
+    <None Include="Images\ExitRed_24.png" />
+    <None Include="Images\ExitRed_16.png" />
+    <None Include="Images\ExitGreen_48.png" />
+    <None Include="Images\ExitGreen_32.png" />
+    <None Include="Images\ExitGreen_24.png" />
+    <None Include="Images\ExitGreen_16.png" />
+    <None Include="Images\ExitRed_48.png" />
+    <None Include="Images\ExitRed_32.png" />
+    <None Include="Images\InjectBlue_32.png" />
+    <None Include="Images\InjectBlue_24.png" />
+    <None Include="Images\InjectBlue_16.png" />
+    <None Include="Images\InjectBlue_48.png" />
+    <None Include="Images\InjectGreen_48.png" />
+    <None Include="Images\InjectGreen_32.png" />
+    <None Include="Images\InjectGreen_24.png" />
+    <None Include="Images\InjectGreen_16.png" />
+    <None Include="Images\Thunder_24.png" />
+    <None Include="Images\Thunder_16.png" />
+    <None Include="Images\Thunder_64.png" />
+    <None Include="Images\Thunder_48.png" />
+    <None Include="Images\Thunder_32.png" />
+    <None Include="Images\CircleOrange_48.png" />
+    <None Include="Images\CircleOrange_32.png" />
+    <None Include="Images\CircleOrange_24.png" />
+    <None Include="Images\CircleOrange_16.png" />
+    <None Include="Images\CircleGreen_48.png" />
+    <None Include="Images\CircleGreen_32.png" />
+    <None Include="Images\CircleGreen_24.png" />
+    <None Include="Images\CircleGreen_16.png" />
+    <None Include="Images\CircleGray_48.png" />
+    <None Include="Images\CircleGray_32.png" />
+    <None Include="Images\CircleGray_24.png" />
+    <None Include="Images\CircleGray_16.png" />
+    <None Include="Images\CircleBlue_48.png" />
+    <None Include="Images\CircleBlue_32.png" />
+    <None Include="Images\CircleBlue_24.png" />
+    <None Include="Images\CircleBlue_16.png" />
+    <None Include="Resources\Refresh_16.png" />
+    <None Include="Resources\Stop_32.png" />
+    <None Include="Resources\Stop_24.png" />
+    <None Include="Resources\Stop_16.png" />
+    <None Include="Resources\Refresh_32.png" />
+    <None Include="Resources\Refresh_24.png" />
+    <None Include="Images\ProcessInfo64.png" />
+    <None Include="Images\ProcessInfo48.png" />
+    <None Include="Images\ProcessInfo32.png" />
+    <None Include="Images\ProcessInfo24.png" />
+    <None Include="Images\ProcessInfo16.png" />
+    <None Include="Images\ProcessWarning64.png" />
+    <None Include="Images\ProcessWarning48.png" />
+    <None Include="Images\ProcessWarning32.png" />
+    <None Include="Images\ProcessWarning24.png" />
+    <None Include="Images\ProcessWarning16.png" />
+    <None Include="Images\Wired32.png" />
+    <None Include="Images\Wired24.png" />
+    <None Include="Images\Wired16.png" />
+    <None Include="Images\Unknown64.png" />
+    <None Include="Images\Unknown48.png" />
+    <None Include="Images\Unknown32.png" />
+    <None Include="Images\Unknown24.png" />
+    <None Include="Images\Unknown16.png" />
+    <None Include="Images\StopDisabled48.png" />
+    <None Include="Images\StopDisabled32.png" />
+    <None Include="Images\StopDisabled24.png" />
+    <None Include="Images\StopDisabled16.png" />
+    <None Include="Images\Skull32.png" />
+    <None Include="Images\Skull24.png" />
+    <None Include="Images\Skull16.png" />
+    <None Include="Images\RecordDisabled48.png" />
+    <None Include="Images\RecordDisabled32.png" />
+    <None Include="Images\RecordDisabled24.png" />
+    <None Include="Images\RecordDisabled16.png" />
+    <None Include="Images\ProcessOk64.png" />
+    <None Include="Images\ProcessOk48.png" />
+    <None Include="Images\ProcessOk32.png" />
+    <None Include="Images\ProcessOk24.png" />
+    <None Include="Images\ProcessOk16.png" />
+    <None Include="Images\PauseDisabled48.png" />
+    <None Include="Images\PauseDisabled32.png" />
+    <None Include="Images\PauseDisabled24.png" />
+    <None Include="Images\PauseDisabled16.png" />
+    <None Include="Images\LinkBreak32.png" />
+    <None Include="Images\LinkBreak24.png" />
+    <None Include="Images\LinkBreak16.png" />
+    <None Include="Images\Gear32.png" />
+    <None Include="Images\Gear24.png" />
+    <None Include="Images\Gear16.png" />
+    <None Include="Images\Zombie48.png" />
+    <None Include="Images\Zombie32.png" />
+    <None Include="Images\Zombie24.png" />
+    <None Include="Images\Zombie16.png" />
+    <None Include="Images\Zombie64.png" />
+    <None Include="Images\BatteryIcons\Thumbs.db" />
+    <None Include="Images\stop48.png" />
+    <None Include="Images\stop32.png" />
+    <None Include="Images\stop16.png" />
+    <None Include="Images\run64.png" />
+    <None Include="Images\run48.png" />
+    <None Include="Images\run32.png" />
+    <None Include="Images\run16.png" />
+    <None Include="Images\stop64.png" />
+    <None Include="Images\refresh16.png" />
+    <None Include="Images\refresh24.png" />
+    <None Include="Images\refresh32.png" />
+    <None Include="Images\refresh48.png" />
+    <None Include="Resources\star2_48.ico" />
+    <None Include="Resources\1267652630_lock_open_48.ico" />
+    <None Include="Resources\star2.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
