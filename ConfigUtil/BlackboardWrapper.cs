@@ -194,7 +194,7 @@ namespace ConfigUtil
 		{
 			if (this.blackboard == null)
 				return false;
-			foreach (Module m in this.blackboard.Modules)
+			foreach (ModuleClient m in this.blackboard.Modules)
 			{
 				if ((moduleName == m.Name) || (moduleName == m.Alias))
 					return true;
@@ -207,7 +207,7 @@ namespace ConfigUtil
 		/// </summary>
 		/// <param name="module">Module to locate in the module collection of the blackboard</param>
 		/// <returns>true if module is in the collection. false otherwise</returns>
-		public bool ContainsModule(Module module)
+		public bool ContainsModule(ModuleClient module)
 		{
 			if (this.blackboard == null)
 				return false;
@@ -223,7 +223,7 @@ namespace ConfigUtil
 		{
 			if (this.blackboard == null)
 				return false;
-			foreach (Module m in this.blackboard.Modules)
+			foreach (ModuleClient m in this.blackboard.Modules)
 				if (m.Prototypes.Contains(prototype)) return true;
 			return false;
 		}
@@ -237,7 +237,7 @@ namespace ConfigUtil
 		{
 			if (this.blackboard == null)
 				return false;
-			foreach (Module m in this.blackboard.Modules)
+			foreach (ModuleClient m in this.blackboard.Modules)
 			{
 				foreach (Prototype prototype in m.Prototypes)
 					if (prototype.Command == commandName) return true;

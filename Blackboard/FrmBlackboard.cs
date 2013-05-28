@@ -68,7 +68,7 @@ namespace Blk.Gui
 		/// <summary>
 		/// Module selected using one of the buttons
 		/// </summary>
-		private Module selectedMC;
+		private ModuleClient selectedMC;
 		/// <summary>
 		/// Represents the UpdateModuleInfo method. Used for async calls
 		/// </summary>
@@ -308,7 +308,7 @@ namespace Blk.Gui
 
 		#region Methods
 
-		private void AddModuleButton(Module mc)
+		private void AddModuleButton(ModuleClient mc)
 		{
 			Button b = CreateModuleButton(mc);
 			flpModuleList.Controls.Add(b);
@@ -316,7 +316,7 @@ namespace Blk.Gui
 			b.Click += new EventHandler(moduleButton_Click);
 		}
 
-		private void AddModuleMenu(Module mc)
+		private void AddModuleMenu(ModuleClient mc)
 		{
 			ToolStripMenuItem mnu = (ToolStripMenuItem)mnuiModules.DropDownItems.Add(mc.Name);
 			mnu.DropDownOpening += new EventHandler(ModuleMenu_DropDownOpening);
@@ -329,7 +329,7 @@ namespace Blk.Gui
 
 		private void PopulateModuleMenu(ToolStripMenuItem mnu)
 		{
-			Module mc = mnu.Tag as Module;
+			ModuleClient mc = mnu.Tag as ModuleClient;
 			if (mc == null)
 				return;
 			mnu.DropDownItems.Clear();
@@ -345,7 +345,7 @@ namespace Blk.Gui
 			PopulateModuleMenu_ZombieCheck(mnu, mc);
 		}
 
-		private void PopulateModuleMenu_CheckAndRun(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_CheckAndRun(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni = (ToolStripMenuItem)mnu.DropDownItems.Add("&Run (if not running)");
 			mni.Image = Properties.Resources.ProcessOk16;
@@ -354,7 +354,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_CheckAndRun_Click);
 		}
 
-		private void PopulateModuleMenu_CloseAndKill(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_CloseAndKill(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni = (ToolStripMenuItem)mnu.DropDownItems.Add("Close and &Kill");
 			mni.Image = Properties.Resources.Skull16;
@@ -363,7 +363,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_CloseAndKill_Click);
 		}
 
-		private void PopulateModuleMenu_Enabled(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_Enabled(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni;
 
@@ -374,7 +374,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_Enabled_Click);
 		}
 
-		private void PopulateModuleMenu_Restart(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_Restart(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni;
 
@@ -385,7 +385,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_Restart_Click);
 		}
 
-		private void PopulateModuleMenu_Run(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_Run(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni = (ToolStripMenuItem)mnu.DropDownItems.Add("Run (&unconditionally)");
 			mni.Image = Properties.Resources.ProcessWarning16;
@@ -394,7 +394,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_Run_Click);
 		}
 
-		private void PopulateModuleMenu_Simulation(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_Simulation(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni = (ToolStripMenuItem)mnu.DropDownItems.Add(mc.Simulation.SimulationEnabled ?
 						 "&Simulation enabled" : "&Simulation disabled");
@@ -406,7 +406,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_Simulation_Click);
 		}
 
-		private void PopulateModuleMenu_Start(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_Start(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni;
 
@@ -417,7 +417,7 @@ namespace Blk.Gui
 			mni.Click += new EventHandler(mnuiModule_Module_Start_Click);
 		}
 
-		private void PopulateModuleMenu_ZombieCheck(ToolStripMenuItem mnu, Module mc)
+		private void PopulateModuleMenu_ZombieCheck(ToolStripMenuItem mnu, ModuleClient mc)
 		{
 			ToolStripMenuItem mni = (ToolStripMenuItem)mnu.DropDownItems.Add("&Check for zombie processes");
 			mni.Image = Properties.Resources.ProcessInfo16;
@@ -428,7 +428,7 @@ namespace Blk.Gui
 
 		#endregion
 
-		private void AddSecondaryModuleButton(Module mc)
+		private void AddSecondaryModuleButton(ModuleClient mc)
 		{
 			Button b2 = CreateModuleButton(mc);
 			frmBbss.FlpModuleList.Controls.Add(b2);
@@ -591,7 +591,7 @@ namespace Blk.Gui
 			blackboard.VirtualModule.Send(new Command(blackboard.VirtualModule, blackboard.VirtualModule, "mystat", sb.ToString()));
 		}
 
-		private Button CreateModuleButton(Module mc)
+		private Button CreateModuleButton(ModuleClient mc)
 		{
 			Button b = new Button();
 			b.Name = "btn" + mc.Name;
@@ -711,7 +711,7 @@ namespace Blk.Gui
 			}
 		}
 
-		private void ModuleEnableDisable(Module module)
+		private void ModuleEnableDisable(ModuleClientTcp module)
 		{
 			if (module == null)
 				
@@ -724,41 +724,41 @@ namespace Blk.Gui
 			UpdateModuleInfo();
 		}
 
-		private void ModuleProcessRun(Module module)
+		private void ModuleProcessRun(ModuleClientTcp module)
 		{
 			if ((processManager == null) || (module == null))
 				return;
 			processManager.LaunchModule(module, ModuleStartupMethod.LaunchAlways);
 		}
 
-		private void ModuleProcessCheckRun(Module module)
+		private void ModuleProcessCheckRun(ModuleClientTcp module)
 		{
 			if ((blackboard == null) || !blackboard.IsRunning || (module == null) || !module.Enabled)
 				return;
 			processManager.LaunchModule(module, ModuleStartupMethod.LaunchIfNotRunning);
 		}
 
-		private void ModuleProcessKill(Module module)
+		private void ModuleProcessKill(ModuleClientTcp module)
 		{
 			if ((processManager == null) || (module == null))
 				return;
 			processManager.ShutdownModule(module, ModuleShutdownMethod.CloseThenKill);
 		}
 
-		private void ModuleProcessZombieCheck(Module module)
+		private void ModuleProcessZombieCheck(ModuleClient module)
 		{
 			if ((processManager == null) || (module == null))
 				return;
 		}
 
-		private void ModuleRestart(Module module)
+		private void ModuleRestart(ModuleClient module)
 		{
 			if ((blackboard == null) || !blackboard.IsRunning || (module == null) || !module.Enabled)
 				return;
 			module.Restart();
 		}
 
-		private void ModuleStart(Module module)
+		private void ModuleStart(ModuleClient module)
 		{
 			module.Start();
 			btnModuleStartStopModule.Enabled = false;
@@ -770,7 +770,7 @@ namespace Blk.Gui
 			btnModuleStartStopModule.Enabled = true;
 		}
 
-		private void ModuleStartStop(Module module)
+		private void ModuleStartStop(ModuleClient module)
 		{
 			if ((blackboard == null) || !blackboard.IsRunning || (module == null) || !module.Enabled) return;
 			if (module.IsRunning)
@@ -779,7 +779,7 @@ namespace Blk.Gui
 				ModuleStart(module);
 		}
 
-		private void ModuleStop(Module module)
+		private void ModuleStop(ModuleClient module)
 		{
 			module.BeginStop();
 			btnModuleStartStopModule.Enabled = false;
@@ -939,7 +939,7 @@ namespace Blk.Gui
 			mnuiModules.DropDownItems.Clear();
 			foreach (IModule im in blackboard.Modules)
 			{
-				Module mc = im as Module;
+				ModuleClient mc = im as ModuleClient;
 				if (mc == null) continue;
 				mc.StatusChanged += new StatusChangedEH(module_StatusChanged);
 				AddModuleButton(mc);
@@ -984,8 +984,11 @@ namespace Blk.Gui
 				return;
 			}
 
-			txtRemoteIPAddress.Text = selectedMC.ServerAddresses.ToString();
-			txtOutputPort.Text = selectedMC.Port.ToString();
+			if (selectedMC is ModuleClientTcp)
+			{
+				txtRemoteIPAddress.Text = ((ModuleClientTcp)selectedMC).ServerAddresses.ToString();
+				txtOutputPort.Text = ((ModuleClientTcp)selectedMC).Port.ToString();
+			}
 			txtModuleName.Text = selectedMC.Name;
 			btnModuleSimulation.Visible = selectedMC.Enabled;
 			btnModuleSimulation.Image = selectedMC.Simulation.SimulationEnabled ?
@@ -1119,12 +1122,12 @@ namespace Blk.Gui
 			this.interactionTool.SelectedModule = selectedMC;
 		}
 
-		private void SimulateModule(Module module, SimulationType simulationType)
+		private void SimulateModule(ModuleClient module, SimulationType simulationType)
 		{
 			SimulateModule(module, simulationType, 1.0);
 		}
 
-		private void SimulateModule(Module module, SimulationType simulationType, double simulationRatio)
+		private void SimulateModule(ModuleClient module, SimulationType simulationType, double simulationRatio)
 		{
 			bool wasRunning;
 
@@ -1521,13 +1524,13 @@ namespace Blk.Gui
 
 		private void moduleButton_Click(object sender, EventArgs e)
 		{
-			Module mc;
+			ModuleClient mc;
 			try
 			{
 				if (!(sender is Button)) return;
 				if (!blackboard.Modules.Contains(((Button)sender).Text)) return;
-				if (!(blackboard.Modules[((Button)sender).Text] is Module)) return;
-				mc = (Module)blackboard.Modules[((Button)sender).Text];
+				if (!(blackboard.Modules[((Button)sender).Text] is ModuleClient)) return;
+				mc = (ModuleClient)blackboard.Modules[((Button)sender).Text];
 				selectedMC = mc;
 				ShowModuleInfo();
 				tcLog.SelectTab(tpModuleInfo);
@@ -1607,6 +1610,7 @@ namespace Blk.Gui
 
 		private void btnModuleEnable_Click(object sender, EventArgs e)
 		{
+			ModuleClientTcp selectedMC = this.selectedMC as ModuleClientTcp;
 			if ((blackboard == null) || (selectedMC == null))
 				return;
 			ModuleEnableDisable(selectedMC);
@@ -1653,6 +1657,7 @@ namespace Blk.Gui
 
 		private void btnModuleProcessRun_Click(object sender, EventArgs e)
 		{
+			ModuleClientTcp selectedMC = this.selectedMC as ModuleClientTcp;
 			if ((processManager == null) || (selectedMC == null))
 				return;
 			processManager.LaunchModule(selectedMC, ModuleStartupMethod.LaunchAlways);
@@ -1660,6 +1665,7 @@ namespace Blk.Gui
 
 		private void btnModuleProcessCheckRun_Click(object sender, EventArgs e)
 		{
+			ModuleClientTcp selectedMC = this.selectedMC as ModuleClientTcp;
 			if ((processManager == null) || (selectedMC == null))
 				return;
 			processManager.LaunchModule(selectedMC, ModuleStartupMethod.LaunchIfNotRunning);
@@ -1667,6 +1673,7 @@ namespace Blk.Gui
 
 		private void btnModuleProcessKill_Click(object sender, EventArgs e)
 		{
+			ModuleClientTcp selectedMC = this.selectedMC as ModuleClientTcp;
 			if ((processManager == null) || (selectedMC == null))
 				return;
 			processManager.ShutdownModule(selectedMC, ModuleShutdownMethod.CloseThenKill);
@@ -1741,48 +1748,48 @@ namespace Blk.Gui
 
 		private void mnuiModule_Module_CheckAndRun_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClientTcp mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClientTcp) == null))
 				return;
 			ModuleProcessCheckRun(mc);
 		}
 
 		private void mnuiModule_Module_CloseAndKill_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClientTcp mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClientTcp) == null))
 				return;
 			ModuleProcessKill(mc);
 		}
 
 		private void mnuiModule_Module_Enabled_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClientTcp mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClientTcp) == null))
 				return;
 			ModuleEnableDisable(mc);
 		}
 
 		private void mnuiModule_Module_Restart_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClient mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClient) == null))
 				return;
 			ModuleRestart(mc);
 		}
 
 		private void mnuiModule_Module_Run_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClientTcp mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClientTcp) == null))
 				return;
 			ModuleProcessRun(mc);
 		}
 
 		private void mnuiModule_Module_Simulation_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClient mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClient) == null))
 				return;
 			if(mc.Simulation.SimulationEnabled)
 				SimulateModule(mc, SimulationType.SimulationDisabled);
@@ -1792,16 +1799,16 @@ namespace Blk.Gui
 
 		private void mnuiModule_Module_Start_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClient mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClient) == null))
 				return;
 			ModuleStartStop(mc);
 		}
 
 		private void mnuiModule_Module_ZombieCheck_Click(object sender, EventArgs e)
 		{
-			Module mc;
-			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as Module) == null))
+			ModuleClient mc;
+			if (!(sender is ToolStripItem) || ((mc = ((ToolStripItem)sender).Tag as ModuleClient) == null))
 				return;
 			ModuleProcessZombieCheck(mc);
 		}
@@ -1882,7 +1889,7 @@ namespace Blk.Gui
 
 		private void btnModuleStartStopModule_Click(object sender, EventArgs e)
 		{
-			Module module;
+			ModuleClient module;
 			if ((module = selectedMC) == null)
 				return;
 			ModuleStartStop(module);
@@ -1925,7 +1932,7 @@ namespace Blk.Gui
 
 		#region Blackboard EventHandler functions
 
-		private void blackboard_Connected(Module m)
+		private void blackboard_Connected(ModuleClient m)
 		{
 			try
 			{
@@ -1940,7 +1947,7 @@ namespace Blk.Gui
 			catch { }
 		}
 
-		private void blackboard_Disconnected(Module m)
+		private void blackboard_Disconnected(ModuleClient m)
 		{
 			try
 			{

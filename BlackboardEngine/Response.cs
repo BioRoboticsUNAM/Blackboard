@@ -183,7 +183,7 @@ namespace Blk.Engine
 				string p;
 				if ((destination != null) && (source != null) && destination.RequirePrefix)
 				{
-					Module mcSource = source as Module;
+					ModuleClient mcSource = source as ModuleClient;
 					if ((mcSource != null) && (mcSource.Alias != mcSource.Name))
 						sb.Append(mcSource.Alias);
 					else
@@ -364,7 +364,7 @@ namespace Blk.Engine
 		/// This parameter is passed uninitialized</param>
 		/// </summary>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		public static bool TryParse(string s, Module source, out Response result)
+		public static bool TryParse(string s, ModuleClient source, out Response result)
 		{
 			Exception ex;
 
@@ -383,7 +383,7 @@ namespace Blk.Engine
 		/// This parameter is passed uninitialized</param>
 		/// </summary>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		public static bool TryParse(string s, Module source, Module destination, out Response result)
+		public static bool TryParse(string s, ModuleClient source, ModuleClient destination, out Response result)
 		{
 			Exception ex;
 
@@ -863,7 +863,7 @@ namespace Blk.Engine
 		/// This parameter is passed uninitialized</param>
 		/// </summary>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		protected static bool TryParse(string s, Module source, out Response response, out Exception ex)
+		protected static bool TryParse(string s, ModuleClient source, out Response response, out Exception ex)
 		{
 			IPrototype proto;
 			//Module destination;
@@ -933,7 +933,7 @@ namespace Blk.Engine
 		/// This parameter is passed uninitialized</param>
 		/// </summary>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		protected static bool TryParse(string s, Module source, Module destination, out Response response, out Exception ex)
+		protected static bool TryParse(string s, ModuleClient source, ModuleClient destination, out Response response, out Exception ex)
 		{
 			IPrototype proto;
 			string sCommand;
@@ -1011,7 +1011,7 @@ namespace Blk.Engine
 		/// <param name="source">The module which sent the response</param>
 		/// </summary>
 		/// <returns>A response object that represents the response contained in s</returns>
-		public static Response Parse(string s, Module source)
+		public static Response Parse(string s, ModuleClient source)
 		{
 			Exception ex;
 			Response response;
@@ -1028,7 +1028,7 @@ namespace Blk.Engine
 		/// <param name="destination">The destination module for the response</param>
 		/// </summary>
 		/// <returns>A response object that represents the response contained in s</returns>
-		public static Response Parse(string s, Module source, Module destination)
+		public static Response Parse(string s, ModuleClient source, ModuleClient destination)
 		{
 			Exception ex;
 			Response response;

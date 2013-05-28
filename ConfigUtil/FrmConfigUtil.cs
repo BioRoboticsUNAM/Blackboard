@@ -13,7 +13,7 @@ using Blk.Engine.SharedVariables;
 using Robotics.API;
 
 using SharedVariable = Blk.Engine.SharedVariables.SharedVariable;
-using Module = Blk.Engine.Module;
+using Module = Blk.Engine.ModuleClient;
 
 namespace ConfigUtil
 {
@@ -353,7 +353,7 @@ namespace ConfigUtil
 			if (modules.ContainsKey(name))
 				return;
 
-			Module module = new Module(name, IPAddress.Loopback, 2000);
+			ModuleClientTcp module = new ModuleClientTcp(name, IPAddress.Loopback, 2000);
 			modules.Add(module.Name, module);
 			ConfigurationHelper.Blackboard.Modules.Add(module);
 			lstBBModules.Items.Add(module);

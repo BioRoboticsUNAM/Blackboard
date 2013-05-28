@@ -16,7 +16,7 @@ namespace ConfigUtil
 		private VoidEventHandler dlgFillModuleData;
 		private VoidEventHandler dlgClearModule;
 		private SortedList<string, Prototype> prototypes;
-		private Module selectedModule;
+		private ModuleClient selectedModule;
 		private Prototype selectedPrototype;
 
 		public ModuleView()
@@ -30,7 +30,7 @@ namespace ConfigUtil
 			FillModuleData();
 		}
 
-		public Module Module
+		public ModuleClient Module
 		{
 			get { return selectedModule; }
 			set
@@ -128,8 +128,11 @@ namespace ConfigUtil
 			}
 			this.Enabled = false;
 			txtModuleName.Text = selectedModule.Name;
-			txtModuleAddress.Text = selectedModule.ServerAddresses.ToString();
-			nudModulePort.Value = selectedModule.Port;
+			if (selectedModule is ModuleClientTcp)
+			{
+				txtModuleAddress.Text = ((ModuleClientTcp)selectedModule).ServerAddresses.ToString();
+				nudModulePort.Value = ((ModuleClientTcp)selectedModule).Port;
+			}
 			chkModuleEnabled.Checked = selectedModule.Enabled;
 			chkModuleCheckAlive.Checked = selectedModule.AliveCheck;
 			chkModuleRequirePrefix.Checked = selectedModule.RequirePrefix;
@@ -160,7 +163,7 @@ namespace ConfigUtil
 			this.Enabled = true;
 		}
 
-		private void ReplacePrototype(Module module, Prototype oldPrototype, Prototype newPrototype)
+		private void ReplacePrototype(ModuleClient module, Prototype oldPrototype, Prototype newPrototype)
 		{
 			//if ((module == null) || (newPrototype == null))
 			//    return;

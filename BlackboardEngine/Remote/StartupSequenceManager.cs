@@ -132,8 +132,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Launches a module if it is not running
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to launch</param>
-		private bool LaunchIfNotRunning(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to launch</param>
+		private bool LaunchIfNotRunning(IModuleClientTcp mc)
 		{
 			return processManager.LaunchProcessIfNotRunning(mc.ProcessInfo);
 		}
@@ -141,8 +141,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Launches a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to launch</param>
-		private bool LaunchModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to launch</param>
+		private bool LaunchModule(IModuleClientTcp mc)
 		{
 			return processManager.LaunchProcess(mc.ProcessInfo);
 		}
@@ -150,8 +150,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Kills a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to kill</param>
-		private bool KillModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to kill</param>
+		private bool KillModule(IModuleClientTcp mc)
 		{
 			return processManager.CloseThenKillProcess(mc.ProcessInfo);
 		}
@@ -161,7 +161,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="mc">The module to start</param>
 		/// <param name="method">The startup sequence method</param>
-		private bool RemoteStartup(IModule mc, ModuleStartupMethod method)
+		private bool RemoteStartup(IModuleClientTcp mc, ModuleStartupMethod method)
 		{
 			RemoteStartupRequest request;
 			RemoteStartupResponse response;
@@ -257,7 +257,7 @@ namespace Blk.Engine.Remote
 		/// <param name="method">The method used for startup</param>
 		public void StartModules(ModuleStartupMethod method)
 		{
-			IModule mc;
+			IModuleClientTcp mc;
 			bool result;
 
 			if ((method == ModuleStartupMethod.None) || (moduleSequence.Count < 1))
@@ -274,7 +274,7 @@ namespace Blk.Engine.Remote
 						Parent.Log.WriteLine(5, "Can not start module '" + moduleSequence[i] + "': The module does not exist.");
 						continue;
 					}
-					mc = Parent.Modules[moduleSequence[i]] as IModule;
+					mc = Parent.Modules[moduleSequence[i]] as IModuleClientTcp;
 					if(!mc.Enabled)
 					{
 						Parent.Log.WriteLine(5, "Can not start module '" + moduleSequence[i] + "': The module is disabled.");
@@ -370,15 +370,15 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Waits untill a module becomes ready
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to wait for</param>
-		private void WaitModuleReady(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to wait for</param>
+		private void WaitModuleReady(IModuleClientTcp mc)
 		{
 			Parent.Log.WriteLine(6, "Waiting for '" + mc.Name + "' to be ready.");
 			do
 			{
 				mc.WaitReady(500);
 			} while (parent.IsRunning && !mc.Ready);
-			Parent.Log.WriteLine(6, "IModule '" + mc.Name + "' is ready.");
+			Parent.Log.WriteLine(6, "IModuleClientTcp '" + mc.Name + "' is ready.");
 		}
 
 		#endregion

@@ -16,7 +16,7 @@ namespace Blk.Engine
 	/// <summary>
 	/// Implements a ModuleBlackboard
 	/// </summary>
-	public sealed class ModuleBlackboard : Module, IModuleBlackboard
+	public sealed class ModuleBlackboard : ModuleClient, IModuleBlackboard
 	{
 		#region Variables
 		
@@ -139,8 +139,6 @@ namespace Blk.Engine
 
 			commandsReceived = new ProducerConsumer<ITextCommand>(50);
 			msc = new MachineStatusCollection(this);
-            
-            this.ServerAddresses.Add(IPAddress.Loopback);
 		}
 
 		#endregion
@@ -277,7 +275,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Performs Restart Tasks
 		/// </summary>
-		private void DoRestartModule()
+		protected override void DoRestartModule()
 		{
 			Busy = true;
 
@@ -306,8 +304,10 @@ namespace Blk.Engine
 		private void FillMachineStatussList()
 		{
 			//msc.Add(new MachineStatus(IPAddress.Parse("127.0.0.1"), 50, BatteryChargeStatus.Unknown));
-			foreach (IModule module in this.Parent.Modules)
+			foreach (IModule m in this.Parent.Modules)
 			{
+				IModuleClientTcp module = m as IModuleClientTcp;
+				if (module == null) continue;
 				for (int i = 0; i < module.ServerAddresses.Count; ++i)
 				{
 					if (!msc.Contains(module.ServerAddresses[i]) &&
@@ -462,6 +462,15 @@ namespace Blk.Engine
 			}
 			#endregion
 
+			return true;
+		}
+
+		/// <summary>
+		/// Sends the provided text string through socket client
+		/// </summary>
+		/// <param name="stringToSend">string to send through socket</param>
+		protected override bool Send(string stringToSend)
+		{
 			return true;
 		}
 
@@ -743,12 +752,12 @@ namespace Blk.Engine
 			sb.Append(module.Busy);
 			sb.Append(" connected=");
 			sb.Append(module.IsConnected);
-			if (module is Module)
+			if (module is ModuleClientTcp)
 			{
 				sb.Append(" endpoint=");
-				sb.Append(((Module)module).ServerAddresses.ToString());
+				sb.Append(((ModuleClientTcp)module).ServerAddresses.ToString());
 				sb.Append(':');
-				sb.Append(((Module)module).Port.ToString());
+				sb.Append(((ModuleClientTcp)module).Port.ToString());
 			}
 			sb.Append(" idletime=");
 			sb.Append(module.IdleTime.TotalSeconds.ToString("0"));
@@ -756,10 +765,10 @@ namespace Blk.Engine
 			sb.Append(module.Ready);
 			sb.Append(" running=");
 			sb.Append(module.IsRunning);
-			if (module is Module)
+			if (module is ModuleClient)
 			{
 				sb.Append(" simulated=");
-				sb.Append(((Module)module).Simulation != ModuleSimulationOptions.SimulationDisabled);
+				sb.Append(((ModuleClient)module).Simulation != ModuleSimulationOptions.SimulationDisabled);
 			}
 
 			sb.Append(" supportedcommands=");
@@ -822,9 +831,9 @@ namespace Blk.Engine
 					break;
 
 				case "module":
-					if ((parts.Length < 2) || !parent.Modules.Contains(parts[1]) || !(parent.Modules[parts[1]] is Module))
+					if ((parts.Length < 2) || !parent.Modules.Contains(parts[1]) || !(parent.Modules[parts[1]] is ModuleClient))
 						SendResponse(command, false);
-					((Module)parent.Modules[parts[1]]).Restart();
+					((ModuleClient)parent.Modules[parts[1]]).Restart();
 					SendResponse(command, true);
 					break;
 			}
@@ -877,12 +886,12 @@ namespace Blk.Engine
 		private void Reset_TestCommand(Command command)
 		{
 			string moduleName = command.Parameters;
-			if (!parent.Modules.Contains(moduleName) || !(parent.Modules[moduleName] is Module))
+			if (!parent.Modules.Contains(moduleName) || !(parent.Modules[moduleName] is ModuleClient))
 			{
 				SendResponse(command, false);
 				return;
 			}
-			((Module)parent.Modules[moduleName]).RestartTest();
+			((ModuleClient)parent.Modules[moduleName]).RestartTest();
 			SendResponse(command, true);
 		}
 		
@@ -896,7 +905,7 @@ namespace Blk.Engine
 			IPAddress ip;
 			int port;
 			string moduleName;
-			Module module;
+			ModuleClientTcp module;
 			Match m;
 			bool running;
 
@@ -906,7 +915,7 @@ namespace Blk.Engine
 				SendResponse(command, false);
 				return;
 			}
-			if (!parent.Modules.Contains(moduleName = m.Result("${moduleName}")) || ((module = this.Parent.Modules[moduleName] as Module) == null))
+			if (!parent.Modules.Contains(moduleName = m.Result("${moduleName}")) || ((module = this.Parent.Modules[moduleName] as ModuleClientTcp) == null))
 			{
 				SendResponse(command, false);
 				return;
@@ -1091,22 +1100,18 @@ namespace Blk.Engine
 						continue;
 					module.BusyChanged += busyEH;
 					module.ReadyChanged += readyEH;
-					if (module is Module)
+					if (module is ModuleClient)
 					{
-						((Module)module).Connected += connectedStatusEH;
-						((Module)module).Disconnected += connectedStatusEH;
+						((ModuleClient)module).Connected += connectedStatusEH;
+						((ModuleClient)module).Disconnected += connectedStatusEH;
 					}
 				}
 			}
 
 			#endregion
 
-			#region First time connection
 			// Fills out MachineStatuss List
 			FillMachineStatussList();
-
-
-			#endregion
 
 			while (running && !stopMainThread)
 			{
@@ -1124,10 +1129,10 @@ namespace Blk.Engine
 						continue;
 					module.BusyChanged -= busyEH;
 					module.ReadyChanged -= readyEH;
-					if (module is Module)
+					if (module is ModuleClient)
 					{
-						((Module)module).Connected -= connectedStatusEH;
-						((Module)module).Disconnected -= connectedStatusEH;
+						((ModuleClient)module).Connected -= connectedStatusEH;
+						((ModuleClient)module).Disconnected -= connectedStatusEH;
 					}
 				}
 			}
@@ -1144,6 +1149,27 @@ namespace Blk.Engine
 			mainThread = null;
 
 			#endregion
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadDisconnect()
+		{
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadFirstTimeConnect()
+		{
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadLoopAutoConnect()
+		{
 		}
 
 		/// <summary>
@@ -1212,7 +1238,7 @@ namespace Blk.Engine
 		/// Manages the changes on the IsConncted status of a module to update shared variables.
 		/// </summary>
 		/// <param name="sender">The module which its IsConnected status changed</param>
-		private void module_ConnectedStatusChanged(Module sender)
+		private void module_ConnectedStatusChanged(ModuleClient sender)
 		{
 			if (sharedVariables.Contains("connected"))
 				sharedVariables["connected"].ReportSubscribers(sender);

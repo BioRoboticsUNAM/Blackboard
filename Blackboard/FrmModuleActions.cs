@@ -11,7 +11,7 @@ namespace Blk.Gui
 {
 	public partial class FrmModuleActions : Form
 	{
-		private Module module;
+		private ModuleClient module;
 
 		public FrmModuleActions()
 		{
@@ -19,7 +19,7 @@ namespace Blk.Gui
 			InitializeComponent();
 		}
 
-		public Module Module
+		public ModuleClient Module
 		{
 			get { return this.module; }
 			set

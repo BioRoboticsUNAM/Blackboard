@@ -77,7 +77,7 @@ namespace Blk.Engine
 		/// <param name="destination">Module to which this command will be sent</param>
 		/// <param name="command">Command sent</param>
 		/// <param name="param">Param sent</param>
-		public CommandBase(Module source, Module destination, string command, string param) : this(source, destination, command, param, -1) { }
+		public CommandBase(ModuleClient source, ModuleClient destination, string command, string param) : this(source, destination, command, param, -1) { }
 
 		/// <summary>
 		/// Initiates a new instance of CommandBase
@@ -87,7 +87,7 @@ namespace Blk.Engine
 		/// <param name="command">Command sent</param>
 		/// <param name="param">Param sent</param>
 		/// <param name="id">id of the command</param>
-		public CommandBase(Module source, Module destination, string command, string param, int id)
+		public CommandBase(ModuleClient source, ModuleClient destination, string command, string param, int id)
 		{
 			this.source = source;
 			this.destination = destination;

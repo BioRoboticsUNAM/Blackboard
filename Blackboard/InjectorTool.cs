@@ -9,7 +9,7 @@ using Robotics.API;
 using Blk.Api;
 using Blk.Engine;
 using IModule = Blk.Api.IModule;
-using Module = Blk.Engine.Module;
+using Module = Blk.Engine.ModuleClient;
 using Command = Blk.Engine.Command;
 using Response = Blk.Engine.Response;
 

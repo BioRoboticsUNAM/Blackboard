@@ -55,10 +55,12 @@
     <Compile Include="MachineStatus.cs" />
     <Compile Include="MachineStatusCollection.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="Module.cs" />
+    <Compile Include="ModuleClient.cs" />
     <Compile Include="ModuleBlackboard.cs" />
+    <Compile Include="ModuleClientTcp.cs" />
     <Compile Include="ModuleCollection.cs" />
     <Compile Include="ModuleConverter.cs" />
+    <Compile Include="ModuleClientPlugin.cs" />
     <Compile Include="ModuleProcessInfo.cs" />
     <Compile Include="ModuleSimulationOptions.cs" />
     <Compile Include="Parser.cs" />

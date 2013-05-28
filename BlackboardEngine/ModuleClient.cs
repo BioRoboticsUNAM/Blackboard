@@ -20,20 +20,20 @@ namespace Blk.Engine
 	/// Represents the method that will handle the Connected and Disconnected event of a Module object.
 	/// </summary>
 	/// <param name="m">Module connected/disconnected</param>
-	public delegate void ModuleConnectionEH(Module m);
+	public delegate void ModuleConnectionEH(ModuleClient m);
 	/// <summary>
 	/// Represents the method that will handle the ActionExecuted event of a Module object.
 	/// </summary>
 	/// <param name="m">Module which performed the action</param>
 	/// <param name="action">Action executed</param>
 	/// <param name="success">true if the action executed successfully, false otherwise</param>
-	internal delegate void ActionExecutedEH(Module m, IAction action, bool success);
+	internal delegate void ActionExecutedEH(ModuleClient m, IAction action, bool success);
 	#endregion
 
 	/// <summary>
 	/// Serves as base class to implement an interface to access a module
 	/// </summary>
-	public abstract class Module : IModule
+	public abstract class ModuleClient : IModule
 	{
 		#region Constants
 
@@ -239,7 +239,7 @@ namespace Blk.Engine
 		/// Initializes a new instance of the Module class
 		/// </summary>
 		/// <param name="name">Module name</param>
-		protected Module(string name)
+		protected ModuleClient(string name)
 		{
 			this.name = name;
 			this.alias = name;
@@ -282,7 +282,7 @@ namespace Blk.Engine
 		/// <param name="ipAddresses">IP Address of Application Module's computer</param>
 		/// <param name="port">Port of the Application Module</param>
 		/// <param name="prototypes">List of the command prototypes supported by the Application Module</param>
-		public Module(string name, Prototype[] prototypes)
+		public ModuleClient(string name, Prototype[] prototypes)
 			: this(name)
 		{
 			if ((prototypes == null) || (prototypes.Length == 0)) throw new ArgumentException("The prototypes list cannot be zero-length nor null");

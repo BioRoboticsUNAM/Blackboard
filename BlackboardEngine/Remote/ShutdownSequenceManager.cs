@@ -125,8 +125,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Closes a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to close</param>
-		private bool CloseModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to close</param>
+		private bool CloseModule(IModuleClientTcp mc)
 		{
 			return processManager.CloseProcessWindow(mc.ProcessInfo);
 		}
@@ -134,8 +134,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Kills a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to kill</param>
-		private bool KillModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to kill</param>
+		private bool KillModule(IModuleClientTcp mc)
 		{
 			return processManager.CloseThenKillProcess(mc.ProcessInfo);
 		}
@@ -145,7 +145,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="mc">The module to start</param>
 		/// <param name="method">The startup sequence method</param>
-		private bool RemoteShutdown(IModule mc, ModuleShutdownMethod method)
+		private bool RemoteShutdown(IModuleClientTcp mc, ModuleShutdownMethod method)
 		{
 			RemoteShutdownRequest request;
 			RemoteShutdownResponse response;
@@ -241,7 +241,7 @@ namespace Blk.Engine.Remote
 		/// <param name="method">The method used for startup</param>
 		public void ShutdownModules(ModuleShutdownMethod method)
 		{
-			IModule mc;
+			IModuleClientTcp mc;
 			bool result;
 
 			if ((method == ModuleShutdownMethod.None) || (moduleSequence.Count < 1))
@@ -258,7 +258,7 @@ namespace Blk.Engine.Remote
 						Parent.Log.WriteLine(5, "Can not shutdown module '" + moduleSequence[i] + "': The module does not exist.");
 						continue;
 					}
-					mc = Parent.Modules[moduleSequence[i]] as IModule;
+					mc = Parent.Modules[moduleSequence[i]] as IModuleClientTcp;
 					if(!mc.Enabled)
 					{
 						Parent.Log.WriteLine(5, "Can not shutdown module '" + moduleSequence[i] + "': The module is disabled.");

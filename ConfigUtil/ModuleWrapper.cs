@@ -13,7 +13,7 @@ namespace ConfigUtil
 	{
 		#region Variables
 
-		private Module module;
+		private ModuleClient module;
 
 		#endregion
 
@@ -23,7 +23,7 @@ namespace ConfigUtil
 		{
 		}
 
-		public ModuleWrapper(Module module)
+		public ModuleWrapper(ModuleClient module)
 		{
 			this.module = module;
 		}
@@ -159,6 +159,7 @@ namespace ConfigUtil
 			}
 		}
 
+		/*
 		/// <summary>
 		/// Gets or sets the ip address used to connect to the module
 		/// </summary>
@@ -207,6 +208,7 @@ namespace ConfigUtil
 				}
 			}
 		}
+		*/
 
 		/// <summary>
 		/// Gets or sets the delay used before send commands to the module

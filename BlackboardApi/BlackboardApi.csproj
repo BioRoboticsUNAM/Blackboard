@@ -70,12 +70,14 @@
     <Compile Include="IBlackboardPluginManager.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="IModuleBlackboard.cs" />
+    <Compile Include="IModuleClientTcp.cs" />
     <Compile Include="IModuleCollection.cs" />
     <Compile Include="IModuleProcessInfo.cs" />
     <Compile Include="IModuleSimulationOptions.cs" />
     <Compile Include="IPrototype.cs" />
     <Compile Include="IServerAddressCollection.cs" />
     <Compile Include="IPrototypeCollection.cs" />
+    <Compile Include="ModulePlugin.cs" />
     <Compile Include="SharedVariables\ISharedVariable.cs" />
     <Compile Include="SharedVariables\ISharedVariableCollection.cs" />
     <Compile Include="ITextCommand.cs" />

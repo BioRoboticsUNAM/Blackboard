@@ -18,9 +18,9 @@ namespace ConfigUtil
 		private VoidEventHandler dlgFillBlackboardData;
 
 		private ConfigurationHelper configurationHelper;
-		private SortedList<string, Module> modules;
+		private SortedList<string, ModuleClient> modules;
 		private SortedList<string, Prototype> prototypes;
-		private Module selectedModule;
+		private ModuleClient selectedModule;
 
 		public Form1()
 		{
@@ -28,7 +28,7 @@ namespace ConfigUtil
 			dlgClearAll = new VoidEventHandler(ClearAll);
 			dlgFillBlackboardData = new VoidEventHandler(FillBlackboardData);
 
-			modules = new SortedList<string, Module>();
+			modules = new SortedList<string, ModuleClient>();
 			prototypes = new SortedList<string, Prototype>();
 			ConfigurationHelper.Blackboard = null;
 		}
@@ -90,7 +90,7 @@ namespace ConfigUtil
 		{
 			if (selectedModule == null)
 				return;
-			Module module = selectedModule;
+			ModuleClient module = selectedModule;
 			selectedModule = null;
 			//gbModule.Enabled = false;
 			ClearModule();
@@ -176,14 +176,14 @@ namespace ConfigUtil
 			if (modules.ContainsKey(name))
 				return;
 
-			Module module = new Module(name, IPAddress.Loopback, 2000);
+			ModuleClientTcp module = new ModuleClientTcp(name, IPAddress.Loopback, 2000);
 			modules.Add(module.Name, module);
 			ConfigurationHelper.Blackboard.Modules.Add(module);
 			lstBBModules.Items.Add(module);
 			lstBBModules.SelectedItem = module;
 		}
 
-		private void ReplacePrototype(Module module, Prototype oldPrototype, Prototype newPrototype)
+		private void ReplacePrototype(ModuleClient module, Prototype oldPrototype, Prototype newPrototype)
 		{
 			if ((module == null) || (newPrototype == null))
 				return;
@@ -231,7 +231,7 @@ namespace ConfigUtil
 			}
 		}
 
-		private void SelectModule(Module selectedModule)
+		private void SelectModule(ModuleClient selectedModule)
 		{
 			//if (selectedModule == null)
 			//{

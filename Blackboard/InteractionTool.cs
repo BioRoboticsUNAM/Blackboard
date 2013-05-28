@@ -21,7 +21,7 @@ namespace Blk.Gui
 
 		private Blackboard blackboard;
 
-		private Module selectedModule;
+		private ModuleClient selectedModule;
 
 		#endregion
 
@@ -37,7 +37,7 @@ namespace Blk.Gui
 
 		#region Properties
 
-		public Module SelectedModule
+		public ModuleClient SelectedModule
 		{
 			get { return this.selectedModule; }
 			set
@@ -116,7 +116,7 @@ namespace Blk.Gui
 			txtSendToModule.Clear();
 		}
 
-		private bool InjectUserMessage(Module mc, string message)
+		private bool InjectUserMessage(ModuleClient mc, string message)
 		{
 			return blackboard.Inject(mc.Name + " " + message);
 		}
@@ -183,7 +183,7 @@ namespace Blk.Gui
 			this.blackboard.Log.WriteLine(s);
 		}
 
-		private bool SendUserMessage(Module mc, string message)
+		private bool SendUserMessage(ModuleClient mc, string message)
 		{
 			Command c;
 			Response r;

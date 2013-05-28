@@ -739,8 +739,8 @@ namespace Blk.Engine
 		{
 			for (int i = 0; i < modules.Count; ++i)
 			{
-				if (modules[i] is Module)
-					((Module)Modules[i]).RequestExecuteTestTimeOutActions();
+				if (modules[i] is ModuleClient)
+					((ModuleClient)Modules[i]).RequestExecuteTestTimeOutActions();
 			}
 		}
 
@@ -751,8 +751,8 @@ namespace Blk.Engine
 		{
 			for (int i = 0; i < modules.Count; ++i)
 			{
-				if (modules[i] is Module)
-					((Module)Modules[i]).Restart();
+				if (modules[i] is ModuleClient)
+					((ModuleClient)Modules[i]).Restart();
 			}
 		}
 
@@ -765,8 +765,8 @@ namespace Blk.Engine
 			{
 				try
 				{
-					if (modules[i] is Module)
-						((Module)Modules[i]).RestartTest();
+					if (modules[i] is ModuleClient)
+						((ModuleClient)Modules[i]).RestartTest();
 				}
 				catch { }
 			}
@@ -810,7 +810,7 @@ namespace Blk.Engine
 				destination = VirtualModule;
 				return true;
 			}
-			foreach (Module m in modules)
+			foreach (ModuleClient m in modules)
 			{
 				if (!m.Enabled || (m == VirtualModule))
 					continue;
@@ -884,8 +884,8 @@ namespace Blk.Engine
 				Log.WriteLine(6, "\tResponse: " + r.ToString());
 				Log.WriteLine(6, "Error: " + ex.ToString());
 			}
-			if (r.Source is Module)
-				((Module)r.Source).Unlock(r);
+			if (r.Source is ModuleClient)
+				((ModuleClient)r.Source).Unlock(r);
 			return r;
 		}
 
@@ -1326,7 +1326,7 @@ namespace Blk.Engine
 		{
 			int i;
 			int retrySendCount = 0;
-			List<Module> modulesPendingToStop;
+			List<ModuleClient> modulesPendingToStop;
 			IAsyncResult stopPluginsAsyncResult = null;
 			//Response[] aResponses;
 			//Command c;
@@ -1343,7 +1343,7 @@ namespace Blk.Engine
 				Thread.Sleep(1);
 			if (running)
 			{
-				foreach (Module module in modules)
+				foreach (ModuleClient module in modules)
 				{
 					if (!module.Enabled)
 						continue;
@@ -1388,7 +1388,7 @@ namespace Blk.Engine
 				{
 					Log.WriteLine(1, "Can not start Tcp Server");
 					running = false;
-					foreach (Module module in modules)
+					foreach (ModuleClient module in modules)
 						if (!module.IsRunning) module.BeginStop();
 				}
 			}
@@ -1526,8 +1526,8 @@ namespace Blk.Engine
 
 			// Begin to Stop modules
 			Log.WriteLine(1, "Stopping modules...");
-			modulesPendingToStop = new List<Module>();
-			foreach (Module module in modules)
+			modulesPendingToStop = new List<ModuleClient>();
+			foreach (ModuleClient module in modules)
 			{
 				modulesPendingToStop.Add(module);
 				module.BeginStop();
@@ -1664,11 +1664,11 @@ namespace Blk.Engine
 		/// <param name="module">Module to configure</param>
 		private void modules_ModuleAdded(IModule module)
 		{
-			if (module is Module)
+			if (module is ModuleClient)
 			{
-				((Module)module).Connected += new ModuleConnectionEH(module_Connected);
-				((Module)module).Disconnected += new ModuleConnectionEH(module_Disconnected);
-				((Module)module).ActionExecuted += new ActionExecutedEH(module_ActionExecuted);
+				((ModuleClient)module).Connected += new ModuleConnectionEH(module_Connected);
+				((ModuleClient)module).Disconnected += new ModuleConnectionEH(module_Disconnected);
+				((ModuleClient)module).ActionExecuted += new ActionExecutedEH(module_ActionExecuted);
 			}
 			module.CommandReceived += new CommandReceivedEH(module_CommandReceived);
 			module.ResponseReceived += new ResponseReceivedEH(module_ResponseReceived);
@@ -1683,11 +1683,11 @@ namespace Blk.Engine
 		/// <param name="module">Module to configure</param>
 		private void modules_ModuleRemoved(IModule module)
 		{
-			if (module is Module)
+			if (module is ModuleClient)
 			{
-				((Module)module).Connected -= new ModuleConnectionEH(module_Connected);
-				((Module)module).Disconnected -= new ModuleConnectionEH(module_Disconnected);
-				((Module)module).ActionExecuted -= new ActionExecutedEH(module_ActionExecuted);
+				((ModuleClient)module).Connected -= new ModuleConnectionEH(module_Connected);
+				((ModuleClient)module).Disconnected -= new ModuleConnectionEH(module_Disconnected);
+				((ModuleClient)module).ActionExecuted -= new ActionExecutedEH(module_ActionExecuted);
 			}
 			module.CommandReceived -= new CommandReceivedEH(module_CommandReceived);
 			module.ResponseReceived -= new ResponseReceivedEH(module_ResponseReceived);
@@ -1698,7 +1698,7 @@ namespace Blk.Engine
 
 		#region Module Event Handler Functions
 
-		private void module_ActionExecuted(Module m, IAction action, bool success)
+		private void module_ActionExecuted(ModuleClient m, IAction action, bool success)
 		{
 			Log.WriteLine(5, m.Name + ": " + action.ToString() + (success ? " Success!!!" : " failed."));
 		}
@@ -1716,13 +1716,13 @@ namespace Blk.Engine
 				Log.WriteLine(5, "<- [" + c.Source.Name + "]: " + c.ToString());
 		}
 
-		private void module_Connected(Module m)
+		private void module_Connected(ModuleClient m)
 		{
 			if (Connected != null) Connected(m);
 			Log.WriteLine(4, "Connected to " + m.Name);
 		}
 
-		private void module_Disconnected(Module m)
+		private void module_Disconnected(ModuleClient m)
 		{
 			if (Disconnected != null) Disconnected(m);
 			Log.WriteLine(4, "Disconnected from " + m.Name);
@@ -1870,9 +1870,9 @@ namespace Blk.Engine
 			//Command startupCommand;o
 			Prototype proto;
 			List<Prototype> protoList;
-			Module mod;
+			ModuleClient mod;
 			List<IPAddress> ips;
-			SortedList<string, Module> disabledModules;
+			SortedList<string, ModuleClient> disabledModules;
 
 			int port;
 			int checkInterval;
@@ -1921,7 +1921,7 @@ namespace Blk.Engine
 			#region Module extraction
 			tmpDoc = new XmlDocument();
 			clientModulesAddedd = 0;
-			disabledModules = new SortedList<string, Module>();
+			disabledModules = new SortedList<string, ModuleClient>();
 			for (i = 0; i < modules.Count; ++i)
 			{
 				try
@@ -1994,7 +1994,7 @@ namespace Blk.Engine
 					log.WriteLine("\t" + ips[0].ToString() + ":" + port);
 
 					// Veify if Blackbard must check Module's alive status
-					checkInterval = Module.GlobalCheckInterval;
+					checkInterval = ModuleClient.GlobalCheckInterval;
 					if(tmpDoc.GetElementsByTagName("aliveCheck").Count != 0)
 					{
 						node=tmpDoc.GetElementsByTagName("aliveCheck")[0];
@@ -2003,9 +2003,9 @@ namespace Blk.Engine
 						// Read alive/busy/ready check interval
 						if ((node.Attributes["interval"] == null) ||
 							!Int32.TryParse(node.Attributes["interval"].InnerText, out checkInterval) ||
-							(checkInterval < Module.MinCheckInterval) ||
-							(checkInterval > Module.MaxCheckInterval))
-							checkInterval = Module.GlobalCheckInterval;
+							(checkInterval < ModuleClient.MinCheckInterval) ||
+							(checkInterval > ModuleClient.MaxCheckInterval))
+							checkInterval = ModuleClient.GlobalCheckInterval;
 
 					}
 					else aliveCheck = true;
@@ -2057,7 +2057,7 @@ namespace Blk.Engine
 					#endregion
 
 					// Module Creation
-					mod = new Module(moduleName, ips, port);
+					mod = new ModuleClientTcp(moduleName, ips, port);
 					mod.Enabled = moduleEnabled;
 					mod.Author = moduleAuthor;
 					mod.ProcessInfo.ProcessName = processName;
@@ -2186,7 +2186,7 @@ namespace Blk.Engine
 
 			#region Move program start actions to be executed by the virtual module
 
-			foreach (Module mc in blackboard.modules)
+			foreach (ModuleClient mc in blackboard.modules)
 			{
 				if(mc == blackboard.virtualModule)
 					continue;
@@ -2225,7 +2225,7 @@ namespace Blk.Engine
 		{
 			XmlDocument tmpDoc;
 			string moduleName;
-			Module mod;
+			ModuleClient mod;
 			string sTime;
 			int iTime;
 			TimeSpan time;
@@ -2322,14 +2322,14 @@ namespace Blk.Engine
 			// Read global alive/busy/ready check interval
 			if ((tmpDoc.GetElementsByTagName("globalCheckInterval").Count == 0) ||
 				!Int32.TryParse(tmpDoc.GetElementsByTagName("globalCheckInterval")[0].InnerText, out globalCheckInterval) ||
-				(globalCheckInterval < Module.MinCheckInterval) || (globalCheckInterval > Module.MaxCheckInterval))
+				(globalCheckInterval < ModuleClient.MinCheckInterval) || (globalCheckInterval > ModuleClient.MaxCheckInterval))
 			{
-				log.WriteLine(1, "No alive/busy/ready check interval specified (or invalid), using default: " + Module.GlobalCheckInterval);
+				log.WriteLine(1, "No alive/busy/ready check interval specified (or invalid), using default: " + ModuleClient.GlobalCheckInterval);
 			}
 			else
 			{
-				Module.GlobalCheckInterval = globalCheckInterval;
-				log.WriteLine(1, "alive/busy/ready check interval: " + Module.GlobalCheckInterval);
+				ModuleClient.GlobalCheckInterval = globalCheckInterval;
+				log.WriteLine(1, "alive/busy/ready check interval: " + ModuleClient.GlobalCheckInterval);
 			}
 
 			// Module load delay
@@ -2385,11 +2385,11 @@ namespace Blk.Engine
 		/// <param name="xmlModuleNode">Xml node used to fetch the required module information.</param>
 		/// <param name="log">The log writer</param>
 		/// <returns>The module created with the data contained in the xml document</returns>
-		private static Module CreateModule(Blackboard blackboard, XmlNode xmlModuleNode, ILogWriter log)
+		private static ModuleClient CreateModule(Blackboard blackboard, XmlNode xmlModuleNode, ILogWriter log)
 		{
 			XmlDocument tmpDoc;
 			XmlNode node;
-			Module mod;
+			ModuleClient mod;
 			string moduleName;
 			bool moduleEnabled;
 			string moduleAlias;
@@ -2456,7 +2456,7 @@ namespace Blk.Engine
 			log.WriteLine("\t" + ips[0].ToString() + ":" + port);
 
 			// Veify if Blackbard must check Module's alive status
-			checkInterval = Module.GlobalCheckInterval;
+			checkInterval = ModuleClient.GlobalCheckInterval;
 			if (tmpDoc.GetElementsByTagName("aliveCheck").Count != 0)
 			{
 				node = tmpDoc.GetElementsByTagName("aliveCheck")[0];
@@ -2465,9 +2465,9 @@ namespace Blk.Engine
 				// Read alive/busy/ready check interval
 				if ((node.Attributes["interval"] == null) ||
 					!Int32.TryParse(node.Attributes["interval"].InnerText, out checkInterval) ||
-					(checkInterval < Module.MinCheckInterval) ||
-					(checkInterval > Module.MaxCheckInterval))
-					checkInterval = Module.GlobalCheckInterval;
+					(checkInterval < ModuleClient.MinCheckInterval) ||
+					(checkInterval > ModuleClient.MaxCheckInterval))
+					checkInterval = ModuleClient.GlobalCheckInterval;
 
 			}
 			else aliveCheck = true;
@@ -2496,7 +2496,7 @@ namespace Blk.Engine
 			}
 
 			// Module Creation
-			mod = new Module(moduleName, ips, port);
+			mod = new ModuleClientTcp(moduleName, ips, port);
 			mod.ProcessInfo.ProcessName = processName;
 			mod.ProcessInfo.ProgramPath = programPath;
 			mod.ProcessInfo.ProgramArgs = programArgs;
@@ -2880,7 +2880,7 @@ namespace Blk.Engine
 		/// <param name="doc">The document from where the commands will be loaded</param>
 		/// <param name="log">The log writer</param>
 		/// <returns>Returns a list of prototypes which contains the command information.</returns>
-		private static Prototype[] XtractModuleCommands(Module module, XmlDocument doc, LogWriter log)
+		private static Prototype[] XtractModuleCommands(ModuleClient module, XmlDocument doc, LogWriter log)
 		{
 			XmlNodeList commands;
 			List<Prototype> protoList;

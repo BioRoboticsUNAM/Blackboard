@@ -95,11 +95,6 @@ namespace Blk.Api
 		IBlackboard Parent { get; set; }
 
 		/// <summary>
-		/// Gets the port where to connect to the Application Module
-		/// </summary>
-		int Port { get; }
-
-		/// <summary>
 		/// Gets data about the program asociated to this module
 		/// </summary>
 		IModuleProcessInfo ProcessInfo { get; }
@@ -128,16 +123,6 @@ namespace Blk.Api
 		/// The maximum value is 300
 		/// </remarks>
 		int SendDelay { get; set; }
-
-		/// <summary>
-		/// Gets the IP Address of Application Module's computer
-		/// </summary>
-		IPAddress ServerAddress { get; }
-
-		/// <summary>
-		/// Gets a collection of IP Addresses of the computers where the Application Module's can be running
-		/// </summary>
-		IServerAddressCollection ServerAddresses { get; }
 
 		/// <summary>
 		/// Gets or sets a value indicating which mode of simulation is active

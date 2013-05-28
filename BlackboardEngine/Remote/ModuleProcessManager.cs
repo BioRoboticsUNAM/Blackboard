@@ -76,8 +76,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Kills a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to kill</param>
-		private bool KillLocalModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to kill</param>
+		private bool KillLocalModule(IModuleClientTcp mc)
 		{
 			return processManager.CloseThenKillProcess(mc.ProcessInfo);
 		}
@@ -85,8 +85,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Closes a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to close</param>
-		private bool CloseLocalModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to close</param>
+		private bool CloseLocalModule(IModuleClientTcp mc)
 		{
 			return processManager.CloseProcessWindow(mc.ProcessInfo);
 		}
@@ -94,8 +94,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Launches a module
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to launch</param>
-		private bool LaunchLocalModule(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to launch</param>
+		private bool LaunchLocalModule(IModuleClientTcp mc)
 		{
 			return processManager.LaunchProcess(mc.ProcessInfo);
 		}
@@ -103,8 +103,8 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Launches a module if it is not running
 		/// </summary>
-		/// <param name="mc">The IModule object which contains the information about the module to launch</param>
-		private bool LaunchLocalModuleIfNotRunning(IModule mc)
+		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to launch</param>
+		private bool LaunchLocalModuleIfNotRunning(IModuleClientTcp mc)
 		{
 			return processManager.LaunchProcessIfNotRunning(mc.ProcessInfo);
 		}
@@ -114,7 +114,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="module">The module to start</param>
 		/// <param name="method">The method used for startup</param>
-		public void LaunchModule(IModule module, ModuleStartupMethod method)
+		public void LaunchModule(IModuleClientTcp module, ModuleStartupMethod method)
 		{
 			bool result;
 
@@ -165,7 +165,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="mc">The module to start</param>
 		/// <param name="method">The startup sequence method</param>
-		private bool RemoteShutdown(IModule mc, ModuleShutdownMethod method)
+		private bool RemoteShutdown(IModuleClientTcp mc, ModuleShutdownMethod method)
 		{
 			RemoteShutdownRequest request;
 			RemoteShutdownResponse response;
@@ -243,7 +243,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="mc">The module to start</param>
 		/// <param name="method">The startup sequence method</param>
-		private bool RemoteStartup(IModule mc, ModuleStartupMethod method)
+		private bool RemoteStartup(IModuleClientTcp mc, ModuleStartupMethod method)
 		{
 			RemoteStartupRequest request;
 			RemoteStartupResponse response;
@@ -321,7 +321,7 @@ namespace Blk.Engine.Remote
 		/// </summary>
 		/// <param name="module">The module to shutdown</param>
 		/// <param name="method">The method used for startup</param>
-		public void ShutdownModule(IModule module, ModuleShutdownMethod method)
+		public void ShutdownModule(IModuleClientTcp module, ModuleShutdownMethod method)
 		{
 			bool result;
 

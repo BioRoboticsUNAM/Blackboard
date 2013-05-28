@@ -12,7 +12,7 @@ namespace Blk.Api
 		#region Properties
 
 		/// <summary>
-		/// The blackboard this PluginManager is bound to
+		/// The blackboard this Plugin is bound to
 		/// </summary>
 		IBlackboard Blackboard { get; }
 

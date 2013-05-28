@@ -130,7 +130,7 @@ namespace Blk.Engine
 				string p;
 				if ((destination != null) && (source != null) && destination.RequirePrefix)
 				{
-					Module mcSource = source as Module;
+					ModuleClient mcSource = source as ModuleClient;
 					if ((mcSource != null) && (mcSource.Alias != mcSource.Name))
 						sb.Append(mcSource.Alias);
 					else
@@ -428,7 +428,7 @@ namespace Blk.Engine
 		/// The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		public static bool TryParse(string s, Module source, out Command command)
+		public static bool TryParse(string s, ModuleClient source, out Command command)
 		{
 			Exception ex;
 			return TryParse(s, source, out command, out ex);
@@ -446,7 +446,7 @@ namespace Blk.Engine
 		/// The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		public static bool TryParse(string s, Module source, Module destination, out Command command)
+		public static bool TryParse(string s, ModuleClient source, ModuleClient destination, out Command command)
 		{
 			Exception ex;
 			return TryParse(s, source, destination, out command, out ex);
@@ -875,7 +875,7 @@ namespace Blk.Engine
 		/// is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		protected static bool TryParse(string s, Module source, out Command cmd, out Exception ex)
+		protected static bool TryParse(string s, ModuleClient source, out Command cmd, out Exception ex)
 		{
 			IPrototype proto;
 			//Module destination;
@@ -945,7 +945,7 @@ namespace Blk.Engine
 		/// is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if conversion was successfull, false otherwise</returns>
-		protected static bool TryParse(string s, Module source, Module destination, out Command cmd, out Exception ex)
+		protected static bool TryParse(string s, ModuleClient source, ModuleClient destination, out Command cmd, out Exception ex)
 		{
 			IPrototype proto;
 			string sCommand;
@@ -1022,7 +1022,7 @@ namespace Blk.Engine
 		/// <param name="source">The module which sent the command</param>
 		/// </summary>
 		/// <returns>A command object that represents the command contained in s</returns>
-		public static Command Parse(string s, Module source)
+		public static Command Parse(string s, ModuleClient source)
 		{
 			Exception ex;
 			Command command;
@@ -1039,7 +1039,7 @@ namespace Blk.Engine
 		/// <param name="destination">The destination module for the command</param>
 		/// </summary>
 		/// <returns>A command object that represents the command contained in s</returns>
-		public static Command Parse(string s, Module source, Module destination)
+		public static Command Parse(string s, ModuleClient source, ModuleClient destination)
 		{
 			Exception ex;
 			Command command;
