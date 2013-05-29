@@ -326,11 +326,12 @@ namespace Blk.Engine.SharedVariables
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		IEnumerator<ISharedVariable> IEnumerable<ISharedVariable>.GetEnumerator()
 		{
-			IEnumerator<ISharedVariable> enumerator;
-			rwLock.AcquireReaderLock(-1);
-			enumerator = (IEnumerator<ISharedVariable>)variables.Values.GetEnumerator();
-			rwLock.ReleaseReaderLock();
-			return enumerator;
+			//IEnumerator<ISharedVariable> enumerator;
+			//rwLock.AcquireReaderLock(-1);
+			//enumerator = (IEnumerator<ISharedVariable>)(variables.Values.GetEnumerator());
+			//rwLock.ReleaseReaderLock();
+			//return enumerator;
+			throw new NotImplementedException();
 		}
 
 		#endregion

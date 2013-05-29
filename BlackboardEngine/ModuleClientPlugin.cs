@@ -1,21 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-/*
+using Blk.Api;
+using Robotics.API;
+
 namespace Blk.Engine
 {
 	/// <summary>
 	/// Provides connection fro Plugin modules
 	/// </summary>
-	public class ModulePluginSkeleton : Module
+	public class ModuleClientPlugin : ModuleClient
 	{
 		#region Variables
+
+		private ModulePlugin modulePlugin;
+
 		#endregion
 
 		#region Constructor
 
-		public ModulePluginSkeleton(string name) :base(name)
+		public ModuleClientPlugin(ModulePlugin modulePlugin)
+			: base(modulePlugin.Name)
 		{
+			this.modulePlugin = modulePlugin;
 		}
 
 		#endregion
@@ -35,10 +40,7 @@ namespace Blk.Engine
 		/// </summary>
 		public override bool IsConnected
 		{
-			get
-			{
-				throw new NotImplementedException();
-			}
+			get { return this.modulePlugin != null; }
 		}
 
 		#endregion
@@ -69,12 +71,32 @@ namespace Blk.Engine
 		/// Sends the provided text string through socket client
 		/// </summary>
 		/// <param name="stringToSend">string to send through socket</param>
-		protected override void Send(string stringToSend)
+		protected override bool Send(string stringToSend)
 		{
 			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadDisconnect()
+		{
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadFirstTimeConnect()
+		{
+		}
+
+		/// <summary>
+		/// Does nothing (internal module, no connection required)
+		/// </summary>
+		protected override void MainThreadLoopAutoConnect()
+		{
 		}
 
 		#endregion
 	}
 }
-*/

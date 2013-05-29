@@ -135,6 +135,7 @@ namespace Blk.Engine
 			//this.Prototypes.Add(new Prototype("create_var", true, true, 300, true));
 			//this.Prototypes.Add(new Prototype("list_vars", true, true, 300, true));
 			//this.Prototypes.Add(new Prototype("read_var", true, true, 300, true));
+			//this.Prototypes.Add(new Prototype("read_vars", true, true, 300, true));
 			//this.Prototypes.Add(new Prototype("write_var", true, true, 300, true));
 
 			commandsReceived = new ProducerConsumer<ITextCommand>(50);

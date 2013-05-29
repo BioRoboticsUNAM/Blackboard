@@ -51,7 +51,7 @@ namespace Blk.Engine.SharedVariables
 			if (this.owner == null)
 				return String.Empty;
 
-			ISharedVariableCollection collection = owner.Parent.VirtualModule.SharedVariables;
+			SharedVariableCollection collection = (SharedVariableCollection)owner.Parent.VirtualModule.SharedVariables;
 			List<string> variables = new List<string>(collection.Count);
 			foreach (SharedVariable sv in collection)
 			{
