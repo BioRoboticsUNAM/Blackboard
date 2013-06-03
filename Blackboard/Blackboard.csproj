@@ -282,6 +282,11 @@
     <Content Include="Images\BatteryIcons\BatUnknown_24.png" />
     <Content Include="Images\BatteryIcons\BatUnknown_32.png" />
     <Content Include="Images\BatteryIcons\BatUnknown_48.png" />
+    <None Include="Resources\Add_48.png" />
+    <None Include="Resources\Add_32.png" />
+    <None Include="Resources\Add_24.png" />
+    <None Include="Resources\Add_16.png" />
+    <None Include="Resources\Filter2HS.png" />
     <None Include="Images\NoRed_32.png" />
     <None Include="Images\NoRed_24.png" />
     <None Include="Images\NoRed_16.png" />

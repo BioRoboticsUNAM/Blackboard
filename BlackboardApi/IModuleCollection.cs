@@ -9,12 +9,12 @@ namespace Blk.Api
 	/// Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
 	/// </summary>
 	/// <param name="module"></param>
-	public delegate void IModuleAddRemoveEH(IModule module);
+	public delegate void IModuleAddRemoveEH(IModuleClient module);
 
 	/// <summary>
 	/// Provides a collection container that enables Blackboard instances to maintain a list of their modules
 	/// </summary>
-	public interface IModuleCollection : IEnumerable<IModule>, ICollection<IModule>
+	public interface IModuleCollection : IEnumerable<IModuleClient>, ICollection<IModuleClient>
 	{
 		#region Properties
 
@@ -32,14 +32,14 @@ namespace Blk.Api
 		/// </summary>
 		/// <param name="i">The zero based index of the element to get or set</param>
 		/// <returns>The module at position i</returns>
-		IModule this[int i]{get; set;}
+		IModuleClient this[int i]{get; set;}
 
 		/// <summary>
 		/// Gets the element with the specified name
 		/// </summary>
 		/// <param name="moduleName">The name of the module element to get or set</param>
 		/// <returns>The module with specified name</returns>
-		IModule this[string moduleName] { get; set; }
+		IModuleClient this[string moduleName] { get; set; }
 
 		#endregion
 
@@ -71,7 +71,7 @@ namespace Blk.Api
 		/// </summary>
 		/// <param name="m">The Module for which the index is returned</param>
 		/// <returns>The index of the specified Module. If the Module is not currently a member of the collection, it returns -1</returns>
-		int IndexOf(IModule m);
+		int IndexOf(IModuleClient m);
 
 		/// <summary>
 		/// Retrieves the index of a specified Module object in the collection

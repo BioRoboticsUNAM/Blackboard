@@ -49,7 +49,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// The IModule object which this SharedVariable object is bound to
 		/// </summary>
-		protected readonly IModule owner;
+		protected readonly IModuleClient owner;
 
 		/// <summary>
 		/// Multiple readers, single writer monitor lock
@@ -133,7 +133,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		/// <param name="owner">The IModule object which this SharedVariable object is bound to</param>
 		/// <param name="name">The name of the variable</param>
-		public SharedVariable(IModule owner, string name)
+		public SharedVariable(IModuleClient owner, string name)
 			: this(owner, "var", name, false, -1)
 		{ }
 
@@ -144,7 +144,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="type">The type of the variable</param>
 		/// <param name="name">The name of the variable</param>
 		/// <param name="isArray">Indicates if the variable is an array</param>
-		public SharedVariable(IModule owner, string type, string name, bool isArray)
+		public SharedVariable(IModuleClient owner, string type, string name, bool isArray)
 			: this(owner, type, name, isArray, -1)
 		{ }
 
@@ -156,7 +156,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="name">The name of the variable</param>
 		/// <param name="isArray">Indicates if the variable is an array</param>
 		/// <param name="arraySize">If the variable is an array, the size of the array or -1 if the variable is not an array. Also a -1 value can be used to indicate dynamic size arrays</param>
-		public SharedVariable(IModule owner, string type, string name, bool isArray, int arraySize)
+		public SharedVariable(IModuleClient owner, string type, string name, bool isArray, int arraySize)
 		{
 			if (owner == null) throw new ArgumentNullException("owner");
 			if (name == null) throw new ArgumentNullException("name");
@@ -344,7 +344,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		[CategoryAttribute("Information")]
 		[DescriptionAttribute("The module to which this Shared Variable object is bound to")]
-		public IModule Owner
+		public IModuleClient Owner
 		{
 			get { return owner; }
 		}
@@ -551,7 +551,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="arraySize">Specifies the size of the array if the variable was created as an array. If the variable is not an array must be -1</param>
 		/// <param name="content">The data in hexadecimal string representation</param>
 		/// <returns>true if the write succeded, false otherwise</returns>
-		public virtual bool WriteStringData(IModule writer, string dataType, int arraySize, string content)
+		public virtual bool WriteStringData(IModuleClient writer, string dataType, int arraySize, string content)
 		{
 			if (!String.IsNullOrEmpty(content) && (this.type != "var") && (this.type != dataType))
 				return false;
@@ -664,7 +664,7 @@ namespace Blk.Engine.SharedVariables
 		/// Sends all subscription messages to the subscribers
 		/// </summary>
 		/// <param name="writer">The IModule object which requested the write operation</param>
-		protected internal void ReportSubscribers(IModule writer)
+		protected internal void ReportSubscribers(IModuleClient writer)
 		{
 			// Generate parameters for notify subscription type
 			//string pNotify = name + " " + Data.Length.ToString();

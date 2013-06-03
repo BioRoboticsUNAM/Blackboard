@@ -66,10 +66,33 @@ namespace Blk.Engine
 			{
 				this.rwPluginsLock.AcquireReaderLock(-1);
 				foreach (IBlackboardPlugin plugin in this.plugins.Values)
-					plugin.AttachBlackboard(this.owner);
+				{
+					try
+					{
+						plugin.AttachBlackboard(this.owner);
+						if (plugin is IModulePlugin)
+							AddClientForModulePlugin((IModulePlugin)plugin);
+					}
+					catch { }
+				}
 				this.rwPluginsLock.ReleaseReaderLock();
 				base.InitializePlugins();
 			}
+		}
+
+		/// <summary>
+		/// Adds a ModuleClientPlugin to the blackboard so it can communicate to the module plugin application
+		/// </summary>
+		/// <param name="plugin">The plugin to initialize as module</param>
+		private void AddClientForModulePlugin(IModulePlugin plugin)
+		{
+			ModuleClientPlugin module;
+
+			module = new ModuleClientPlugin(plugin);
+			if (this.owner.Modules.Contains(plugin.ModuleName))
+				return;
+			this.owner.Modules.Add(module);
+			plugin.AttachClient(module);
 		}
 
 		#endregion

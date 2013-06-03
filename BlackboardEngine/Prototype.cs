@@ -35,7 +35,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// The Module this prototype is bind to
 		/// </summary>
-		internal IModule parent;
+		internal IModuleClient parent;
 		/// <summary>
 		/// True if a response is required, false otherwise
 		/// </summary>
@@ -121,7 +121,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the Module this prototype is bind to
 		/// </summary>
-		public IModule Parent
+		public IModuleClient Parent
 		{
 			get { return parent; }
 			set

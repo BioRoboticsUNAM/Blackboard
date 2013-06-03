@@ -21,25 +21,12 @@ namespace Blk.Engine
 	{
 		#region Variables
 
-		#region Execution and Thread Vars
-
-		/// <summary>
-		/// Event used to synchronize changes on the Ready property
-		/// </summary>
-		private ManualResetEvent readyEvent;
-
-		#endregion
-
 		#region Message flow vars
 
 		/// <summary>
-		/// List of commands sent which are waiting for response
+		/// Stores all data received trough socket
 		/// </summary>
-		private List<Command> lockList;
-		/// <summary>
-		/// Commands the main thread to clear the LockList to prevent list to be modified and get trouble
-		/// </summary>
-		private bool clearLockList = false;
+		protected ProducerConsumer<TcpPacket> dataReceived;
 
 		#endregion
 
@@ -71,6 +58,7 @@ namespace Blk.Engine
 		/// <param name="name">Module name</param>
 		protected ModuleClientTcp(string name) : base (name)
 		{
+			this.dataReceived = new ProducerConsumer<TcpPacket>(100);
 			this.serverAddresses = new ServerAddressCollection(this);
 			this.port = 0;
 		}
@@ -204,34 +192,6 @@ namespace Blk.Engine
 		#region Methods
 
 		/// <summary>
-		/// Checks if the module is busy
-		/// </summary>
-		protected override void CheckBusy()
-		{
-			int i;
-
-			// Remove commands caduced
-			for (i = 0; i < lockList.Count; ++i)
-				if ((lockList[i].Response != null) || (lockList[i].MillisecondsLeft <= 0)) lockList.RemoveAt(i);
-
-			if (busy)
-			{
-				// Unlock on empty lock list
-				if ((lockList.Count <= 0) || clearLockList)
-					Unlock();
-				// Ask if module is busy
-				if (client.IsConnected)
-				{
-					//try
-					//{
-					//	Send("alive");
-					//}
-					//catch { }
-				}
-			}
-		}
-
-		/// <summary>
 		/// Performs Restart Tasks
 		/// </summary>
 		protected override void DoRestartModule()
@@ -254,7 +214,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Performs Restart-test Tasks
 		/// </summary>
-		private void DoRestartTest()
+		protected override void DoRestartTest()
 		{
 			restartTestRequested = false;
 			Busy = true;
@@ -267,13 +227,28 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
-		/// Marks the module as Busy and adds the command to list of blocking commands
+		/// Parses all pending TCPPackets received
 		/// </summary>
-		/// <param name="command"></param>
-		private void Lock(Command command)
+		protected override void ParsePendingData()
 		{
-			lockList.Add(command);
-			Busy = true;
+			TcpPacket packet;
+			string message;
+			int i;
+
+			do
+			{
+				packet = dataReceived.Consume(20);
+				if (packet == null)
+					return;
+				if (!packet.IsAnsi)
+					continue;
+				for (i = 0; i < packet.DataStrings.Length; ++i)
+				{
+					message = packet.DataStrings[i].Trim();
+
+					ParseMessage(message);
+				}
+			} while (!stopMainThread && dataReceived.Count > 0);
 		}
 
 		/// <summary>
@@ -400,15 +375,6 @@ namespace Blk.Engine
 			return name + " [" + serverAddresses.ToString() + ":" + port.ToString() + "]";
 		}
 
-		/// <summary>
-		/// Marks the module as free
-		/// </summary>
-		private void Unlock()
-		{
-			lockList.Clear();
-			Busy = busyModule;
-		}
-
 		#region Thread Control Methods
 
 		/// <summary>
@@ -416,6 +382,7 @@ namespace Blk.Engine
 		/// </summary>
 		protected override void MainThreadDisconnect()
 		{
+			this.dataReceived.Clear();
 			if ((client != null) && client.IsOpen)
 			{
 				try { client.Disconnect(); }

@@ -126,7 +126,7 @@ namespace Blk.Gui
 			if (this.blackboard == null)
 				return;
 
-			foreach (IModule im in blackboard.Modules)
+			foreach (IModuleClient im in blackboard.Modules)
 			{
 				string suggestion;
 				IPrototype p;

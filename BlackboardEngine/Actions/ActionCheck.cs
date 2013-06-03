@@ -19,7 +19,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// The Module this ActionCheck is bind to
 		/// </summary>
-		private IModule parent;
+		private IModuleClient parent;
 		/// <summary>
 		/// The name of the process for which check
 		/// </summary>
@@ -93,7 +93,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// Gets or sets the Module this Action is bind to
 		/// </summary>
-		public IModule Parent
+		public IModuleClient Parent
 		{
 			get { return parent; }
 			set { parent = value; }

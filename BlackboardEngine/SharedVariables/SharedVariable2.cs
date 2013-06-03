@@ -27,7 +27,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// The IModule object which this SharedVariable object is bound to
 		/// </summary>
-		protected readonly IModule owner;
+		protected readonly IModuleClient owner;
 
 		/// <summary>
 		/// Collection of subscriptions asociated to this SharedVariable object
@@ -75,7 +75,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		/// <param name="owner">The IModule object which this SharedVariable object is bound to</param>
 		/// <param name="name">The name of the variable</param>
-		public SharedVariable2(IModule owner, string name)
+		public SharedVariable2(IModuleClient owner, string name)
 		{
 			if (owner == null) throw new ArgumentNullException("owner");
 			if (String.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
@@ -115,7 +115,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// Gets the IModule object which this SharedVariable object is bound to
 		/// </summary>
-		public IModule Owner
+		public IModuleClient Owner
 		{
 			get { return owner; }
 		}
@@ -157,7 +157,7 @@ namespace Blk.Engine.SharedVariables
 		/// Sends all subscription messages to the subscribers
 		/// </summary>
 		/// <param name="writer">The IModule object which requested the write operation</param>
-		protected abstract void ReportSubscribers(IModule writer);
+		protected abstract void ReportSubscribers(IModuleClient writer);
 
 		/// <summary>
 		/// Gets the string representation of the SharedVariable
@@ -315,7 +315,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		/// <param name="owner">The IModule object which this SharedVariable object is bound to</param>
 		/// <param name="name">The name of the variable</param>
-		public SharedVariable(IModule owner, string name)
+		public SharedVariable(IModuleClient owner, string name)
 			: base(owner, name)
 		{
 			rwLock = new ReaderWriterLock();
@@ -406,7 +406,7 @@ namespace Blk.Engine.SharedVariables
 		/// Sends all subscription messages to the subscribers
 		/// </summary>
 		/// <param name="writer">The IModule object which requested the write operation</param>
-		protected override void ReportSubscribers(IModule writer)
+		protected override void ReportSubscribers(IModuleClient writer)
 		{
 			// Generate parameters for notify subscription type
 			//string pNotify = name + " " + Data.Length.ToString();

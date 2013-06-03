@@ -7,7 +7,7 @@ namespace Blk.Api
 	/// <summary>
 	/// Represents a blackboard module interface which connects to a remote module via TCP/IP
 	/// </summary>
-	public interface IModuleClientTcp : IModule
+	public interface IModuleClientTcp : IModuleClient
 	{
 		#region Properties
 

@@ -103,6 +103,10 @@ namespace Blk.Gui
 		#region Delegates for async calls
 
 		/// <summary>
+		/// Represents the SetupBlackboardModule method
+		/// </summary>
+		private IModuleAddRemoveEH dlgSetupBlackboardModule;
+		/// <summary>
 		/// Represents the MachineStatusList_MachineStatusAdded method. Used for async calls
 		/// </summary>
 		private MachineStatusAddRemoveEH dlgMslMachineStatusAdded;
@@ -115,10 +119,6 @@ namespace Blk.Gui
 		/// </summary>
 		private MachineStatusElementChangedEH dlgMslMachineStatusChanged;
 		/// <summary>
-		/// Represents the AddRedirectionListItem method. Used for async calls
-		/// </summary>
-		private AddRedirectionListItemEH dlgAddRedirectionListItem;
-		/// <summary>
 		/// Represents the bbStatusChanged method. Used for async calls
 		/// </summary>
 		private VoidEventHandler dlgBbStatusChanged;
@@ -126,10 +126,18 @@ namespace Blk.Gui
 		/// Represents the module_StatusChanged method. Used for async calls
 		/// </summary>
 		private StatusChangedEH dlgModuleStatusChanged;
+
+#if !SPEED_UP
+		/// <summary>
+		/// Represents the AddRedirectionListItem method. Used for async calls
+		/// </summary>
+		private AddRedirectionListItemEH dlgAddRedirectionListItem;
 		/// <summary>
 		/// Represents the blackboard_ResponseRedirected method. Used for async calls
 		/// </summary>
 		private ResponseRedirectedEH dlgBlackboardResponseRedirected;
+#endif
+
 		/// <summary>
 		/// Represents the SharedVariables_SharedVariableAdded method. Used for async calls
 		/// </summary>
@@ -172,6 +180,7 @@ namespace Blk.Gui
 			dlgBbStatusChanged = new VoidEventHandler(bbStatusChanged);
 			dlgModuleStatusChanged = new StatusChangedEH(module_StatusChanged);
 			dlgShvSharedVariableAdded = new SharedVariableAddedEventHandler(SharedVariables_SharedVariableAdded);
+			dlgSetupBlackboardModule = new IModuleAddRemoveEH(SetupBlackboardModule);
 
 #if !SPEED_UP
 			dlgBlackboardResponseRedirected = new ResponseRedirectedEH(blackboard_ResponseRedirected);
@@ -466,6 +475,7 @@ namespace Blk.Gui
 
 		private void BlackboardRunning()
 		{
+			injectorTool.Blackboard = blackboard;
 			frmBbss.BtnStartStop.Text = 
 				btnStartStop.Text =
 				mnuiBlackboard_StartStop.Text =
@@ -511,6 +521,7 @@ namespace Blk.Gui
 
 		private void BlackboardStopping()
 		{
+			injectorTool.Blackboard = null;
 			frmBbss.BtnStartStop.Text =
 				btnStartStop.Text =
 				mnuiBlackboard_StartStop.Text =
@@ -631,7 +642,6 @@ namespace Blk.Gui
 		{
 			FileInfo configFileInfo;
 			string bbConfigFileName;
-			string pluginsPath;
 			tcLog.SelectedTab = tpOutputLog;
 			frmBbss.GbBlackboardFiles.Enabled = gbBlackboardFiles.Enabled = false;
 			try
@@ -639,8 +649,6 @@ namespace Blk.Gui
 				SetupBlackboard();
 				configFileInfo = new FileInfo(bbConfigFile);
 				bbConfigFileName = configFileInfo.FullName;
-				pluginsPath = configFileInfo.DirectoryName + "\\Plugins";
-				LoadPlugins(pluginsPath);
 			}
 			catch (Exception ex)
 			{
@@ -653,7 +661,6 @@ namespace Blk.Gui
 			//if (bbConfigFileName.Length > (txtConfigurationFile.Width / txtConfigurationFile.Font.SizeInPoints))
 			ConfigFile = bbConfigFileName;
 			//txtConfigurationFile.ScrollToCaret();
-			injectorTool.Blackboard = blackboard;
 			txtBBInputPort.Text = blackboard.Port.ToString();
 			txtBBAddresses.Text = GetIPAddresses();
 			frmBbss.GbBlackboardFiles.Enabled = gbBlackboardFiles.Enabled = false;
@@ -672,10 +679,27 @@ namespace Blk.Gui
 			return true;
 		}
 
+		private void LoadPlugins()
+		{
+			string pluginsPath;
+			pluginsPath = Application.StartupPath + "\\Plugins";
+			LoadPlugins(pluginsPath);
+		}
+
 		private void LoadPlugins(string pluginsPath)
 		{
-			if (Directory.Exists(pluginsPath))
-				blackboard.PluginManager.LoadPlugins(pluginsPath);
+			try
+			{
+				if (Directory.Exists(pluginsPath))
+					blackboard.PluginManager.LoadPlugins(pluginsPath);
+			}
+#if DEBUG
+			catch (Exception ex) {
+				MessageBox.Show(ex.Message);
+			}
+#else
+			catch {}
+#endif
 			mnuiPlugins.DropDownItems.Clear();
 			foreach (IBlackboardPlugin plugin in blackboard.PluginManager)
 			{
@@ -904,6 +928,7 @@ namespace Blk.Gui
 			blackboard = Blackboard.FromXML(ConfigFile, log);
 			blackboard.VerbosityLevel = 1;
 			//blackboard = Blackboard.FromXML("bb.xml");
+			LoadPlugins();
 			interactionTool.Blackboard = blackboard;
 			SetupBlackboardModules();
 			SetupBlackboardEvents();
@@ -920,6 +945,7 @@ namespace Blk.Gui
 			blackboard.Connected += new ModuleConnectionEH(blackboard_Connected);
 			blackboard.Disconnected += new ModuleConnectionEH(blackboard_Disconnected);
 			blackboard.StatusChanged += new BlackboardStatusChangedEH(blackboard_StatusChanged);
+			blackboard.Modules.ModuleAdded += new IModuleAddRemoveEH(BlackboardModuleAdded); ;
 #if !SPEED_UP
 			blackboard.ResponseRedirected += new ResponseRedirectedEH(blackboard_ResponseRedirected);
 #endif
@@ -937,15 +963,25 @@ namespace Blk.Gui
 			flpModuleList.Controls.Clear();
 			frmBbss.FlpModuleList.Controls.Clear();
 			mnuiModules.DropDownItems.Clear();
-			foreach (IModule im in blackboard.Modules)
+			foreach (IModuleClient im in blackboard.Modules)
+				SetupBlackboardModule(im);
+		}
+
+		private void SetupBlackboardModule(IModuleClient iModuleClient)
+		{
+			if (this.InvokeRequired)
 			{
-				ModuleClient mc = im as ModuleClient;
-				if (mc == null) continue;
-				mc.StatusChanged += new StatusChangedEH(module_StatusChanged);
-				AddModuleButton(mc);
-				AddSecondaryModuleButton(mc);
-				AddModuleMenu(mc);
+				if (!this.IsHandleCreated || this.Disposing || this.IsDisposed)
+					return;
+				this.BeginInvoke(dlgSetupBlackboardModule, iModuleClient);
+				return;
 			}
+			ModuleClient mc = iModuleClient as ModuleClient;
+			if (mc == null) return;
+			mc.StatusChanged += new StatusChangedEH(module_StatusChanged);
+			AddModuleButton(mc);
+			AddSecondaryModuleButton(mc);
+			AddModuleMenu(mc);
 		}
 
 		private void SetupLogfile()
@@ -1438,6 +1474,8 @@ namespace Blk.Gui
 			if (AutoStart && File.Exists(bbConfigFile))
 				LoadBlackboard(bbConfigFile);
 			frmBbss.Show();
+
+			//LoadPluginsFromManagedDll("Plugins\\PluginExample.dll");
 		}
 
 		private void chkAutoLog_CheckedChanged(object sender, EventArgs e)
@@ -1961,7 +1999,12 @@ namespace Blk.Gui
 			catch { }
 		}
 
-		private void module_StatusChanged(IModule sender)
+		void BlackboardModuleAdded(IModuleClient module)
+		{
+			SetupBlackboardModule(module);
+		}
+
+		private void module_StatusChanged(IModuleClient sender)
 		{
 			try
 			{
@@ -2214,5 +2257,39 @@ namespace Blk.Gui
 
 		#endregion
 
+
+		/// <summary>
+		/// Loads plugins from a managed Dll file
+		/// </summary>
+		/// <param name="dll">A DllInfo object which contains information about the file which contains the plugins to load</param>
+		protected virtual void LoadPluginsFromManagedDll(string path)
+		{
+			System.Reflection.Assembly assembly;
+			Type[] types;
+			List<IBlackboardPlugin> pluginList = new List<IBlackboardPlugin>();
+			IBlackboardPlugin instance;
+
+			//assembly = System.Reflection.Assembly.LoadFrom(path);
+			assembly = System.Reflection.Assembly.LoadFile(Application.StartupPath + "\\"+ path);
+
+			if (assembly.ManifestModule.Name == "Robotics.dll")
+				return;
+			types = assembly.GetTypes();
+
+			foreach (Type type in types)
+			{
+				if ((type.GetInterface("IBlackboardPlugin") == null) || type.IsAbstract)
+					continue;
+
+				//try
+				//{
+				//instance = (Plugin)Activator.CreateInstance(type);
+				instance = (IBlackboardPlugin)assembly.CreateInstance(type.FullName);
+				//instance = (Plugin) AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(dll.FilePath, type.FullName);
+				pluginList.Add(instance);
+				//}
+				//catch { continue; }
+			}
+		}
 	}
 }

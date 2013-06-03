@@ -31,7 +31,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// The Module this ActionSend is bind to
 		/// </summary>
-		private IModule parent;
+		private IModuleClient parent;
 
 		#endregion
 
@@ -74,7 +74,7 @@ namespace Blk.Engine.Actions
 				{
 					if ((parent != null) && (command == null))
 					{
-						IModule source;
+						IModuleClient source;
 						if ((parent.Parent != null) && (parent.Parent.VirtualModule != null))
 							source = parent.Parent.VirtualModule;
 						else source = parent;
@@ -89,7 +89,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// Gets or sets the Module this Action is bind to
 		/// </summary>
-		public IModule Parent
+		public IModuleClient Parent
 		{
 			get { return parent; }
 			set

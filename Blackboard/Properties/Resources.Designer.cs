@@ -88,6 +88,34 @@ namespace Blk.Gui.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap Add_16 {
+            get {
+                object obj = ResourceManager.GetObject("Add_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Add_24 {
+            get {
+                object obj = ResourceManager.GetObject("Add_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Add_32 {
+            get {
+                object obj = ResourceManager.GetObject("Add_32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Add_48 {
+            get {
+                object obj = ResourceManager.GetObject("Add_48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ArrowNext_16 {
             get {
                 object obj = ResourceManager.GetObject("ArrowNext_16", resourceCulture);
@@ -700,6 +728,13 @@ namespace Blk.Gui.Properties {
         internal static System.Drawing.Bitmap ExitRed_48 {
             get {
                 object obj = ResourceManager.GetObject("ExitRed_48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Filter2HS {
+            get {
+                object obj = ResourceManager.GetObject("Filter2HS", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

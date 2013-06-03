@@ -33,7 +33,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// The Module this ActionSend is bind to
 		/// </summary>
-		private IModule parent;
+		private IModuleClient parent;
 
 		#endregion
 
@@ -95,7 +95,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// Gets or sets the Module this Action is bind to
 		/// </summary>
-		public IModule Parent
+		public IModuleClient Parent
 		{
 			get { return parent; }
 			set

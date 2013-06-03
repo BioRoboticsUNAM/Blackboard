@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using Robotics.API;
 using Blk.Api;
 using Blk.Engine;
-using IModule = Blk.Api.IModule;
+using IModule = Blk.Api.IModuleClient;
 using Module = Blk.Engine.ModuleClient;
 using Command = Blk.Engine.Command;
 using Response = Blk.Engine.Response;
@@ -17,14 +17,21 @@ namespace Blk.Gui
 {
 	public partial class InjectorTool : UserControl
 	{
+		private const string InputTip = "Type command/response here";
 		private Blackboard blackboard;
 		private List<Prototype> prototypes;
+		private List<HistoryToken> history;
 		private char[] separators = { '\r', '\n'};
 
 		public InjectorTool()
 		{
 			InitializeComponent();
 			prototypes = new List<Prototype>();
+			history = new List<HistoryToken>();
+			this.cmbHystoryFilter.Sorted = true;
+			this.cmbHystoryFilter.Items.Add("(none)");
+			this.cmbHystoryFilter.AutoCompleteSource = AutoCompleteSource.CustomSource;
+			DisplayInputTip();
 		}
 
 		public Blackboard Blackboard
@@ -35,11 +42,14 @@ namespace Blk.Gui
 				//if ((this.blackboard = value) == null)
 				//	throw new ArgumentNullException();
 				this.blackboard = value;
+				string quickCommand;
 
 				prototypes.Clear();
 				cbModules.Items.Clear();
+				cmbQuickCommand.Items.Clear();
 
 				// Load modules, prototypes and populate autocomplete list
+				this.Enabled = blackboard != null;
 				if (blackboard == null)
 					return;
 				foreach (Module module in blackboard.Modules)
@@ -51,7 +61,10 @@ namespace Blk.Gui
 					foreach (Prototype proto in module.Prototypes)
 					{
 						prototypes.Add(proto);
-						txtMessage.AutoCompleteCustomSource.Add(proto.Command + (proto.ParamsRequired ? " \"\"" : String.Empty) + " @0");
+						quickCommand = proto.Command + (proto.ParamsRequired ? " \"\"" : String.Empty) + " @0";
+						txtMessage.AutoCompleteCustomSource.Add(quickCommand);
+						cmbQuickCommand.Items.Add(quickCommand);
+						AddFilter(proto.Command);
 					}
 				}
 			}
@@ -60,6 +73,55 @@ namespace Blk.Gui
 		public bool BulkMode
 		{
 			get { return chkBulk.Checked; }
+		}
+
+		private void AddHystoryToken(HistoryToken token)
+		{
+			if(!history.Contains(token))
+				history.Add(token);
+			//if (!lstHistory.Items.Contains(token))
+			//    lstHistory.Items.Add(token);
+			if (!txtMessage.AutoCompleteCustomSource.Contains(token.StringValue))
+				txtMessage.AutoCompleteCustomSource.Add(token.StringValue);
+			Filter();
+		}
+
+		private void AddFilter(string filterString)
+		{
+			if (cmbHystoryFilter.Items.Contains(filterString))
+				return;
+			cmbHystoryFilter.Items.Add(filterString);
+			cmbHystoryFilter.AutoCompleteCustomSource.Add(filterString);
+		}
+
+		private void AddQuickCommand()
+		{
+			
+			if (cmbQuickCommand.SelectedIndex == -1)
+				return;
+			txtMessage.AppendText( cmbQuickCommand.SelectedItem.ToString());
+			int ix = txtMessage.Text.LastIndexOf('"');
+			if (ix == -1)
+				return;
+			txtMessage.Focus();
+			txtMessage.SelectionStart = ix;
+			txtMessage.SelectionLength = 0;
+		}
+
+		private void ClearInputTip()
+		{
+			if (String.Compare(txtMessage.Text, InputTip, true) != 0)
+				return;
+			txtMessage.ForeColor = Control.DefaultForeColor;
+			txtMessage.Clear();
+		}
+
+		private void DisplayInputTip()
+		{
+			if (!String.IsNullOrEmpty(txtMessage.Text))
+				return;
+			this.txtMessage.Text = InputTip;
+			this.txtMessage.ForeColor = Color.LightGray;
 		}
 
 		private void Inject()
@@ -96,13 +158,36 @@ namespace Blk.Gui
 				}
 				
 				blackboard.Inject(token.StringToInject);
-				if (!lstHistory.Items.Contains(token))
-					lstHistory.Items.Add(token);
-				if (!txtMessage.AutoCompleteCustomSource.Contains(token.StringValue))
-					txtMessage.AutoCompleteCustomSource.Add(token.StringValue);
+				AddHystoryToken(token);
 			}
 			txtMessage.Clear();
 
+		}
+
+		private void Filter()
+		{
+			if ((cmbHystoryFilter.SelectedIndex == 0) && (cmbHystoryFilter.Text == (string)cmbHystoryFilter.Items[0]))
+			{
+				Filter(null);
+				return;
+			}
+
+			if (!String.IsNullOrEmpty(cmbHystoryFilter.Text) && !cmbHystoryFilter.Items.Contains(cmbHystoryFilter.Text))
+				AddFilter(cmbHystoryFilter.Text);
+			Filter(cmbHystoryFilter.Text);
+		}
+
+		private void Filter(string filterString)
+		{
+			lstHistory.SuspendLayout();
+			lstHistory.Items.Clear();
+
+			for (int i = 0; i < history.Count; ++i)
+			{
+				if(String.IsNullOrEmpty(filterString) || history[i].StringValue.Contains(filterString))
+					lstHistory.Items.Add(history[i]);
+			}
+			lstHistory.ResumeLayout();
 		}
 
 		private bool IsValidInput(Module source, string s)
@@ -121,7 +206,7 @@ namespace Blk.Gui
 			Module source;
 			string[] inputs;
 
-			if (String.IsNullOrEmpty(txtMessage.Text))
+			if (String.IsNullOrEmpty(txtMessage.Text) || (String.Compare(txtMessage.Text, InputTip, true) == 0))
 			{
 				txtMessage.BackColor = SystemColors.Window;
 				return;
@@ -298,6 +383,44 @@ namespace Blk.Gui
 				e.Cancel = true;
 				return;
 			}
+		}
+
+		private void cmbHystoryFilter_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			if (e.KeyChar == '\r')
+				Filter();
+		}
+
+		private void btnHystoryFilter_Click(object sender, EventArgs e)
+		{
+			Filter();
+		}
+
+		private void cmbHystoryFilter_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			Filter();
+		}
+
+		private void btnQuickCommand_Click(object sender, EventArgs e)
+		{
+			AddQuickCommand();
+		}
+
+		private void cmbQuickCommand_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (cmbQuickCommand.SelectedIndex == -1)
+				return;
+			AddQuickCommand();
+		}
+
+		private void txtMessage_Enter(object sender, EventArgs e)
+		{
+			ClearInputTip();
+		}
+
+		private void txtMessage_Leave(object sender, EventArgs e)
+		{
+			DisplayInputTip();
 		}
 
 		protected class HistoryToken :  IComparable<HistoryToken>

@@ -45,7 +45,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// Gets the Module this IAction is bind to
 		/// </summary>
-		IModule Parent
+		IModuleClient Parent
 		{
 			get;
 			set;

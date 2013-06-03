@@ -19,7 +19,7 @@ namespace Blk.Engine.Actions
 	{
 		#region Variables
 
-		private IModule owner;
+		private IModuleClient owner;
 		private List<IAction> actions;
 
 		#endregion
@@ -31,7 +31,7 @@ namespace Blk.Engine.Actions
 		/// </summary>
 		/// <param name="owner">The Module that the action collection is created for</param>
 		/// <param name="capacity">The number of elements that the new ActionCollection can initially store</param>
-		public ActionCollection(IModule owner, int capacity)
+		public ActionCollection(IModuleClient owner, int capacity)
 		{
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
@@ -42,7 +42,7 @@ namespace Blk.Engine.Actions
 		/// Initializes a new instance of the ActionCollection class for the specified parent Module.
 		/// </summary>
 		/// <param name="owner">The Module that the action collection is created for</param>
-		public ActionCollection(IModule owner)
+		public ActionCollection(IModuleClient owner)
 			: this(owner, 10)
 		{
 		}
@@ -54,7 +54,7 @@ namespace Blk.Engine.Actions
 		/// <summary>
 		/// Gets the Module to which the ActionCollection object belongs
 		/// </summary>
-		public IModule Owner
+		public IModuleClient Owner
 		{
 			get { return owner; }
 		}

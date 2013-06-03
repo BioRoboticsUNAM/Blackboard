@@ -40,7 +40,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Gets the Module this prototype is bind to
 		/// </summary>
-		IModule Parent { get; set; }
+		IModuleClient Parent { get; set; }
 
 		#endregion
 	}

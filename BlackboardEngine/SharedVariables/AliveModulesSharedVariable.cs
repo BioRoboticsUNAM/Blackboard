@@ -52,7 +52,7 @@ namespace Blk.Engine.SharedVariables
 				return String.Empty;
 
 			List<string> aliveModules = new List<string>(owner.Parent.Modules.Count);
-			foreach (IModule module in owner.Parent.Modules)
+			foreach (IModuleClient module in owner.Parent.Modules)
 			{
 				if (module.IsAlive)
 					aliveModules.Add(module.Name);
@@ -76,7 +76,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="arraySize">Specifies the size of the array if the variable was created as an array. If the variable is not an array must be -1</param>
 		/// <param name="content">The data in hexadecimal string representation</param>
 		/// <returns>false</returns>
-		public override bool WriteStringData(IModule writer, string dataType, int arraySize, string content)
+		public override bool WriteStringData(IModuleClient writer, string dataType, int arraySize, string content)
 		{
 			return false;
 		}

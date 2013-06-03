@@ -82,12 +82,12 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the destination Module of this command
 		/// </summary>
-		IModule Destination { get; }
+		IModuleClient Destination { get; }
 		
 		/// <summary>
 		/// Gets the source Module of this command
 		/// </summary>
-		IModule Source { get; }
+		IModuleClient Source { get; }
 		
 		#endregion
 

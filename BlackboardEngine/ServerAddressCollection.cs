@@ -13,7 +13,7 @@ namespace Blk.Engine
 	{
 		#region Variables
 
-		private IModule owner;
+		private IModuleClient owner;
 		private List<IPAddress> addresses;
 
 		#endregion
@@ -25,7 +25,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="owner">The module that the IP address collection is created for</param>
 		/// <param name="capacity">The number of elements that the new ServerAddressCollection can initially store</param>
-		internal ServerAddressCollection(IModule owner, int capacity)
+		internal ServerAddressCollection(IModuleClient owner, int capacity)
 		{
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
@@ -36,7 +36,7 @@ namespace Blk.Engine
 		/// Initializes a new instance of the ServerAddressCollection class for the specified parent IModule.
 		/// </summary>
 		/// <param name="owner">The module that the IP address collection is created for</param>
-		internal ServerAddressCollection(IModule owner)
+		internal ServerAddressCollection(IModuleClient owner)
 			: this(owner, 10)
 		{
 		}
@@ -48,7 +48,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the module to which the ServerAddressCollection object belongs
 		/// </summary>
-		public IModule Owner
+		public IModuleClient Owner
 		{
 			get { return owner; }
 		}

@@ -15,7 +15,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Gets the module to which the ServerAddressCollection object belongs
 		/// </summary>
-		IModule Owner { get; }
+		IModuleClient Owner { get; }
 
 		#endregion
 

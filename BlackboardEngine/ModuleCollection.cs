@@ -15,7 +15,7 @@ namespace Blk.Engine
 		#region Variables
 
 		private Blackboard owner;
-		private List<IModule> modules;
+		private List<IModuleClient> modules;
 
 		#endregion
 
@@ -30,7 +30,7 @@ namespace Blk.Engine
 		{
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
-			this.modules = new List<IModule>(capacity);
+			this.modules = new List<IModuleClient>(capacity);
 		}
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="i">The zero based index of the element to get or set</param>
 		/// <returns>The module at position i</returns>
-		public IModule this[int i]
+		public IModuleClient this[int i]
 		{
 			get { return modules[i]; }
 			set { modules[i] = value; }
@@ -101,7 +101,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="moduleName">The name of the module element to get or set</param>
 		/// <returns>The module with specified name</returns>
-		public IModule this[string moduleName]
+		public IModuleClient this[string moduleName]
 		{
 			get
 			{
@@ -156,7 +156,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="m">The Module for which the index is returned</param>
 		/// <returns>The index of the specified Module. If the Module is not currently a member of the collection, it returns -1</returns>
-		public virtual int IndexOf(IModule m)
+		public virtual int IndexOf(IModuleClient m)
 		{
 			return modules.IndexOf(m);
 		}
@@ -193,7 +193,7 @@ namespace Blk.Engine
 		/// Adds the specified Module object to the collection.
 		/// </summary>
 		/// <param name="item">The Module to add to the collection</param>
-		public void Add(IModule item)
+		public void Add(IModuleClient item)
 		{
 			item.Parent = owner;
 			if (ModuleAdded != null) ModuleAdded(item);
@@ -219,7 +219,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="item">The Module to search for in the collection</param>
 		/// <returns>true if the specified Module exists in the collection; otherwise, false</returns>
-		public bool Contains(IModule item)
+		public bool Contains(IModuleClient item)
 		{
 			return modules.Contains(item);
 		}
@@ -229,7 +229,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="array">The Module array to copy the child controls to.</param>
 		/// <param name="arrayIndex">The zero-based relative index in array where copying begins</param>
-		public void CopyTo(IModule[] array, int arrayIndex)
+		public void CopyTo(IModuleClient[] array, int arrayIndex)
 		{
 			modules.CopyTo(array, arrayIndex);
 		}
@@ -239,7 +239,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="item">The Module to be removed</param>
 		/// <returns>true if the specified Module exists in the collection; otherwise, false</returns>
-		public bool Remove(IModule item)
+		public bool Remove(IModuleClient item)
 		{
 			item.Parent = null;
 			if (modules.Contains(item) && (ModuleRemoved != null)) ModuleRemoved(item);
@@ -253,7 +253,7 @@ namespace Blk.Engine
 		/// Retrieves an enumerator that can iterate through the ModuleCollection object
 		/// </summary>
 		/// <returns>The enumerator to iterate through the collection.</returns>
-		public IEnumerator<IModule> GetEnumerator()
+		public IEnumerator<IModuleClient> GetEnumerator()
 		{
 			return modules.GetEnumerator();
 		}

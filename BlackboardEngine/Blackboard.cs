@@ -781,7 +781,7 @@ namespace Blk.Engine
 		/// The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if a destination module was found, false otherwise</returns>
-		public bool FindDestinationModule(string commandName, out IModule destination)
+		public bool FindDestinationModule(string commandName, out IModuleClient destination)
 		{
 			IPrototype p;
 			return FindDestinationModule(commandName, out destination, out p);
@@ -800,7 +800,7 @@ namespace Blk.Engine
 		/// The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if a destination module was found, false otherwise</returns>
-		public bool FindDestinationModule(string commandName, out IModule destination, out IPrototype prototype)
+		public bool FindDestinationModule(string commandName, out IModuleClient destination, out IPrototype prototype)
 		{
 			destination = null;
 			prototype = null;
@@ -1336,64 +1336,12 @@ namespace Blk.Engine
 			RunningStatus = BlackboardRunningStatus.Starting;
 			Log.WriteLine(4, "Main Thread: Running");
 
-			#region Start Modules
-			if(!VirtualModule.IsRunning)
-				VirtualModule.Start();
-			while (!VirtualModule.IsRunning)
-				Thread.Sleep(1);
-			if (running)
-			{
-				foreach (ModuleClient module in modules)
-				{
-					if (!module.Enabled)
-						continue;
-					if (!module.IsRunning)
-					{
-						module.Start();
-						Thread.Sleep(this.ModuleLoadDelay);
-					}
-				}
-			}
-
-			#endregion
-
-			#region Start Plugins
-
-			if (this.pluginManager.Count > 0)
-			{
-				Log.WriteLine(4, "Initializing plugins");
-				pluginManager.InitializePlugins();
-				Log.WriteLine(4, "Starting plugins");
-				pluginManager.BeginStartPlugins(null, null);
-			}
-
-			#endregion
-
-			// Start Server and clear queues
-			#region Server Start
-
-			if (running)
-			{
-				if ((server != null) && (server.Started))
-					server.Stop();
-				dataReceived.Clear();
-				commandsPending.Clear();
-				commandsWaiting.Clear();
-				SetupServer();
-				try
-				{
-					server.Start();
-				}
-				catch
-				{
-					Log.WriteLine(1, "Can not start Tcp Server");
-					running = false;
-					foreach (ModuleClient module in modules)
-						if (!module.IsRunning) module.BeginStop();
-				}
-			}
-
-			#endregion
+			// Start Plugins
+			StartPlugins();
+			// Start Client Modules
+			StartModules();
+			// Start TCP Server and clear queues
+			StartServer();
 
 			startupTime = DateTime.Now;
 			testTimeOutExecuted = false;
@@ -1538,11 +1486,7 @@ namespace Blk.Engine
 
 			#region Begin to stop Plugins
 
-			if (this.pluginManager.Count > 0)
-			{
-				Log.WriteLine(4, "Stopping plugins");
-				stopPluginsAsyncResult = this.pluginManager.BeginStopPlugins(null, null);
-			}
+			stopPluginsAsyncResult = BeginStopPlugins();
 
 			#endregion
 
@@ -1587,11 +1531,7 @@ namespace Blk.Engine
 
 			#region Wait for Plugins to stop
 
-			if ((this.pluginManager.Count > 0) && (stopPluginsAsyncResult != null))
-			{
-				this.pluginManager.EndStopPlugins(stopPluginsAsyncResult);
-				Log.WriteLine(4, "Plugins stopped");
-			}
+			EndStopPlugins(stopPluginsAsyncResult);
 
 			#endregion
 
@@ -1600,6 +1540,96 @@ namespace Blk.Engine
 			RunningStatus = BlackboardRunningStatus.Stopped;
 			Log.WriteLine(1, "Blackboard Stopped");
 			Log.Flush();
+		}
+
+		/// <summary>
+		/// Starts the blackboard modules
+		/// </summary>
+		private void StartModules()
+		{
+			if (!VirtualModule.IsRunning)
+				VirtualModule.Start();
+			while (!VirtualModule.IsRunning)
+				Thread.Sleep(1);
+			if (running)
+			{
+				foreach (ModuleClient module in modules)
+				{
+					if (!module.Enabled)
+						continue;
+					if (!module.IsRunning)
+					{
+						module.Start();
+						Thread.Sleep(this.ModuleLoadDelay);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Initialize and starts the plugins
+		/// </summary>
+		private void StartPlugins()
+		{
+			if (this.pluginManager.Count > 0)
+			{
+				Log.WriteLine(4, "Initializing plugins");
+				pluginManager.InitializePlugins();
+				Log.WriteLine(4, "Starting plugins");
+				pluginManager.BeginStartPlugins(null, null);
+			}
+		}
+
+		/// <summary>
+		/// Starts the blackboard tcp server
+		/// </summary>
+		private void StartServer()
+		{
+			if (running)
+			{
+				if ((server != null) && (server.Started))
+					server.Stop();
+				dataReceived.Clear();
+				commandsPending.Clear();
+				commandsWaiting.Clear();
+				SetupServer();
+				try
+				{
+					server.Start();
+				}
+				catch
+				{
+					Log.WriteLine(1, "Can not start Tcp Server");
+					running = false;
+					foreach (ModuleClient module in modules)
+						if (!module.IsRunning) module.BeginStop();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Request plugins to stop
+		/// </summary>
+		private IAsyncResult BeginStopPlugins()
+		{
+			if (this.pluginManager.Count > 0)
+			{
+				Log.WriteLine(4, "Stopping plugins");
+				return this.pluginManager.BeginStopPlugins(null, null);
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Wait until plugins has been stopped
+		/// </summary>
+		private void EndStopPlugins(IAsyncResult stopPluginsAsyncResult)
+		{
+			if ((this.pluginManager.Count > 0) && (stopPluginsAsyncResult != null))
+			{
+				this.pluginManager.EndStopPlugins(stopPluginsAsyncResult);
+				Log.WriteLine(4, "Plugins stopped");
+			}
 		}
 
 		/// <summary>
@@ -1662,7 +1692,7 @@ namespace Blk.Engine
 		/// Configures the Module object added to the ModuleCollection of the Blackboard object
 		/// </summary>
 		/// <param name="module">Module to configure</param>
-		private void modules_ModuleAdded(IModule module)
+		private void modules_ModuleAdded(IModuleClient module)
 		{
 			if (module is ModuleClient)
 			{
@@ -1681,7 +1711,7 @@ namespace Blk.Engine
 		/// Configures the Module object removed the ModuleCollection of the Blackboard object
 		/// </summary>
 		/// <param name="module">Module to configure</param>
-		private void modules_ModuleRemoved(IModule module)
+		private void modules_ModuleRemoved(IModuleClient module)
 		{
 			if (module is ModuleClient)
 			{
@@ -1703,7 +1733,7 @@ namespace Blk.Engine
 			Log.WriteLine(5, m.Name + ": " + action.ToString() + (success ? " Success!!!" : " failed."));
 		}
 
-		private void module_CommandReceived(IModule sender, ITextCommand c)
+		private void module_CommandReceived(IModuleClient sender, ITextCommand c)
 		{
 			Command cmd = c as Command;
 			if (c == null)
@@ -1728,7 +1758,7 @@ namespace Blk.Engine
 			Log.WriteLine(4, "Disconnected from " + m.Name);
 		}
 
-		private void module_ResponseReceived(IModule sender, ITextResponse r)
+		private void module_ResponseReceived(IModuleClient sender, ITextResponse r)
 		{
 			Response rsp = r as Response;
 			if (rsp == null)
@@ -1744,12 +1774,12 @@ namespace Blk.Engine
 				Log.WriteLine(5, "<- [" + r.Source.Name + "]: " + r.ToString());
 		}
 
-		private void module_Started(IModule m)
+		private void module_Started(IModuleClient m)
 		{
 			Log.WriteLine(4, "Started module [" + m.Name + "]");
 		}
 
-		private void module_Stopped(IModule m)
+		private void module_Stopped(IModuleClient m)
 		{
 			Log.WriteLine(4, "Stopped module [" + m.Name + "]");
 		}

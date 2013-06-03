@@ -41,7 +41,7 @@ namespace Blk.Api.SharedVariables
 		/// <summary>
 		/// Gets the IModule object which this SharedVariable object is bound to
 		/// </summary>
-		IModule Owner { get; }
+		IModuleClient Owner { get; }
 
 		/// <summary>
 		/// Gets the size of the SharedVariable

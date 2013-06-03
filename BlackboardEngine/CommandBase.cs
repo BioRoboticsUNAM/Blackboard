@@ -21,7 +21,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// The destination Module of this command
 		/// </summary>
-		protected IModule destination;
+		protected IModuleClient destination;
 
 		/// <summary>
 		/// Command Id
@@ -46,7 +46,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// The source Module of this command
 		/// </summary>
-		protected IModule source;
+		protected IModuleClient source;
 
 		/// <summary>
 		/// Stores the last sent attempt result for this CommandBase instance
@@ -112,7 +112,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the destination Module of this command
 		/// </summary>
-		public virtual IModule Destination
+		public virtual IModuleClient Destination
 		{
 			get { return destination; }
 		}
@@ -197,7 +197,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the source Module of this command
 		/// </summary>
-		public virtual IModule Source
+		public virtual IModuleClient Source
 		{
 			get { return source; }
 		}

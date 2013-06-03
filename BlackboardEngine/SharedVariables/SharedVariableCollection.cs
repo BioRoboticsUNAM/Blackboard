@@ -16,7 +16,7 @@ namespace Blk.Engine.SharedVariables
 	/// Provides a collection container that enables ModuleBlackboard instances to maintain a list of their shared variables
 	/// allowing multiple readers and single writer on the collection
 	/// </summary>
-	public class SharedVariableCollection : ISharedVariableCollection, IEnumerable<SharedVariable>, ICollection<SharedVariable>
+	public class SharedVariableCollection : ISharedVariableCollection, ICollection<SharedVariable>
 	{
 		#region Variables
 
@@ -326,12 +326,14 @@ namespace Blk.Engine.SharedVariables
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		IEnumerator<ISharedVariable> IEnumerable<ISharedVariable>.GetEnumerator()
 		{
-			//IEnumerator<ISharedVariable> enumerator;
-			//rwLock.AcquireReaderLock(-1);
-			//enumerator = (IEnumerator<ISharedVariable>)(variables.Values.GetEnumerator());
-			//rwLock.ReleaseReaderLock();
-			//return enumerator;
-			throw new NotImplementedException();
+
+			List<ISharedVariable> vars;
+			rwLock.AcquireReaderLock(-1);
+			vars = new List<ISharedVariable>(variables.Count);
+			for (int i = 0; i < vars.Count; ++i)
+				vars[i] = variables.Values[i];
+			rwLock.ReleaseReaderLock();
+			return vars.GetEnumerator();
 		}
 
 		#endregion

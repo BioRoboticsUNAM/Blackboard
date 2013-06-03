@@ -14,7 +14,7 @@ namespace Blk.Api
 	/// <summary>
 	/// Implements a ModuleBlackboard
 	/// </summary>
-	public interface IModuleBlackboard : IModule
+	public interface IModuleBlackboard : IModuleClient
 	{
 		#region Properties
 

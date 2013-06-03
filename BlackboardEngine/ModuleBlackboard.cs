@@ -280,7 +280,7 @@ namespace Blk.Engine
 		{
 			Busy = true;
 
-			dataReceived.Clear();
+			//dataReceived.Clear();
 			ExecuteRestartActions();
 
 			Busy = false;
@@ -289,7 +289,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Performs Restart-test Tasks
 		/// </summary>
-		private void DoRestartTest()
+		protected override void DoRestartTest()
 		{
 			Busy = true;
 
@@ -305,7 +305,7 @@ namespace Blk.Engine
 		private void FillMachineStatussList()
 		{
 			//msc.Add(new MachineStatus(IPAddress.Parse("127.0.0.1"), 50, BatteryChargeStatus.Unknown));
-			foreach (IModule m in this.Parent.Modules)
+			foreach (IModuleClient m in this.Parent.Modules)
 			{
 				IModuleClientTcp module = m as IModuleClientTcp;
 				if (module == null) continue;
@@ -319,6 +319,14 @@ namespace Blk.Engine
 					}
 				}
 			}
+		}
+		
+		/// <summary>
+		/// No data parsing is required.
+		/// All process is made by the ParsePendingCommands method
+		/// </summary>
+		protected override void ParsePendingData()
+		{
 		}
 
 		/// <summary>
@@ -743,7 +751,7 @@ namespace Blk.Engine
 			}
 			StringBuilder sb = new StringBuilder();
 			int i = 0;
-			IModule module = parent.Modules[moduleName];
+			IModuleClient module = parent.Modules[moduleName];
 			sb.Append(moduleName);
 			sb.Append(" alive=");
 			sb.Append(module.IsAlive);
@@ -1095,7 +1103,7 @@ namespace Blk.Engine
 			connectedStatusEH = new ModuleConnectionEH(module_ConnectedStatusChanged);
 			if (this.Parent != null)
 			{
-				foreach (IModule module in Parent.Modules)
+				foreach (IModuleClient module in Parent.Modules)
 				{
 					if (module == this)
 						continue;
@@ -1124,7 +1132,7 @@ namespace Blk.Engine
 
 			if (this.Parent != null)
 			{
-				foreach (IModule module in Parent.Modules)
+				foreach (IModuleClient module in Parent.Modules)
 				{
 					if (module == this)
 						continue;
@@ -1229,7 +1237,7 @@ namespace Blk.Engine
 		/// Manages the changes on the busy status of a module to update shared variables.
 		/// </summary>
 		/// <param name="sender">The module which Ready status changed</param>
-		private void module_BusyChanged(IModule sender)
+		private void module_BusyChanged(IModuleClient sender)
 		{
 			if (sharedVariables.Contains("busy"))
 				sharedVariables["busy"].ReportSubscribers(sender);
@@ -1256,7 +1264,7 @@ namespace Blk.Engine
 		/// Manages the changes on the ready status of a module to update shared variables.
 		/// </summary>
 		/// <param name="sender">The module which Ready status changed</param>
-		private void module_ReadyChanged(IModule sender)
+		private void module_ReadyChanged(IModuleClient sender)
 		{
 			if (sharedVariables.Contains("ready"))
 			sharedVariables["ready"].ReportSubscribers(sender);

@@ -259,7 +259,7 @@ namespace Blk.Api
 		/// The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if a destination module was found, false otherwise</returns>
-		bool FindDestinationModule(string commandName, out IModule destination);
+		bool FindDestinationModule(string commandName, out IModuleClient destination);
 
 		/// <summary>
 		/// Look for a module in the blackboard that supports specified command
@@ -274,7 +274,7 @@ namespace Blk.Api
 		/// The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
 		/// This parameter is passed uninitialized</param>
 		/// <returns>true if a destination module was found, false otherwise</returns>
-		bool FindDestinationModule(string commandName, out IModule destination, out IPrototype prototype);
+		bool FindDestinationModule(string commandName, out IModuleClient destination, out IPrototype prototype);
 
 		#endregion
 

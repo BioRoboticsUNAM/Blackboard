@@ -68,22 +68,26 @@
     <Compile Include="IBlackboard.cs" />
     <Compile Include="IBlackboardPlugin.cs" />
     <Compile Include="IBlackboardPluginManager.cs" />
-    <Compile Include="IModule.cs" />
+    <Compile Include="IModuleClient.cs" />
     <Compile Include="IModuleBlackboard.cs" />
+    <Compile Include="IModuleClientPlugin.cs" />
     <Compile Include="IModuleClientTcp.cs" />
     <Compile Include="IModuleCollection.cs" />
+    <Compile Include="IModulePlugin.cs" />
     <Compile Include="IModuleProcessInfo.cs" />
     <Compile Include="IModuleSimulationOptions.cs" />
     <Compile Include="IPrototype.cs" />
     <Compile Include="IServerAddressCollection.cs" />
     <Compile Include="IPrototypeCollection.cs" />
     <Compile Include="ModulePlugin.cs" />
+    <Compile Include="PluginConnector.cs" />
     <Compile Include="SharedVariables\ISharedVariable.cs" />
     <Compile Include="SharedVariables\ISharedVariableCollection.cs" />
     <Compile Include="ITextCommand.cs" />
     <Compile Include="ITextMessage.cs" />
     <Compile Include="ITextResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SharedVariables\ModuleClientPlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Introduccion.txt">

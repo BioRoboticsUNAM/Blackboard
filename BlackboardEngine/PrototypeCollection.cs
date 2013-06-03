@@ -13,7 +13,7 @@ namespace Blk.Engine
 	{
 		#region Variables
 
-		private IModule owner;
+		private IModuleClient owner;
 		private List<IPrototype> prototypes;
 
 		#endregion
@@ -25,7 +25,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="owner">The module that the module collection is created for</param>
 		/// <param name="capacity">The number of elements that the new ModuleCollection can initially store</param>
-		internal PrototypeCollection(IModule owner, int capacity)
+		internal PrototypeCollection(IModuleClient owner, int capacity)
 		{
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
@@ -36,7 +36,7 @@ namespace Blk.Engine
 		/// Initializes a new instance of the PrototypeCollection class for the specified parent module.
 		/// </summary>
 		/// <param name="owner">The module that the module collection is created for</param>
-		internal PrototypeCollection(IModule owner)
+		internal PrototypeCollection(IModuleClient owner)
 			: this(owner, 10)
 		{
 		}
@@ -48,7 +48,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the module to which the PrototypeCollection object belongs
 		/// </summary>
-		public IModule Owner
+		public IModuleClient Owner
 		{
 			get { return owner; }
 		}

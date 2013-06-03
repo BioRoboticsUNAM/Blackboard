@@ -185,7 +185,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		/// <param name="module">The IModule used to remove the subscriptions.</param>
 		/// <returns>true if items was successfully removed from the SharedVariableSubscriptionList; otherwise, false. This method also returns false if item is not found in the original SharedVariableSubscriptionList</returns>
-		public bool Remove(IModule module)
+		public bool Remove(IModuleClient module)
 		{
 			bool result;
 			Queue<SharedVariableSubscription> removed;

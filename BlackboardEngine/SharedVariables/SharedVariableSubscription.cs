@@ -61,7 +61,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// The IModule object that subscribes to the shared variable
 		/// </summary>
-		protected readonly IModule subscriber;
+		protected readonly IModuleClient subscriber;
 
 		/// <summary>
 		/// The type of subscription to the shared variable
@@ -92,7 +92,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		/// <param name="variableName">The name of the shared variable</param>
 		/// <param name="subscriber">The IModule object that subscribes to the shared variable</param>
-		public SharedVariableSubscription(string variableName, IModule subscriber)
+		public SharedVariableSubscription(string variableName, IModuleClient subscriber)
 			: this(variableName, subscriber, SharedVariableSubscriptionType.WriteOthers, SharedVariableReportType.Notify, -1)
 		{
 		}
@@ -103,7 +103,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="variableName">The name of the shared variable</param>
 		/// <param name="subscriber">The IModule object that subscribes to the shared variable</param>
 		/// <param name="subscriptionType">The type of subscription to the shared variable</param>
-		public SharedVariableSubscription(string variableName, IModule subscriber, SharedVariableSubscriptionType subscriptionType)
+		public SharedVariableSubscription(string variableName, IModuleClient subscriber, SharedVariableSubscriptionType subscriptionType)
 			: this(variableName, subscriber, subscriptionType, SharedVariableReportType.Notify, -1)
 		{
 		}
@@ -115,7 +115,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="subscriber">The IModule object that subscribes to the shared variable</param>
 		/// <param name="subscriptionType">The type of subscription to the shared variable</param>
 		/// <param name="variableSize">The size the variable must match to send a subscription notification. A -1 value indicates any size</param>
-		public SharedVariableSubscription(string variableName, IModule subscriber, SharedVariableSubscriptionType subscriptionType, int variableSize)
+		public SharedVariableSubscription(string variableName, IModuleClient subscriber, SharedVariableSubscriptionType subscriptionType, int variableSize)
 			:this(variableName, subscriber, subscriptionType, SharedVariableReportType.Notify, variableSize)
 		{
 		}
@@ -128,7 +128,7 @@ namespace Blk.Engine.SharedVariables
 		/// <param name="subscriptionType">The type of subscription to the shared variable</param>
 		/// <param name="reportType">The report type choosen by the subscriber</param>
 		/// <param name="variableSize">The size the variable must match to send a subscription notification. A -1 value indicates any size</param>
-		public SharedVariableSubscription(string variableName, IModule subscriber, SharedVariableSubscriptionType subscriptionType, SharedVariableReportType reportType, int variableSize)
+		public SharedVariableSubscription(string variableName, IModuleClient subscriber, SharedVariableSubscriptionType subscriptionType, SharedVariableReportType reportType, int variableSize)
 		{
 			this.reportType = reportType;
 			this.subscriber = subscriber;
@@ -152,7 +152,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// Gets the IModule object that subscribes to the shared variable
 		/// </summary>
-		public IModule Subscriber
+		public IModuleClient Subscriber
 		{
 			get { return subscriber; }
 		}

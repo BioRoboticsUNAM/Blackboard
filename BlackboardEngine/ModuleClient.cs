@@ -33,7 +33,7 @@ namespace Blk.Engine
 	/// <summary>
 	/// Serves as base class to implement an interface to access a module
 	/// </summary>
-	public abstract class ModuleClient : IModule
+	public abstract class ModuleClient : IModuleClient
 	{
 		#region Constants
 
@@ -224,11 +224,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Commands the main thread to clear the LockList to prevent list to be modified and get trouble
 		/// </summary>
-		private bool clearLockList = false;
-		/// <summary>
-		/// Stores all data received trough socket
-		/// </summary>
-		protected ProducerConsumer<TcpPacket> dataReceived;
+		protected bool clearLockList = false;
 		#endregion
 
 		#endregion
@@ -258,7 +254,6 @@ namespace Blk.Engine
 			this.startupActions = new ActionCollection(this);
 			this.stopActions = new ActionCollection(this);
 			this.testTimeOutActions = new ActionCollection(this);
-			this.dataReceived = new ProducerConsumer<TcpPacket>(1000);
 
 			this.restartRequested = false;
 			this.restartTestRequested = false;
@@ -496,7 +491,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the blackboard to which the ModuleCollection object belongs
 		/// </summary>
-		IBlackboard IModule.Parent
+		IBlackboard IModuleClient.Parent
 		{
 			get { return this.parent; }
 			set { parent = (Blackboard)value; }
@@ -516,7 +511,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Gets the prototypes managed by the Module
 		/// </summary>
-		IPrototypeCollection IModule.Prototypes
+		IPrototypeCollection IModuleClient.Prototypes
 		{
 			get { return prototypes; }
 		}
@@ -717,6 +712,27 @@ namespace Blk.Engine
 		#region Abstract Methods
 
 		/// <summary>
+		/// When overriden in a derived class, disconnects from the Module application.
+		/// This method is called by the Module Client Thread after the stop actions are executed,
+		/// but before cleaning the thread
+		/// </summary>
+		protected abstract void MainThreadDisconnect();
+
+		/// <summary>
+		/// When overriden in a derived class, implements a loop to connect with the Module application.
+		/// This method is called by the Module Client Thread after the startup actions are executed,
+		/// but before entering the thread loop for send and receive messages
+		/// </summary>
+		protected abstract void MainThreadFirstTimeConnect();
+
+		/// <summary>
+		/// When overriden in a derived class, checks the status of the connection with the Module application,
+		/// and, when broken, tries to connect with the Module application.
+		/// This method is called by the Module Client Thread on each message loop
+		/// </summary>
+		protected abstract void MainThreadLoopAutoConnect();
+
+		/// <summary>
 		/// When overriden in a derived class, it sends the provided text string to the module application
 		/// </summary>
 		/// <param name="stringToSend">string to send to the module application</param>
@@ -910,7 +926,6 @@ namespace Blk.Engine
 			Busy = true;
 
 			Unlock();
-			dataReceived.Clear();
 
 			ExecuteRestartActions();
 			Busy = false;
@@ -919,12 +934,11 @@ namespace Blk.Engine
 		/// <summary>
 		/// Performs Restart-test Tasks
 		/// </summary>
-		private void DoRestartTest()
+		protected virtual void DoRestartTest()
 		{
 			restartTestRequested = false;
 			Busy = true;
 			
-			dataReceived.Clear();
 			Unlock();
 			ExecuteRestartTestActions();
 
@@ -1145,6 +1159,39 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
+		/// Parses a string with a single message and, if valid, adds it to the corresponding queue
+		/// </summary>
+		protected void ParseMessage(string message)
+		{
+			Command c;
+			Response r;
+
+			if (String.IsNullOrEmpty(message))
+				return;
+
+			if (IsControlResponse(message))
+			{
+				ParseControlResponse(message);
+				return;
+			}
+
+			// Check if message received is a response
+			if (Response.TryParse(message, this, out r))
+			{
+				// A response has been received so it is redirected to blackboard
+				this.lastActivityTime = DateTime.Now;
+				ParseResponse(r);
+			}
+			// Check if message received is a command
+			else if (Command.TryParse(message, this, out c))
+			{
+				// A command has been received so it is redirected to blackboard
+				this.lastActivityTime = DateTime.Now;
+				ParseCommand(c);
+			}
+		}
+
+		/// <summary>
 		/// Parses a control command
 		/// </summary>
 		/// <param name="s">String to parse</param>
@@ -1228,55 +1275,9 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
-		/// Parses all pending TCPPackets received
+		/// When overriden in a derived class, parses all pending data received
 		/// </summary>
-		protected virtual void ParsePendingData()
-		{
-			TcpPacket packet;
-			string message;
-			Command c;
-			Response r;
-			int i;
-
-			do
-			{
-				packet = dataReceived.Consume(20);
-				if (packet == null)
-					return;
-				if (!packet.IsAnsi)
-					continue;
-				Stopwatch sw = new Stopwatch();
-				sw.Start();
-				for (i = 0; i < packet.DataStrings.Length; ++i)
-				{
-					message = packet.DataStrings[i].Trim();
-
-					// Check if message received is a control command
-					if (IsControlResponse(message))
-					{
-						ParseControlResponse(message);
-						continue;
-					}
-
-					// Check if message received is a response
-					if (Response.TryParse(message, this, out r))
-					{
-						// A response has been received so it is redirected to blackboard
-						this.lastActivityTime = DateTime.Now;
-						ParseResponse(r);
-					}
-					// Check if message received is a command
-					else if (Command.TryParse(message, this, out c))
-					{
-						// A command has been received so it is redirected to blackboard
-						this.lastActivityTime = DateTime.Now;
-						ParseCommand(c);
-					}
-				}
-				sw.Stop();
-				sw.Reset();
-			} while (!stopMainThread && dataReceived.Count > 0);
-		}
+		protected abstract void ParsePendingData();
 
 		/// <summary>
 		/// Parses a received response
@@ -1536,7 +1537,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Marks the module as free
 		/// </summary>
-		private void Unlock()
+		protected void Unlock()
 		{
 			lockList.Clear();
 			Busy = busyModule;
@@ -2028,27 +2029,6 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
-		/// When overriden in a derived class, disconnects from the Module application.
-		/// This method is called by the Module Client Thread after the stop actions are executed,
-		/// but before cleaning the thread
-		/// </summary>
-		protected abstract void MainThreadDisconnect();
-
-		/// <summary>
-		/// When overriden in a derived class, implements a loop to connect with the Module application.
-		/// This method is called by the Module Client Thread after the startup actions are executed,
-		/// but before entering the thread loop for send and receive messages
-		/// </summary>
-		protected abstract void MainThreadFirstTimeConnect();
-
-		/// <summary>
-		/// When overriden in a derived class, checks the status of the connection with the Module application,
-		/// and, when broken, tries to connect with the Module application.
-		/// This method is called by the Module Client Thread on each message loop
-		/// </summary>
-		protected abstract void MainThreadLoopAutoConnect();
-
-		/// <summary>
 		/// Sends the startup commands to the remote module application
 		/// </summary>
 		protected void SendStartupCommands()
@@ -2085,7 +2065,7 @@ namespace Blk.Engine
 			OnStopped();
 			OnStatusChanged();
 
-			this.dataReceived.Clear();
+			
 
 			if (Monitor.TryEnter(mainTheadLockObject))
 			{
@@ -2265,7 +2245,7 @@ namespace Blk.Engine
 		/// </summary>
 		/// <param name="other">An object to compare with this object</param>
 		/// <returns>A 32-bit signed integer that indicates the relative order of the objects being compared.</returns>
-		public int CompareTo(IModule other)
+		public int CompareTo(IModuleClient other)
 		{
 			return name.CompareTo(other.Name);
 		}

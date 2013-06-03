@@ -61,7 +61,7 @@ namespace Blk.Api
 		/// Gets the destination module for this response.
 		/// Also allows to set when destination module is null
 		/// </summary>
-		new IModule Destination { get; set; }
+		new IModuleClient Destination { get; set; }
 
 		/// <summary>
 		/// Gets a value indicating if the command execution was successfull or not

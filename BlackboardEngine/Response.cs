@@ -73,7 +73,7 @@ namespace Blk.Engine
 		/// <param name="response">Response sent</param>
 		/// <param name="param">Param sent</param>
 		/// <param name="success">Value that indicates if the command was executed successfully</param>
-		public Response(IModule source, IModule destination, string response, string param, bool success) : this(source, destination, response, param, success, -1) { }
+		public Response(IModuleClient source, IModuleClient destination, string response, string param, bool success) : this(source, destination, response, param, success, -1) { }
 
 		/// <summary>
 		/// Initiates a new instance of Message
@@ -84,7 +84,7 @@ namespace Blk.Engine
 		/// <param name="param">Param sent</param>
 		/// <param name="id">id of the message</param>
 		/// <param name="success">Value that indicates if the command was executed successfully</param>
-		public Response(IModule source, IModule destination, string response, string param, bool success, int id)
+		public Response(IModuleClient source, IModuleClient destination, string response, string param, bool success, int id)
 			: base()
 		{
 			this.source = source;
@@ -157,7 +157,7 @@ namespace Blk.Engine
 		/// Gets the destination module for this response.
 		/// Also allows to set when destination module is null
 		/// </summary>
-		new public IModule Destination
+		new public IModuleClient Destination
 		{
 			get
 			{
@@ -791,8 +791,8 @@ namespace Blk.Engine
 		protected static bool TryParse(string s, Blackboard blackboard, out Response response, out Exception ex)
 		{
 			IPrototype proto;
-			IModule source;
-			IModule destination;
+			IModuleClient source;
+			IModuleClient destination;
 			string sCommand;
 			string sParams;
 			string sSrc;
@@ -867,9 +867,9 @@ namespace Blk.Engine
 		{
 			IPrototype proto;
 			//Module destination;
-			IModule destination;
+			IModuleClient destination;
 			//Module eSource;
-			IModule eSource;
+			IModuleClient eSource;
 			string sCommand;
 			string sParams;
 			string sDest;

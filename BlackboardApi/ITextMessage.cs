@@ -39,7 +39,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Gets the destination Module of this ITextMessage
 		/// </summary>
-		IModule Destination { get; }
+		IModuleClient Destination { get; }
 
 		/// <summary>
 		/// Gets the id of the ITextMessage
@@ -79,7 +79,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Gets the source Module of this ITextMessage
 		/// </summary>
-		IModule Source { get; }
+		IModuleClient Source { get; }
 
 		/// <summary>
 		/// Gets a string which can be sent to a module

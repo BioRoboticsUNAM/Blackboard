@@ -64,7 +64,7 @@ namespace Blk.Engine
 		/// <param name="destination">Module to which this message will be sent</param>
 		/// <param name="command">Command sent</param>
 		/// <param name="param">Param sent</param>
-		public Command(IModule source, IModule destination, string command, string param) : this(source, destination, command, param, -1) { }
+		public Command(IModuleClient source, IModuleClient destination, string command, string param) : this(source, destination, command, param, -1) { }
 
 		/// <summary>
 		/// Initiates a new instance of Message
@@ -74,7 +74,7 @@ namespace Blk.Engine
 		/// <param name="command">Command name</param>
 		/// <param name="param">Parameters of the command</param>
 		/// <param name="id">id of the command</param>
-		public Command(IModule source, IModule destination, string command, string param, int id)
+		public Command(IModuleClient source, IModuleClient destination, string command, string param, int id)
 			: base()
 		{
 			this.source = source;
@@ -807,8 +807,8 @@ namespace Blk.Engine
 			IPrototype proto;
 			//Module source;
 			//Module destination;
-			IModule source;
-			IModule destination;
+			IModuleClient source;
+			IModuleClient destination;
 			string sCommand;
 			string sParams;
 			string sSrc;
@@ -879,7 +879,7 @@ namespace Blk.Engine
 		{
 			IPrototype proto;
 			//Module destination;
-			IModule destination;
+			IModuleClient destination;
 			string sCommand;
 			string sParams;
 			string sDest;
