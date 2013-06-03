@@ -6,12 +6,6 @@ using System.Text.RegularExpressions;
 namespace Blk.Api
 {
 	/// <summary>
-	/// Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
-	/// </summary>
-	/// <param name="module"></param>
-	public delegate void IModuleAddRemoveEH(IModuleClient module);
-
-	/// <summary>
 	/// Provides a collection container that enables Blackboard instances to maintain a list of their modules
 	/// </summary>
 	public interface IModuleCollection : IEnumerable<IModuleClient>, ICollection<IModuleClient>

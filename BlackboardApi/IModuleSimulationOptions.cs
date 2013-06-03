@@ -5,26 +5,6 @@ using System.Text;
 namespace Blk.Api
 {
 	/// <summary>
-	/// Enumerates the simulations types a Module support
-	/// </summary>
-	//public enum SimulationOptions { SimulationDisabled, EnabledExact, EnabledWithError };
-	public enum SimulationType
-	{
-		/// <summary>
-		/// Simulation is disabled
-		/// </summary>
-		SimulationDisabled = 0,
-		/// <summary>
-		/// Simulates and responses match the commands successfully
-		/// </summary>
-		EnabledExact,
-		/// <summary>
-		/// Simulates and responses match the commands
-		/// </summary>
-		EnabledWithError
-	};
-
-	/// <summary>
 	/// Encapsulates simlation options for a Module
 	/// </summary>
 	public interface IModuleSimulationOptions

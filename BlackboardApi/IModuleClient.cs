@@ -4,30 +4,6 @@ using System.Net;
 
 namespace Blk.Api
 {
-	#region Delegates
-
-	/// <summary>
-	/// Represents the method that will handle the CommandReceived event of a IModule object.
-	/// </summary>
-	/// <param name="sender">The module where the command has arrived</param>
-	/// <param name="c">Command received</param>
-	public delegate void CommandReceivedEH(IModuleClient sender, ITextCommand c);
-
-	/// <summary>
-	/// Represents the method that will handle the ResponseReceived event of a IModule object.
-	/// </summary>
-	/// <param name="sender">The module where the response has arrived</param>
-	/// <param name="r">Response received</param>
-	public delegate void ResponseReceivedEH(IModuleClient sender, ITextResponse r);
-
-	/// <summary>
-	/// Represent the method that will handle the change of the status of a IModule object.
-	/// </summary>
-	/// <param name="sender">The IModule which status has changed</param>
-	public delegate void StatusChangedEH(IModuleClient sender);
-
-	#endregion
-
 	/// <summary>
 	/// Provides the base connection interface for modules.
 	/// </summary>

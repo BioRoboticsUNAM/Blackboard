@@ -93,6 +93,35 @@ namespace Blk.Engine
 		#region Methods
 
 		/// <summary>
+		/// Returns the string representation of the object
+		/// </summary>
+		/// <returns>A string representation of the object</returns>
+		public override string ToString()
+		{
+			string s = String.Empty;
+			if (!String.IsNullOrEmpty(this.processName))
+				s += "ProcessName=" + this.processName;
+			
+			if (!String.IsNullOrEmpty(this.programPath))
+			{
+				if (!String.IsNullOrEmpty(s))
+					s += "; ";
+				s += "Path=" + this.programPath;
+			}
+
+			
+			if (!String.IsNullOrEmpty(this.programArgs))
+			{
+				if (!String.IsNullOrEmpty(s))
+					s += "; ";
+				s += "Args=" + this.programPath;
+			}
+			if (String.IsNullOrEmpty(s))
+				s += "(None)";
+			return s;
+		}
+
+		/// <summary>
 		/// Serializes a ModuleProcessInfo object to xml
 		/// </summary>
 		/// <param name="mpi">Object to serialize</param>

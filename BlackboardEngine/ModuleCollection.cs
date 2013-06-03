@@ -187,6 +187,28 @@ namespace Blk.Engine
 			modules.RemoveAt(index);
 		}
 
+		/// <summary>
+		/// Returns the string representation of the object
+		/// </summary>
+		/// <returns>A string representation of the object</returns>
+		public override string ToString()
+		{
+			int i = 0;
+			string s = string.Empty;
+
+			for (i = 0; i < this.modules.Count - 1; ++i)
+			{
+				s += this.modules[i].Name;
+				if (!modules[i].Enabled)
+					s += " (disabled)";
+				s += ", ";
+			}
+			s += this.modules[i].Name;
+			if (!modules[i].Enabled)
+				s += " (disabled)";
+			return s;
+		}
+
 		#region ICollection<Module> Members
 
 		/// <summary>
@@ -273,7 +295,7 @@ namespace Blk.Engine
 
 		#endregion
 
-		#endregion		
+		#endregion
 	}
 
 }

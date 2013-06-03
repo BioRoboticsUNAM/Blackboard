@@ -12,66 +12,6 @@ using Robotics.Utilities;
 
 namespace Blk.Api
 {
-	#region Delegates
-	/// <summary>
-	/// Represents the method that will handle the StatusChanged event of a Blackboard object.
-	/// </summary>
-	/// <param name="blackboard">Blackboard which raised the event</param>
-	public delegate void BlackboardStatusChangedEH(IBlackboard blackboard);
-	/// <summary>
-	/// Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
-	/// </summary>
-	/// <param name="message">Message received/sent</param>
-	public delegate void MessageIOEH(ITextMessage message);
-	/// <summary>
-	/// Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-	/// </summary>
-	/// <param name="ip">The ip Address of the client</param>
-	public delegate void BlackboardClientCnnEH(IPAddress ip);
-	/// <summary>
-	/// Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-	/// </summary>
-	/// <param name="command">Command tried to be executed</param>
-	/// <param name="response">Response to command redirected</param>
-	/// <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
-	public delegate void ResponseRedirectedEH(ITextCommand command, ITextResponse response, bool sendResponseSuccess);
-	#endregion
-
-	#region Enumerations
-
-	/// <summary>
-	/// Enumerates the running status of the blackboard
-	/// </summary>
-	public enum BlackboardRunningStatus
-	{
-		/// <summary>
-		/// Blackboard is stopped
-		/// </summary>
-		Stopped,
-		/// <summary>
-		/// Blackboard is running normally
-		/// </summary>
-		Running,
-		/// <summary>
-		/// Blackboard is starting up modules
-		/// </summary>
-		Starting,
-		/// <summary>
-		/// Blackboard is stopping off modules
-		/// </summary>
-		Stopping,
-		/// <summary>
-		/// Blackboard is restarting modules
-		/// </summary>
-		Restarting,
-		/// <summary>
-		/// Blackboard is restarting the test
-		/// </summary>
-		RestartingTest
-	}
-
-	#endregion
-
 	/// <summary>
 	/// Implements a blackboard
 	/// </summary>

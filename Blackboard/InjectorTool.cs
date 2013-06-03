@@ -28,9 +28,9 @@ namespace Blk.Gui
 			InitializeComponent();
 			prototypes = new List<Prototype>();
 			history = new List<HistoryToken>();
-			this.cmbHystoryFilter.Sorted = true;
-			this.cmbHystoryFilter.Items.Add("(none)");
-			this.cmbHystoryFilter.AutoCompleteSource = AutoCompleteSource.CustomSource;
+			this.cmbHistoryFilter.Sorted = true;
+			this.cmbHistoryFilter.Items.Add("(none)");
+			this.cmbHistoryFilter.AutoCompleteSource = AutoCompleteSource.CustomSource;
 			DisplayInputTip();
 		}
 
@@ -52,6 +52,8 @@ namespace Blk.Gui
 				this.Enabled = blackboard != null;
 				if (blackboard == null)
 					return;
+
+				List<string> quickCommands = new List<string>(1000);
 				foreach (Module module in blackboard.Modules)
 				{
 					cbModules.Items.Add(module);
@@ -62,10 +64,16 @@ namespace Blk.Gui
 					{
 						prototypes.Add(proto);
 						quickCommand = proto.Command + (proto.ParamsRequired ? " \"\"" : String.Empty) + " @0";
-						txtMessage.AutoCompleteCustomSource.Add(quickCommand);
-						cmbQuickCommand.Items.Add(quickCommand);
+						if(!quickCommands.Contains(quickCommand))
+							quickCommands.Add(quickCommand);
 						AddFilter(proto.Command);
 					}
+				}
+				quickCommands.Sort();
+				for (int i = 0; i < quickCommands.Count; ++i)
+				{
+					txtMessage.AutoCompleteCustomSource.Add(quickCommands[i]);
+					cmbQuickCommand.Items.Add(quickCommands[i]);
 				}
 			}
 		}
@@ -88,20 +96,25 @@ namespace Blk.Gui
 
 		private void AddFilter(string filterString)
 		{
-			if (cmbHystoryFilter.Items.Contains(filterString))
+			if (cmbHistoryFilter.Items.Contains(filterString))
 				return;
-			cmbHystoryFilter.Items.Add(filterString);
-			cmbHystoryFilter.AutoCompleteCustomSource.Add(filterString);
+			cmbHistoryFilter.Items.Add(filterString);
+			cmbHistoryFilter.AutoCompleteCustomSource.Add(filterString);
 		}
 
 		private void AddQuickCommand()
 		{
-			
 			if (cmbQuickCommand.SelectedIndex == -1)
 				return;
 
 			ClearInputTip();
-			txtMessage.AppendText( cmbQuickCommand.SelectedItem.ToString());
+			if (this.chkBulk.Checked)
+			{
+				txtMessage.SelectionStart = txtMessage.Text.Length;
+				txtMessage.AppendText("\r\n" + cmbQuickCommand.SelectedItem.ToString());
+			}
+			else
+				txtMessage.Text = cmbQuickCommand.SelectedItem.ToString();
 			int ix = txtMessage.Text.LastIndexOf('"');
 			if (ix == -1)
 				return;
@@ -168,15 +181,15 @@ namespace Blk.Gui
 
 		private void Filter()
 		{
-			if ((cmbHystoryFilter.SelectedIndex == 0) && (cmbHystoryFilter.Text == (string)cmbHystoryFilter.Items[0]))
+			if ((cmbHistoryFilter.SelectedIndex == 0) && (cmbHistoryFilter.Text == (string)cmbHistoryFilter.Items[0]))
 			{
 				Filter(null);
 				return;
 			}
 
-			if (!String.IsNullOrEmpty(cmbHystoryFilter.Text) && !cmbHystoryFilter.Items.Contains(cmbHystoryFilter.Text))
-				AddFilter(cmbHystoryFilter.Text);
-			Filter(cmbHystoryFilter.Text);
+			if (!String.IsNullOrEmpty(cmbHistoryFilter.Text) && !cmbHistoryFilter.Items.Contains(cmbHistoryFilter.Text))
+				AddFilter(cmbHistoryFilter.Text);
+			Filter(cmbHistoryFilter.Text);
 		}
 
 		private void Filter(string filterString)
@@ -466,6 +479,11 @@ namespace Blk.Gui
 			}
 
 			#endregion
+		}
+
+		private void cmbQuickCommand_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			e.Handled = true;
 		}
 
 	}

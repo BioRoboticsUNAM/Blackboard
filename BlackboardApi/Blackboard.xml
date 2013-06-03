@@ -206,82 +206,6 @@
             Gets a collection of IP Addresses of the computers where the Application Module's can be running
             </summary>
         </member>
-        <member name="T:Blk.Api.SimulationType">
-            <summary>
-            Enumerates the simulations types a Module support
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.SimulationDisabled">
-            <summary>
-            Simulation is disabled
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.EnabledExact">
-            <summary>
-            Simulates and responses match the commands successfully
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.EnabledWithError">
-            <summary>
-            Simulates and responses match the commands
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IModuleSimulationOptions">
-            <summary>
-            Encapsulates simlation options for a Module
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.Type">
-            <summary>
-            Gets the type of the simulation
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.SuccessRatio">
-            <summary>
-            Gets or sets a value between 0 and 1 that indicates the success ratio of a simulated response. A value greater than 1 disables the simulation.
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.SimulationEnabled">
-            <summary>
-            gets a value indicating if the simulation is enabled
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IBlackboardPluginManager">
-            <summary>
-            Represents a PluginManager interfaced with a Blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboardPluginManager.Owner">
-            <summary>
-            The blackboard this IPluginManager is bound to
-            </summary>
-        </member>
-        <member name="T:Blk.Api.BlackboardStatusChangedEH">
-            <summary>
-            Represents the method that will handle the StatusChanged event of a Blackboard object.
-            </summary>
-            <param name="blackboard">Blackboard which raised the event</param>
-        </member>
-        <member name="T:Blk.Api.MessageIOEH">
-            <summary>
-            Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
-            </summary>
-            <param name="message">Message received/sent</param>
-        </member>
-        <member name="T:Blk.Api.BlackboardClientCnnEH">
-            <summary>
-            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-            </summary>
-            <param name="ip">The ip Address of the client</param>
-        </member>
-        <member name="T:Blk.Api.ResponseRedirectedEH">
-            <summary>
-            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-            </summary>
-            <param name="command">Command tried to be executed</param>
-            <param name="response">Response to command redirected</param>
-            <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
-        </member>
         <member name="T:Blk.Api.BlackboardRunningStatus">
             <summary>
             Enumerates the running status of the blackboard
@@ -315,6 +239,168 @@
         <member name="F:Blk.Api.BlackboardRunningStatus.RestartingTest">
             <summary>
             Blackboard is restarting the test
+            </summary>
+        </member>
+        <member name="T:Blk.Api.ResponseFailReason">
+            <summary>
+            Enumerates the reasons for which a command was not executed generating a failed response 
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.None">
+            <summary>
+            The response was succeded
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.ExecutedButNotSucceded">
+            <summary>
+            The command was executed in the destination module but was not succeded
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.TimedOut">
+            <summary>
+            Generated failed response due to timeout
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.ModuleDisconnected">
+            <summary>
+            The module is disconected
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestarting">
+            <summary>
+            Blackboard is restarting. Message has not sent
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestartingTest">
+            <summary>
+            Blackboard is restarting the test. Message has not sent
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ResponseFailReason.Unknown">
+            <summary>
+            Unknown reason
+            </summary>
+        </member>
+        <member name="T:Blk.Api.SentStatus">
+            <summary>
+            Sent Status	for	classes	derived	from CommandBase Class
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.NotSentYet">
+            <summary>
+            The	Command/Response has not been sent yet
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.SentSuccessfull">
+            <summary>
+            Send operation succeded
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.SentFailed">
+            <summary>
+            Send operation failed
+            </summary>
+        </member>
+        <member name="T:Blk.Api.SimulationType">
+            <summary>
+            Enumerates the simulations types a Module support
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SimulationType.SimulationDisabled">
+            <summary>
+            Simulation is disabled
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SimulationType.EnabledExact">
+            <summary>
+            Simulates and responses match the commands successfully
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SimulationType.EnabledWithError">
+            <summary>
+            Simulates and responses match the commands
+            </summary>
+        </member>
+        <member name="T:Blk.Api.BlackboardClientCnnEH">
+            <summary>
+            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
+            </summary>
+            <param name="ip">The ip Address of the client</param>
+        </member>
+        <member name="T:Blk.Api.BlackboardStatusChangedEH">
+            <summary>
+            Represents the method that will handle the StatusChanged event of a Blackboard object.
+            </summary>
+            <param name="blackboard">Blackboard which raised the event</param>
+        </member>
+        <member name="T:Blk.Api.CommandReceivedEH">
+            <summary>
+            Represents the method that will handle the CommandReceived event of a IModule object.
+            </summary>
+            <param name="sender">The module where the command has arrived</param>
+            <param name="c">Command received</param>
+        </member>
+        <member name="T:Blk.Api.IModuleAddRemoveEH">
+            <summary>
+            Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
+            </summary>
+            <param name="module"></param>
+        </member>
+        <member name="T:Blk.Api.MessageIOEH">
+            <summary>
+            Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
+            </summary>
+            <param name="message">Message received/sent</param>
+        </member>
+        <member name="T:Blk.Api.ResponseRedirectedEH">
+            <summary>
+            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
+            </summary>
+            <param name="command">Command tried to be executed</param>
+            <param name="response">Response to command redirected</param>
+            <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
+        </member>
+        <member name="T:Blk.Api.ResponseReceivedEH">
+            <summary>
+            Represents the method that will handle the ResponseReceived event of a IModule object.
+            </summary>
+            <param name="sender">The module where the response has arrived</param>
+            <param name="r">Response received</param>
+        </member>
+        <member name="T:Blk.Api.StatusChangedEH">
+            <summary>
+            Represent the method that will handle the change of the status of a IModule object.
+            </summary>
+            <param name="sender">The IModule which status has changed</param>
+        </member>
+        <member name="T:Blk.Api.IModuleSimulationOptions">
+            <summary>
+            Encapsulates simlation options for a Module
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.Type">
+            <summary>
+            Gets the type of the simulation
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.SuccessRatio">
+            <summary>
+            Gets or sets a value between 0 and 1 that indicates the success ratio of a simulated response. A value greater than 1 disables the simulation.
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.SimulationEnabled">
+            <summary>
+            gets a value indicating if the simulation is enabled
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IBlackboardPluginManager">
+            <summary>
+            Represents a PluginManager interfaced with a Blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboardPluginManager.Owner">
+            <summary>
+            The blackboard this IPluginManager is bound to
             </summary>
         </member>
         <member name="T:Blk.Api.IBlackboard">
@@ -668,6 +754,17 @@
             <param name="commandName">The name of the module element to get or set</param>
             <returns>The module with specified name</returns>
         </member>
+        <member name="T:Blk.Api.IModuleClientPlugin">
+            <summary>
+            Represents a ModuleClient for interfacing module applications running as plugins
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClientPlugin.Receive(System.String)">
+            <summary>
+            Receives a message and enqueues it for processing and redirection
+            </summary>
+            <param name="message">The message to receive</param>
+        </member>
         <member name="T:Blk.Api.IServerAddressCollection">
             <summary>
             Manages several IP addresses to connect to a IP address
@@ -763,46 +860,6 @@
             </summary>
             <param name="variableName">The name of the element to get</param>
             <returns>The variable with specified name</returns>
-        </member>
-        <member name="T:Blk.Api.ResponseFailReason">
-            <summary>
-            Enumerates the reasons for which a command was not executed generating a failed response 
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.None">
-            <summary>
-            The response was succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.ExecutedButNotSucceded">
-            <summary>
-            The command was executed in the destination module but was not succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.TimedOut">
-            <summary>
-            Generated failed response due to timeout
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.ModuleDisconnected">
-            <summary>
-            The module is disconected
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestarting">
-            <summary>
-            Blackboard is restarting. Message has not sent
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestartingTest">
-            <summary>
-            Blackboard is restarting the test. Message has not sent
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.Unknown">
-            <summary>
-            Unknown reason
-            </summary>
         </member>
         <member name="T:Blk.Api.ITextResponse">
             <summary>
@@ -921,26 +978,6 @@
             Gets the arguments used to run this module (used for launch operations)
             </summary>
         </member>
-        <member name="T:Blk.Api.SentStatus">
-            <summary>
-            Sent Status for classes derived from CommandBase Class
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.NotSentYet">
-            <summary>
-            The Command/Response has not been sent yet
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.SentSuccessfull">
-            <summary>
-            Send operation succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.SentFailed">
-            <summary>
-            Send operation failed
-            </summary>
-        </member>
         <member name="T:Blk.Api.SharedVariables.ISharedVariable">
             <summary>
             Represents a stored shared variable
@@ -991,12 +1028,6 @@
             <summary>
             Gets the type of the variable
             </summary>
-        </member>
-        <member name="T:Blk.Api.IModuleAddRemoveEH">
-            <summary>
-            Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
-            </summary>
-            <param name="module"></param>
         </member>
         <member name="T:Blk.Api.IModuleCollection">
             <summary>
@@ -1057,6 +1088,11 @@
         <member name="E:Blk.Api.IModuleCollection.ModuleRemoved">
             <summary>
             Raises when a IModule is removed from the ModuleCollection
+            </summary>
+        </member>
+        <member name="T:Blk.Api.SharedVariables.ModuleApplicationPlugin">
+            <summary>
+            Serves as base class for a module application which connects with the blackboard as a Plugin
             </summary>
         </member>
         <member name="T:Blk.Api.IPrototype">
@@ -1140,21 +1176,6 @@
             Gets or sets the response asociated to this Command object
             </summary>
         </member>
-        <member name="T:Blk.Api.IModuleBlackboard">
-            <summary>
-            Implements a ModuleBlackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleBlackboard.SharedVariables">
-            <summary>
-            Gets the list of shared variables
-            </summary>
-        </member>
-        <member name="T:Blk.Api.SharedVariables.ModuleApplicationPlugin">
-            <summary>
-            Serves as base class for a module application which connects with the blackboard as a Plugin
-            </summary>
-        </member>
         <member name="T:Blk.Api.PluginConnector">
             <summary>
             Implements message communication with blackboard via plugin interface
@@ -1222,36 +1243,15 @@
             Returns the ModuleName property of the asociated IConnectionManager object
             </summary>
         </member>
-        <member name="T:Blk.Api.CommandReceivedEH">
+        <member name="T:Blk.Api.IModuleBlackboard">
             <summary>
-            Represents the method that will handle the CommandReceived event of a IModule object.
-            </summary>
-            <param name="sender">The module where the command has arrived</param>
-            <param name="c">Command received</param>
-        </member>
-        <member name="T:Blk.Api.ResponseReceivedEH">
-            <summary>
-            Represents the method that will handle the ResponseReceived event of a IModule object.
-            </summary>
-            <param name="sender">The module where the response has arrived</param>
-            <param name="r">Response received</param>
-        </member>
-        <member name="T:Blk.Api.StatusChangedEH">
-            <summary>
-            Represent the method that will handle the change of the status of a IModule object.
-            </summary>
-            <param name="sender">The IModule which status has changed</param>
-        </member>
-        <member name="T:Blk.Api.IModuleClientPlugin">
-            <summary>
-            Represents a ModuleClient for interfacing module applications running as plugins
+            Implements a ModuleBlackboard
             </summary>
         </member>
-        <member name="M:Blk.Api.IModuleClientPlugin.Receive(System.String)">
+        <member name="P:Blk.Api.IModuleBlackboard.SharedVariables">
             <summary>
-            Receives a message and enqueues it for processing and redirection
+            Gets the list of shared variables
             </summary>
-            <param name="message">The message to receive</param>
         </member>
     </members>
 </doc>

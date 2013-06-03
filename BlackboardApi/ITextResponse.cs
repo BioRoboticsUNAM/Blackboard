@@ -6,41 +6,6 @@ using System.Text.RegularExpressions;
 namespace Blk.Api
 {
 	/// <summary>
-	/// Enumerates the reasons for which a command was not executed generating a failed response 
-	/// </summary>
-	public enum ResponseFailReason
-	{
-		/// <summary>
-		/// The response was succeded
-		/// </summary>
-		None,
-		/// <summary>
-		/// The command was executed in the destination module but was not succeded
-		/// </summary>
-		ExecutedButNotSucceded,
-		/// <summary>
-		/// Generated failed response due to timeout
-		/// </summary>
-		TimedOut,
-		/// <summary>
-		/// The module is disconected
-		/// </summary>
-		ModuleDisconnected,
-		/// <summary>
-		/// Blackboard is restarting. Message has not sent
-		/// </summary>
-		BlackboardRestarting,
-		/// <summary>
-		/// Blackboard is restarting the test. Message has not sent
-		/// </summary>
-		BlackboardRestartingTest,
-		/// <summary>
-		/// Unknown reason
-		/// </summary>
-		Unknown
-	}
-
-	/// <summary>
 	/// Represents a command response
 	/// </summary>
 	public interface ITextResponse : ITextMessage

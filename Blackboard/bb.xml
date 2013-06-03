@@ -14,8 +14,15 @@
 
 		<startupSequence>
 			<module>ACT-PLN</module>
+			<module>SP-GEN</module>
 			<module>MVN-PLN</module>
 		</startupSequence>
+
+		<shutdownSequence>
+			<module>ACT-PLN</module>
+			<module>MVN-PLN</module>
+			<module>SP-GEN</module>
+		</shutdownSequence>
 	</configuration>
 
 	<!--
@@ -125,6 +132,7 @@
 			<ip>127.0.0.1</ip>
 			<port>2052</port>
 			<aliveCheck>true</aliveCheck>
+			<program processName="SocketSpeech3" path="D:\Robocup Apps\SocketSpeech3\SocketSpeech3\bin\x86\Release\SocketSpeech3.exe" />
 			<commands>
 				<command name="spg_say" answer="true" timeout="20000" priority="True" />
 				<command name="say" answer="true" timeout="20000" priority="True" />

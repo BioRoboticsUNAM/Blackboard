@@ -60,7 +60,7 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Stores the method of shutdown for modules
 		/// </summary>
-		public ModuleShutdownMethod method;
+		private ModuleShutdownMethod method;
 
 		/// <summary>
 		/// Object used to allow only one thread to access the methods at a time
@@ -251,7 +251,7 @@ namespace Blk.Engine.Remote
 			{
 				Parent.Log.WriteLine(4, "Executing shutdown sequence...");
 
-				for (int i = 0; i < moduleSequence.Count && (parent.RunningStatus == BlackboardRunningStatus.Stopping); ++i)
+				for (int i = 0; i < moduleSequence.Count; ++i)
 				{
 					if (!Parent.Modules.Contains(moduleSequence[i]))
 					{

@@ -33,7 +33,6 @@
 			this.cbModules = new System.Windows.Forms.ComboBox();
 			this.lblMessage = new System.Windows.Forms.Label();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.btnInject = new System.Windows.Forms.Button();
 			this.txtMessage = new System.Windows.Forms.TextBox();
 			this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.miUndo = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,16 +46,17 @@
 			this.miClear = new System.Windows.Forms.ToolStripMenuItem();
 			this.miSelectAll = new System.Windows.Forms.ToolStripMenuItem();
 			this.miSendToMessage = new System.Windows.Forms.ToolStripMenuItem();
-			this.gbHistory = new System.Windows.Forms.GroupBox();
-			this.cmbHystoryFilter = new System.Windows.Forms.ComboBox();
-			this.lblHystoryFilter = new System.Windows.Forms.Label();
+			this.cmbHistoryFilter = new System.Windows.Forms.ComboBox();
 			this.lstHistory = new System.Windows.Forms.ListBox();
-			this.gbInjector = new System.Windows.Forms.GroupBox();
 			this.chkBulk = new System.Windows.Forms.CheckBox();
-			this.lblQuickCommand = new System.Windows.Forms.Label();
 			this.cmbQuickCommand = new System.Windows.Forms.ComboBox();
 			this.btnQuickCommand = new System.Windows.Forms.Button();
 			this.btnHystoryFilter = new System.Windows.Forms.Button();
+			this.btnInject = new System.Windows.Forms.Button();
+			this.gbHistory = new System.Windows.Forms.GroupBox();
+			this.lblHystoryFilter = new System.Windows.Forms.Label();
+			this.gbInjector = new System.Windows.Forms.GroupBox();
+			this.lblQuickCommand = new System.Windows.Forms.Label();
 			this.contextMenu.SuspendLayout();
 			this.gbHistory.SuspendLayout();
 			this.gbInjector.SuspendLayout();
@@ -90,17 +90,6 @@
 			this.lblMessage.Size = new System.Drawing.Size(53, 13);
 			this.lblMessage.TabIndex = 2;
 			this.lblMessage.Text = "Message:";
-			// 
-			// btnInject
-			// 
-			this.btnInject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnInject.Location = new System.Drawing.Point(158, 145);
-			this.btnInject.Name = "btnInject";
-			this.btnInject.Size = new System.Drawing.Size(121, 23);
-			this.btnInject.TabIndex = 3;
-			this.btnInject.Text = "Inject to blackboard";
-			this.btnInject.UseVisualStyleBackColor = true;
-			this.btnInject.Click += new System.EventHandler(this.btnInject_Click);
 			// 
 			// txtMessage
 			// 
@@ -212,42 +201,18 @@
 			this.miSendToMessage.Text = "&Send to message";
 			this.miSendToMessage.Click += new System.EventHandler(this.miSendToMessage_Click);
 			// 
-			// gbHistory
+			// cmbHistoryFilter
 			// 
-			this.gbHistory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)));
-			this.gbHistory.Controls.Add(this.btnHystoryFilter);
-			this.gbHistory.Controls.Add(this.cmbHystoryFilter);
-			this.gbHistory.Controls.Add(this.lblHystoryFilter);
-			this.gbHistory.Controls.Add(this.lstHistory);
-			this.gbHistory.Location = new System.Drawing.Point(3, 3);
-			this.gbHistory.Name = "gbHistory";
-			this.gbHistory.Size = new System.Drawing.Size(253, 174);
-			this.gbHistory.TabIndex = 5;
-			this.gbHistory.TabStop = false;
-			this.gbHistory.Text = "Injection History";
-			// 
-			// cmbHystoryFilter
-			// 
-			this.cmbHystoryFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+			this.cmbHistoryFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.cmbHystoryFilter.FormattingEnabled = true;
-			this.cmbHystoryFilter.Location = new System.Drawing.Point(44, 19);
-			this.cmbHystoryFilter.Name = "cmbHystoryFilter";
-			this.cmbHystoryFilter.Size = new System.Drawing.Size(176, 21);
-			this.cmbHystoryFilter.TabIndex = 8;
-			this.toolTip.SetToolTip(this.cmbHystoryFilter, "Type to filter the injection history list");
-			this.cmbHystoryFilter.SelectedIndexChanged += new System.EventHandler(this.cmbHystoryFilter_SelectedIndexChanged);
-			this.cmbHystoryFilter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmbHystoryFilter_KeyPress);
-			// 
-			// lblHystoryFilter
-			// 
-			this.lblHystoryFilter.AutoSize = true;
-			this.lblHystoryFilter.Location = new System.Drawing.Point(6, 22);
-			this.lblHystoryFilter.Name = "lblHystoryFilter";
-			this.lblHystoryFilter.Size = new System.Drawing.Size(32, 13);
-			this.lblHystoryFilter.TabIndex = 7;
-			this.lblHystoryFilter.Text = "Filter:";
+			this.cmbHistoryFilter.FormattingEnabled = true;
+			this.cmbHistoryFilter.Location = new System.Drawing.Point(44, 19);
+			this.cmbHistoryFilter.Name = "cmbHistoryFilter";
+			this.cmbHistoryFilter.Size = new System.Drawing.Size(176, 21);
+			this.cmbHistoryFilter.TabIndex = 8;
+			this.toolTip.SetToolTip(this.cmbHistoryFilter, "Type to filter the injection history list");
+			this.cmbHistoryFilter.SelectedIndexChanged += new System.EventHandler(this.cmbHystoryFilter_SelectedIndexChanged);
+			this.cmbHistoryFilter.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmbHystoryFilter_KeyPress);
 			// 
 			// lstHistory
 			// 
@@ -263,27 +228,6 @@
 			this.toolTip.SetToolTip(this.lstHistory, "Double click to inject the selected message");
 			this.lstHistory.DoubleClick += new System.EventHandler(this.lstHistory_DoubleClick);
 			// 
-			// gbInjector
-			// 
-			this.gbInjector.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.gbInjector.Controls.Add(this.btnQuickCommand);
-			this.gbInjector.Controls.Add(this.chkBulk);
-			this.gbInjector.Controls.Add(this.lblQuickCommand);
-			this.gbInjector.Controls.Add(this.lblSourceModule);
-			this.gbInjector.Controls.Add(this.cmbQuickCommand);
-			this.gbInjector.Controls.Add(this.cbModules);
-			this.gbInjector.Controls.Add(this.lblMessage);
-			this.gbInjector.Controls.Add(this.txtMessage);
-			this.gbInjector.Controls.Add(this.btnInject);
-			this.gbInjector.Location = new System.Drawing.Point(262, 3);
-			this.gbInjector.Name = "gbInjector";
-			this.gbInjector.Size = new System.Drawing.Size(285, 174);
-			this.gbInjector.TabIndex = 6;
-			this.gbInjector.TabStop = false;
-			this.gbInjector.Text = "Inject command/response";
-			// 
 			// chkBulk
 			// 
 			this.chkBulk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -296,15 +240,6 @@
 			this.toolTip.SetToolTip(this.chkBulk, "Enable to inject multiple commands simultaneously");
 			this.chkBulk.UseVisualStyleBackColor = true;
 			// 
-			// lblQuickCommand
-			// 
-			this.lblQuickCommand.AutoSize = true;
-			this.lblQuickCommand.Location = new System.Drawing.Point(6, 49);
-			this.lblQuickCommand.Name = "lblQuickCommand";
-			this.lblQuickCommand.Size = new System.Drawing.Size(38, 13);
-			this.lblQuickCommand.TabIndex = 0;
-			this.lblQuickCommand.Text = "Quick:";
-			// 
 			// cmbQuickCommand
 			// 
 			this.cmbQuickCommand.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -314,9 +249,11 @@
 			this.cmbQuickCommand.Location = new System.Drawing.Point(65, 46);
 			this.cmbQuickCommand.Name = "cmbQuickCommand";
 			this.cmbQuickCommand.Size = new System.Drawing.Size(187, 21);
+			this.cmbQuickCommand.Sorted = true;
 			this.cmbQuickCommand.TabIndex = 1;
 			this.toolTip.SetToolTip(this.cmbQuickCommand, "Select to append a command prototype to the message textbox");
 			this.cmbQuickCommand.SelectedIndexChanged += new System.EventHandler(this.cmbQuickCommand_SelectedIndexChanged);
+			this.cmbQuickCommand.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmbQuickCommand_KeyPress);
 			// 
 			// btnQuickCommand
 			// 
@@ -343,6 +280,71 @@
 			this.toolTip.SetToolTip(this.btnHystoryFilter, "Apply the selected filter to the injection history list");
 			this.btnHystoryFilter.UseVisualStyleBackColor = true;
 			this.btnHystoryFilter.Click += new System.EventHandler(this.btnHystoryFilter_Click);
+			// 
+			// btnInject
+			// 
+			this.btnInject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnInject.Location = new System.Drawing.Point(158, 145);
+			this.btnInject.Name = "btnInject";
+			this.btnInject.Size = new System.Drawing.Size(121, 23);
+			this.btnInject.TabIndex = 3;
+			this.btnInject.Text = "Inject to blackboard";
+			this.btnInject.UseVisualStyleBackColor = true;
+			this.btnInject.Click += new System.EventHandler(this.btnInject_Click);
+			// 
+			// gbHistory
+			// 
+			this.gbHistory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+						| System.Windows.Forms.AnchorStyles.Left)));
+			this.gbHistory.Controls.Add(this.btnHystoryFilter);
+			this.gbHistory.Controls.Add(this.cmbHistoryFilter);
+			this.gbHistory.Controls.Add(this.lblHystoryFilter);
+			this.gbHistory.Controls.Add(this.lstHistory);
+			this.gbHistory.Location = new System.Drawing.Point(3, 3);
+			this.gbHistory.Name = "gbHistory";
+			this.gbHistory.Size = new System.Drawing.Size(253, 174);
+			this.gbHistory.TabIndex = 5;
+			this.gbHistory.TabStop = false;
+			this.gbHistory.Text = "Injection History";
+			// 
+			// lblHystoryFilter
+			// 
+			this.lblHystoryFilter.AutoSize = true;
+			this.lblHystoryFilter.Location = new System.Drawing.Point(6, 22);
+			this.lblHystoryFilter.Name = "lblHystoryFilter";
+			this.lblHystoryFilter.Size = new System.Drawing.Size(32, 13);
+			this.lblHystoryFilter.TabIndex = 7;
+			this.lblHystoryFilter.Text = "Filter:";
+			// 
+			// gbInjector
+			// 
+			this.gbInjector.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+						| System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.gbInjector.Controls.Add(this.btnQuickCommand);
+			this.gbInjector.Controls.Add(this.chkBulk);
+			this.gbInjector.Controls.Add(this.lblQuickCommand);
+			this.gbInjector.Controls.Add(this.lblSourceModule);
+			this.gbInjector.Controls.Add(this.cmbQuickCommand);
+			this.gbInjector.Controls.Add(this.cbModules);
+			this.gbInjector.Controls.Add(this.lblMessage);
+			this.gbInjector.Controls.Add(this.txtMessage);
+			this.gbInjector.Controls.Add(this.btnInject);
+			this.gbInjector.Location = new System.Drawing.Point(262, 3);
+			this.gbInjector.Name = "gbInjector";
+			this.gbInjector.Size = new System.Drawing.Size(285, 174);
+			this.gbInjector.TabIndex = 6;
+			this.gbInjector.TabStop = false;
+			this.gbInjector.Text = "Inject command/response";
+			// 
+			// lblQuickCommand
+			// 
+			this.lblQuickCommand.AutoSize = true;
+			this.lblQuickCommand.Location = new System.Drawing.Point(6, 49);
+			this.lblQuickCommand.Name = "lblQuickCommand";
+			this.lblQuickCommand.Size = new System.Drawing.Size(38, 13);
+			this.lblQuickCommand.TabIndex = 0;
+			this.lblQuickCommand.Text = "Quick:";
 			// 
 			// InjectorTool
 			// 
@@ -386,7 +388,7 @@
 		private System.Windows.Forms.ToolStripMenuItem miClear;
 		private System.Windows.Forms.ToolStripMenuItem miSelectAll;
 		private System.Windows.Forms.Button btnHystoryFilter;
-		private System.Windows.Forms.ComboBox cmbHystoryFilter;
+		private System.Windows.Forms.ComboBox cmbHistoryFilter;
 		private System.Windows.Forms.Label lblHystoryFilter;
 		private System.Windows.Forms.Label lblQuickCommand;
 		private System.Windows.Forms.ComboBox cmbQuickCommand;

@@ -56,8 +56,6 @@ namespace Blk.Gui
 			this.txtLogFile = new System.Windows.Forms.TextBox();
 			this.txtConfigurationFile = new System.Windows.Forms.TextBox();
 			this.gbBlackboardSettings = new System.Windows.Forms.GroupBox();
-			this.chkRedirectionHistory = new System.Windows.Forms.CheckBox();
-			this.nudVerbosityLogFile = new System.Windows.Forms.NumericUpDown();
 			this.nudVerbosity = new System.Windows.Forms.NumericUpDown();
 			this.nudRetrySendAttempts = new System.Windows.Forms.NumericUpDown();
 			this.lblRetrySendAttempts = new System.Windows.Forms.Label();
@@ -68,7 +66,6 @@ namespace Blk.Gui
 			this.txtBBInputPort = new System.Windows.Forms.TextBox();
 			this.lblTimeLeft = new System.Windows.Forms.Label();
 			this.lblBBAddresses = new System.Windows.Forms.Label();
-			this.lblVerbosityLogFile = new System.Windows.Forms.Label();
 			this.lblVerbosity = new System.Windows.Forms.Label();
 			this.lblBBInputPort = new System.Windows.Forms.Label();
 			this.tcLog = new System.Windows.Forms.TabControl();
@@ -76,14 +73,12 @@ namespace Blk.Gui
 			this.gbRemoteMachineStatus = new System.Windows.Forms.GroupBox();
 			this.flpRemoteMachineStatus = new System.Windows.Forms.FlowLayoutPanel();
 			this.tpInjector = new System.Windows.Forms.TabPage();
-			this.injectorTool = new Blk.Gui.InjectorTool();
 			this.tpMessagePendingList = new System.Windows.Forms.TabPage();
 			this.gbCommandsPending = new System.Windows.Forms.GroupBox();
 			this.lstCommandsPending = new System.Windows.Forms.ListBox();
 			this.gbCommandsWaiting = new System.Windows.Forms.GroupBox();
 			this.lstCommandsWaiting = new System.Windows.Forms.ListBox();
 			this.tpModuleInfo = new System.Windows.Forms.TabPage();
-			this.interactionTool = new Blk.Gui.InteractionTool();
 			this.tsModuleToolBar = new System.Windows.Forms.ToolStrip();
 			this.btnModuleEnable = new System.Windows.Forms.ToolStripButton();
 			this.tsModuletoolBarSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -152,6 +147,12 @@ namespace Blk.Gui
 			this.mnuiBlackboard_Exit = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuiModules = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuiPlugins = new System.Windows.Forms.ToolStripMenuItem();
+			this.cbModuleShutdownMode = new System.Windows.Forms.ComboBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.btnSutdownSequence = new System.Windows.Forms.Button();
+			this.mnuShutdownSequence = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.injectorTool = new Blk.Gui.InjectorTool();
+			this.interactionTool = new Blk.Gui.InteractionTool();
 			this.gbModuleList.SuspendLayout();
 			this.scTop.Panel1.SuspendLayout();
 			this.scTop.Panel2.SuspendLayout();
@@ -159,7 +160,6 @@ namespace Blk.Gui
 			this.gbGeneralActions.SuspendLayout();
 			this.gbBlackboardFiles.SuspendLayout();
 			this.gbBlackboardSettings.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.nudVerbosityLogFile)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudVerbosity)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudRetrySendAttempts)).BeginInit();
 			this.tcLog.SuspendLayout();
@@ -261,6 +261,7 @@ namespace Blk.Gui
 			// 
 			this.gbGeneralActions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Right)));
+			this.gbGeneralActions.Controls.Add(this.btnSutdownSequence);
 			this.gbGeneralActions.Controls.Add(this.btnStartSequence);
 			this.gbGeneralActions.Controls.Add(this.btnRestartTimer);
 			this.gbGeneralActions.Controls.Add(this.btnRestartBlackboard);
@@ -380,6 +381,7 @@ namespace Blk.Gui
 			this.cbModuleStartupMode.Name = "cbModuleStartupMode";
 			this.cbModuleStartupMode.Size = new System.Drawing.Size(137, 21);
 			this.cbModuleStartupMode.TabIndex = 6;
+			this.cbModuleStartupMode.SelectedIndexChanged += new System.EventHandler(this.cbModuleStartupMode_SelectedIndexChanged);
 			// 
 			// btnLoad
 			// 
@@ -467,19 +469,18 @@ namespace Blk.Gui
 			// 
 			this.gbBlackboardSettings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)));
-			this.gbBlackboardSettings.Controls.Add(this.chkRedirectionHistory);
-			this.gbBlackboardSettings.Controls.Add(this.nudVerbosityLogFile);
 			this.gbBlackboardSettings.Controls.Add(this.nudVerbosity);
 			this.gbBlackboardSettings.Controls.Add(this.nudRetrySendAttempts);
+			this.gbBlackboardSettings.Controls.Add(this.cbModuleShutdownMode);
 			this.gbBlackboardSettings.Controls.Add(this.lblRetrySendAttempts);
 			this.gbBlackboardSettings.Controls.Add(this.txtTimeLeft);
 			this.gbBlackboardSettings.Controls.Add(this.txtClientsConnected);
+			this.gbBlackboardSettings.Controls.Add(this.label1);
 			this.gbBlackboardSettings.Controls.Add(this.lblClientsConnected);
 			this.gbBlackboardSettings.Controls.Add(this.txtBBAddresses);
 			this.gbBlackboardSettings.Controls.Add(this.txtBBInputPort);
 			this.gbBlackboardSettings.Controls.Add(this.lblTimeLeft);
 			this.gbBlackboardSettings.Controls.Add(this.lblBBAddresses);
-			this.gbBlackboardSettings.Controls.Add(this.lblVerbosityLogFile);
 			this.gbBlackboardSettings.Controls.Add(this.lblVerbosity);
 			this.gbBlackboardSettings.Controls.Add(this.lblBBInputPort);
 			this.gbBlackboardSettings.Location = new System.Drawing.Point(12, 129);
@@ -488,31 +489,6 @@ namespace Blk.Gui
 			this.gbBlackboardSettings.TabIndex = 3;
 			this.gbBlackboardSettings.TabStop = false;
 			this.gbBlackboardSettings.Text = "Blackboard Settings";
-			// 
-			// chkRedirectionHistory
-			// 
-			this.chkRedirectionHistory.AutoSize = true;
-			this.chkRedirectionHistory.Location = new System.Drawing.Point(217, 100);
-			this.chkRedirectionHistory.Name = "chkRedirectionHistory";
-			this.chkRedirectionHistory.Size = new System.Drawing.Size(145, 17);
-			this.chkRedirectionHistory.TabIndex = 5;
-			this.chkRedirectionHistory.Text = "Show Redirection History";
-			this.chkRedirectionHistory.UseVisualStyleBackColor = true;
-			this.chkRedirectionHistory.CheckedChanged += new System.EventHandler(this.chkRedirectionHistory_CheckedChanged);
-			// 
-			// nudVerbosityLogFile
-			// 
-			this.nudVerbosityLogFile.Enabled = false;
-			this.nudVerbosityLogFile.Location = new System.Drawing.Point(103, 97);
-			this.nudVerbosityLogFile.Maximum = new decimal(new int[] {
-            9,
-            0,
-            0,
-            0});
-			this.nudVerbosityLogFile.Name = "nudVerbosityLogFile";
-			this.nudVerbosityLogFile.Size = new System.Drawing.Size(100, 20);
-			this.nudVerbosityLogFile.TabIndex = 4;
-			this.nudVerbosityLogFile.ValueChanged += new System.EventHandler(this.nudVerbosityLogFile_ValueChanged);
 			// 
 			// nudVerbosity
 			// 
@@ -604,16 +580,6 @@ namespace Blk.Gui
 			this.lblBBAddresses.TabIndex = 0;
 			this.lblBBAddresses.Text = "BB IP Addresses:";
 			// 
-			// lblVerbosityLogFile
-			// 
-			this.lblVerbosityLogFile.AutoSize = true;
-			this.lblVerbosityLogFile.Enabled = false;
-			this.lblVerbosityLogFile.Location = new System.Drawing.Point(6, 101);
-			this.lblVerbosityLogFile.Name = "lblVerbosityLogFile";
-			this.lblVerbosityLogFile.Size = new System.Drawing.Size(90, 13);
-			this.lblVerbosityLogFile.TabIndex = 0;
-			this.lblVerbosityLogFile.Text = "LogFile Verbosity:";
-			// 
 			// lblVerbosity
 			// 
 			this.lblVerbosity.AutoSize = true;
@@ -690,15 +656,6 @@ namespace Blk.Gui
 			this.tpInjector.Text = "Injection Tool";
 			this.tpInjector.UseVisualStyleBackColor = true;
 			// 
-			// injectorTool
-			// 
-			this.injectorTool.Blackboard = null;
-			this.injectorTool.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.injectorTool.Location = new System.Drawing.Point(0, 0);
-			this.injectorTool.Name = "injectorTool";
-			this.injectorTool.Size = new System.Drawing.Size(607, 207);
-			this.injectorTool.TabIndex = 0;
-			// 
 			// tpMessagePendingList
 			// 
 			this.tpMessagePendingList.Controls.Add(this.gbCommandsPending);
@@ -770,18 +727,6 @@ namespace Blk.Gui
 			this.tpModuleInfo.TabIndex = 2;
 			this.tpModuleInfo.Text = "Module Information";
 			this.tpModuleInfo.UseVisualStyleBackColor = true;
-			// 
-			// interactionTool
-			// 
-			this.interactionTool.Blackboard = null;
-			this.interactionTool.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.interactionTool.Location = new System.Drawing.Point(3, 142);
-			this.interactionTool.MaximumSize = new System.Drawing.Size(0, 62);
-			this.interactionTool.MinimumSize = new System.Drawing.Size(300, 62);
-			this.interactionTool.Name = "interactionTool";
-			this.interactionTool.SelectedModule = null;
-			this.interactionTool.Size = new System.Drawing.Size(601, 62);
-			this.interactionTool.TabIndex = 4;
 			// 
 			// tsModuleToolBar
 			// 
@@ -1404,6 +1349,69 @@ namespace Blk.Gui
 			this.mnuiPlugins.Size = new System.Drawing.Size(58, 20);
 			this.mnuiPlugins.Text = "&Plugins";
 			// 
+			// cbModuleShutdownMode
+			// 
+			this.cbModuleShutdownMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbModuleShutdownMode.FormattingEnabled = true;
+			this.cbModuleShutdownMode.Items.AddRange(new object[] {
+            "None",
+            "Close only",
+            "Kill only",
+            "Close, if not closes kill"});
+			this.cbModuleShutdownMode.Location = new System.Drawing.Point(103, 97);
+			this.cbModuleShutdownMode.Name = "cbModuleShutdownMode";
+			this.cbModuleShutdownMode.Size = new System.Drawing.Size(100, 21);
+			this.cbModuleShutdownMode.TabIndex = 6;
+			this.cbModuleShutdownMode.SelectedIndexChanged += new System.EventHandler(this.cbModuleShutdownMode_SelectedIndexChanged);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(7, 100);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(87, 13);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Shutdown mode:";
+			// 
+			// btnSutdownSequence
+			// 
+			this.btnSutdownSequence.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.btnSutdownSequence.Location = new System.Drawing.Point(6, 182);
+			this.btnSutdownSequence.Name = "btnSutdownSequence";
+			this.btnSutdownSequence.Size = new System.Drawing.Size(153, 23);
+			this.btnSutdownSequence.TabIndex = 101;
+			this.btnSutdownSequence.Text = "Run shutdown sequence";
+			this.btnSutdownSequence.UseVisualStyleBackColor = true;
+			this.btnSutdownSequence.Click += new System.EventHandler(this.btnShutdownSequence_Click);
+			// 
+			// mnuShutdownSequence
+			// 
+			this.mnuShutdownSequence.Name = "contextMenuStrip1";
+			this.mnuShutdownSequence.ShowImageMargin = false;
+			this.mnuShutdownSequence.Size = new System.Drawing.Size(36, 4);
+			// 
+			// injectorTool
+			// 
+			this.injectorTool.Blackboard = null;
+			this.injectorTool.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.injectorTool.Location = new System.Drawing.Point(0, 0);
+			this.injectorTool.Name = "injectorTool";
+			this.injectorTool.Size = new System.Drawing.Size(607, 207);
+			this.injectorTool.TabIndex = 0;
+			// 
+			// interactionTool
+			// 
+			this.interactionTool.Blackboard = null;
+			this.interactionTool.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.interactionTool.Location = new System.Drawing.Point(3, 142);
+			this.interactionTool.MaximumSize = new System.Drawing.Size(0, 62);
+			this.interactionTool.MinimumSize = new System.Drawing.Size(300, 62);
+			this.interactionTool.Name = "interactionTool";
+			this.interactionTool.SelectedModule = null;
+			this.interactionTool.Size = new System.Drawing.Size(601, 62);
+			this.interactionTool.TabIndex = 4;
+			// 
 			// FrmBlackboard
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1429,7 +1437,6 @@ namespace Blk.Gui
 			this.gbBlackboardFiles.PerformLayout();
 			this.gbBlackboardSettings.ResumeLayout(false);
 			this.gbBlackboardSettings.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.nudVerbosityLogFile)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudVerbosity)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudRetrySendAttempts)).EndInit();
 			this.tcLog.ResumeLayout(false);
@@ -1521,12 +1528,9 @@ namespace Blk.Gui
 		private System.Windows.Forms.FlowLayoutPanel flpRemoteMachineStatus;
 		private System.Windows.Forms.NumericUpDown nudVerbosity;
 		private System.Windows.Forms.Label lblVerbosity;
-		private System.Windows.Forms.CheckBox chkRedirectionHistory;
 		private System.Windows.Forms.TabPage tpSharedVars;
 		private System.Windows.Forms.PropertyGrid pgSelectedSharedVar;
 		private System.Windows.Forms.ListView lvSharedVariables;
-		private System.Windows.Forms.NumericUpDown nudVerbosityLogFile;
-		private System.Windows.Forms.Label lblVerbosityLogFile;
 		private System.Windows.Forms.ComboBox cbModuleStartupMode;
 		private System.Windows.Forms.Label lblModuleStartupMode;
 		private System.Windows.Forms.Button btnStartSequence;
@@ -1581,6 +1585,10 @@ namespace Blk.Gui
 		private System.Windows.Forms.ToolStripMenuItem mnuiModules;
 		private System.Windows.Forms.ToolStripMenuItem mnuiBlackboard_Load;
 		private System.Windows.Forms.ToolStripSeparator mnuiBlackboard_Separator3;
+		private System.Windows.Forms.ComboBox cbModuleShutdownMode;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button btnSutdownSequence;
+		private System.Windows.Forms.ContextMenuStrip mnuShutdownSequence;
 	}
 }
 

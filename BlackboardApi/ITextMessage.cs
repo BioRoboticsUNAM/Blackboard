@@ -6,25 +6,6 @@ using System.Text.RegularExpressions;
 namespace Blk.Api
 {
 	/// <summary>
-	/// Sent Status for classes derived from CommandBase Class
-	/// </summary>
-	public enum SentStatus
-	{
-		/// <summary>
-		/// The Command/Response has not been sent yet
-		/// </summary>
-		NotSentYet,
-		/// <summary>
-		/// Send operation succeded
-		/// </summary>
-		SentSuccessfull,
-		/// <summary>
-		/// Send operation failed
-		/// </summary>
-		SentFailed
-	};
-
-	/// <summary>
 	/// Implements a command between Blackboard and Modules
 	/// </summary>
 	public interface ITextMessage : IComparable<ITextMessage>

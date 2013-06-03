@@ -62,10 +62,6 @@ namespace Blk.Gui
 		/// </summary>
 		private bool requestClose;
 		/// <summary>
-		/// Indicates if the redirection history is enabled
-		/// </summary>
-		private bool redirectionHistoryEnabled;
-		/// <summary>
 		/// Module selected using one of the buttons
 		/// </summary>
 		private ModuleClient selectedMC;
@@ -73,14 +69,6 @@ namespace Blk.Gui
 		/// Represents the UpdateModuleInfo method. Used for async calls
 		/// </summary>
 		private VoidEventHandler updateModuleInfo;
-		/// <summary>
-		/// Lost of dispatched commands for fill the RedirectionHistory list
-		/// </summary>
-		private List<Command> dispatchedCommands;
-		/// <summary>
-		/// Stores the column used for sort the RedirectionHistory list
-		/// </summary>
-		private int redirectionHistoryColumn;
 		/// <summary>
 		/// Stores the relation between MachineStatus and its asociated control
 		/// </summary>
@@ -129,6 +117,14 @@ namespace Blk.Gui
 
 #if !SPEED_UP
 		/// <summary>
+		/// Stores the column used for sort the RedirectionHistory list
+		/// </summary>
+		private int redirectionHistoryColumn;
+		/// <summary>
+		/// Lost of dispatched commands for fill the RedirectionHistory list
+		/// </summary>
+		private List<ITextCommand> dispatchedCommands;
+		/// <summary>
 		/// Represents the AddRedirectionListItem method. Used for async calls
 		/// </summary>
 		private AddRedirectionListItemEH dlgAddRedirectionListItem;
@@ -155,6 +151,7 @@ namespace Blk.Gui
 
 			frmBbss = new FrmBlackboardSecondaryScreen(this);
 			this.scTop.Panel2MinSize = 257;
+			SetupShutdownModeControls();
 			SetupStartupModeControls();
 			//TextBoxStreamWriter tbsw = new TextBoxStreamWriter(txtOutputLog);
 			//tbsw.AppendDate = true;
@@ -168,9 +165,7 @@ namespace Blk.Gui
 			frmBbss.BtnStartStop.Enabled = false;
 			this.Icon = Properties.Resources.star2_48;
 			updateModuleInfo = new VoidEventHandler(UpdateModuleInfo);
-			dispatchedCommands = new List<Command>(10000);
 			rmsList = new Dictionary<IPAddress, MachineStatusControl>();
-			this.redirectionHistoryColumn = lvwRedirectionHistory.Columns.IndexOf(chCommandSent);
 			tcLog.SelectedTab = tpOutputLog;
 			this.chkAutoLog.Checked = true;
 
@@ -183,6 +178,8 @@ namespace Blk.Gui
 			dlgSetupBlackboardModule = new IModuleAddRemoveEH(SetupBlackboardModule);
 
 #if !SPEED_UP
+			this.redirectionHistoryColumn = lvwRedirectionHistory.Columns.IndexOf(chCommandSent);
+			dispatchedCommands = new List<ITextCommand>(10000);
 			dlgBlackboardResponseRedirected = new ResponseRedirectedEH(blackboard_ResponseRedirected);
 			dlgAddRedirectionListItem = new AddRedirectionListItemEH(AddRedirectionListItem);
 #else
@@ -673,6 +670,7 @@ namespace Blk.Gui
 			frmBbss.BtnLoad.Text = btnLoad.Text = "Reload blackboard";
 			//SendAttempts = 3;
 			blackboard.StartupSequence.Method = (ModuleStartupMethod)cbModuleStartupMode.SelectedIndex;
+			blackboard.ShutdownSequence.Method = (ModuleShutdownMethod)cbModuleShutdownMode.SelectedIndex;
 			//blackboard.VerbosityLevel = (int)nudVerbosity.Value;
 			nudVerbosity.Value = blackboard.VerbosityLevel;
 
@@ -900,6 +898,19 @@ namespace Blk.Gui
 				}
 			}
 			GUISettings.SaveToFile(guiSettings);
+		}
+
+		private void SetupShutdownModeControls()
+		{
+			ToolStripItem item;
+
+			this.cbModuleShutdownMode.SelectedIndex = (int)ModuleShutdownMethod.CloseThenKill;
+			for (int i = 0; i < cbModuleShutdownMode.Items.Count; ++i)
+			{
+				item = mnuShutdownSequence.Items.Add((string)cbModuleShutdownMode.Items[i]);
+				item.Click += new EventHandler(tsiShutdownSequence_Click);
+				item.Tag = (ModuleShutdownMethod)i;
+			}
 		}
 
 		private void SetupStartupModeControls()
@@ -1260,7 +1271,7 @@ namespace Blk.Gui
 
 #if !SPEED_UP
 
-		private void AddRedirectionListItem(Command command, Response response)
+		private void AddRedirectionListItem(ITextCommand command, ITextResponse response)
 		{
 			if (this.InvokeRequired)
 			{
@@ -1274,7 +1285,7 @@ namespace Blk.Gui
 			lvwRedirectionHistory.Refresh();
 		}
 
-		private ListViewItem CreateRedirectionListItem(Command command, Response response)
+		private ListViewItem CreateRedirectionListItem(ITextCommand command, ITextResponse response)
 		{
 			ListViewItem item;
 			int index;
@@ -1344,10 +1355,10 @@ namespace Blk.Gui
 		{
 			//if (lvwRedirectionHistory.Items.Count == dispatchedCommands.Count) return;
 
-			Command command;
-			Response response;
+			ITextCommand command;
+			ITextResponse response;
 			ListViewItem item;
-			Comparison<Command> comparison;
+			Comparison<ITextCommand> comparison;
 			//int selectedIndex;
 			//Command selectedItem;
 
@@ -1357,36 +1368,36 @@ namespace Blk.Gui
 			switch (lvwRedirectionHistory.Columns[redirectionHistoryColumn].Name)
 			{
 				case "chCommand":
-					comparison = new Comparison<Command>(rhComparisonCommand);
+					comparison = new Comparison<ITextCommand>(rhComparisonCommand);
 					break;
 
 				case "chCommandDestination":
-					comparison = new Comparison<Command>(rhComparisonDestination);
+					comparison = new Comparison<ITextCommand>(rhComparisonDestination);
 					break;
 
 				default:
 				case "chCommandSent":
-					comparison = new Comparison<Command>(rhComparisonSentTime);
+					comparison = new Comparison<ITextCommand>(rhComparisonSentTime);
 					break;
 
 				case "chCommandSource":
-					comparison = new Comparison<Command>(rhComparisonSource);
+					comparison = new Comparison<ITextCommand>(rhComparisonSource);
 					break;
 
 				case "chInfo":
-					comparison = new Comparison<Command>(rhComparisonInfo);
+					comparison = new Comparison<ITextCommand>(rhComparisonInfo);
 					break;
 
 				case "chResponse":
-					comparison = new Comparison<Command>(rhComparisonResponse);
+					comparison = new Comparison<ITextCommand>(rhComparisonResponse);
 					break;
 
 				case "chResponseArrival":
-					comparison = new Comparison<Command>(rhComparisonArrival);
+					comparison = new Comparison<ITextCommand>(rhComparisonArrival);
 					break;
 
 				case "chResponseSent":
-					comparison = new Comparison<Command>(rhComparisonSentStatus);
+					comparison = new Comparison<ITextCommand>(rhComparisonSentStatus);
 					break;
 			}
 //#endregion
@@ -1412,42 +1423,42 @@ namespace Blk.Gui
 			//	lvwRedirectionHistory.Items.
 		}
 
-		private int rhComparisonCommand(Command c1, Command c2)
+		private int rhComparisonCommand(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.ToString().CompareTo(c2.ToString());
 		}
 
-		private int rhComparisonResponse(Command c1, Command c2)
+		private int rhComparisonResponse(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Response.ToString().CompareTo(c2.Response.ToString());
 		}
 
-		private int rhComparisonSource(Command c1, Command c2)
+		private int rhComparisonSource(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Source.CompareTo(c2.Source);
 		}
 
-		private int rhComparisonDestination(Command c1, Command c2)
+		private int rhComparisonDestination(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Destination.CompareTo(c2.Destination);
 		}
 
-		private int rhComparisonSentTime(Command c1, Command c2)
+		private int rhComparisonSentTime(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.SentTime.CompareTo(c2.SentTime);
 		}
 
-		private int rhComparisonArrival(Command c1, Command c2)
+		private int rhComparisonArrival(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Response.ArrivalTime.CompareTo(c2.Response.ArrivalTime);
 		}
 
-		private int rhComparisonInfo(Command c1, Command c2)
+		private int rhComparisonInfo(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Response.FailReason.CompareTo(c2.Response.FailReason);
 		}
 
-		private int rhComparisonSentStatus(Command c1, Command c2)
+		private int rhComparisonSentStatus(ITextCommand c1, ITextCommand c2)
 		{
 			return c1.Response.SentStatus.CompareTo(c2.Response.SentStatus);
 		}
@@ -1613,16 +1624,6 @@ namespace Blk.Gui
 				blackboard.VerbosityLevel = (int)nudVerbosity.Value;
 		}
 
-		private void nudVerbosityLogFile_ValueChanged(object sender, EventArgs e)
-		{
-			//tbsw.LogFileVerbosityThreshold = (int)nudVerbosityLogFile.Value;
-		}
-
-		private void chkRedirectionHistory_CheckedChanged(object sender, EventArgs e)
-		{
-			redirectionHistoryEnabled = chkRedirectionHistory.Checked;
-		}
-
 		private void lvSharedVariables_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			SharedVariable shVar;
@@ -1640,6 +1641,24 @@ namespace Blk.Gui
 			if (shVar == null) return;
 			pgSelectedSharedVar.SelectedObject = shVar;
 			pgSelectedSharedVar.Refresh();
+		}
+
+		private void cbModuleShutdownMode_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if ((blackboard == null) ||
+				(blackboard.RunningStatus == BlackboardRunningStatus.Stopping) ||
+				(cbModuleStartupMode.SelectedIndex == -1))
+				return;
+			blackboard.ShutdownSequence.Method = (ModuleShutdownMethod)cbModuleShutdownMode.SelectedIndex;
+		}
+
+		private void cbModuleStartupMode_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if ((blackboard == null) ||
+				(blackboard.RunningStatus != BlackboardRunningStatus.Stopped) ||
+				(cbModuleStartupMode.SelectedIndex == -1))
+				return;
+			blackboard.StartupSequence.Method = (ModuleStartupMethod)cbModuleStartupMode.SelectedIndex;
 		}
 
 		#endregion
@@ -1660,6 +1679,24 @@ namespace Blk.Gui
 				btnStartSequence,
 				new Point(btnStartSequence.Width - 5, 0),
 				ToolStripDropDownDirection.Right);
+		}
+
+		private void btnShutdownSequence_Click(object sender, EventArgs e)
+		{
+			mnuShutdownSequence.Show(
+				btnSutdownSequence,
+				new Point(btnSutdownSequence.Width - 5, 0),
+				ToolStripDropDownDirection.Right);
+		}
+
+		private void tsiShutdownSequence_Click(object sender, EventArgs e)
+		{
+			ToolStripItem item;
+
+			item = sender as ToolStripItem;
+			if ((blackboard == null) || (item == null) || !(item.Tag is ModuleShutdownMethod))
+				return;
+			blackboard.ShutdownSequence.ShutdownModulesAsync((ModuleShutdownMethod)item.Tag);
 		}
 
 		private void tsiStartSequence_Click(object sender, EventArgs e)
@@ -2131,10 +2168,8 @@ namespace Blk.Gui
 
 #if !SPEED_UP
 
-		private void blackboard_ResponseRedirected(Command command, Response response, bool sendResponseSuccess)
+		private void blackboard_ResponseRedirected(ITextCommand command, ITextResponse response, bool sendResponseSuccess)
 		{
-			if (!redirectionHistoryEnabled)
-				return;
 			try
 			{
 				if (this.InvokeRequired)
