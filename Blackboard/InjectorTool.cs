@@ -99,6 +99,8 @@ namespace Blk.Gui
 			
 			if (cmbQuickCommand.SelectedIndex == -1)
 				return;
+
+			ClearInputTip();
 			txtMessage.AppendText( cmbQuickCommand.SelectedItem.ToString());
 			int ix = txtMessage.Text.LastIndexOf('"');
 			if (ix == -1)
