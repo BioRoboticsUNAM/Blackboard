@@ -9,6 +9,7 @@ using System.Xml;
 using Robotics;
 using Blk.Api;
 using Blk.Api.SharedVariables;
+using Blk.Engine.Remote;
 using Blk.Engine.SharedVariables;
 
 namespace Blk.Engine
@@ -45,6 +46,11 @@ namespace Blk.Engine
 		/// </summary>
 		private static readonly Regex rxSetupModule =
 			new Regex(@"(?<moduleName>[A-Z][A-Z\-]+[A-Z])\s+ip\s*=\s*(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+port\s*=\s*(?<port>\d{4,5})", RegexOptions.Compiled);
+
+		/// <summary>
+		/// A process manager object which can be used to start and stop remote modules.
+		/// </summary>
+		private ProcessManager processManager;
 
 		/// <summary>
 		/// Thread used to asynchronously launches the applications specified in the blackboad configuration file
@@ -125,6 +131,10 @@ namespace Blk.Engine
 			this.Prototypes.Add(new Prototype("mstatus", true, true, 300, true));
 			this.Prototypes.Add(new Prototype("mystat", true, false, 300, true));
 
+			// Remote module start and stop commands
+			this.Prototypes.Add(new Prototype("start_module_app", true, true, 3000, true));
+			this.Prototypes.Add(new Prototype("stop_module_app", true, false, 3000, true));
+
 			// Shared Variable related
 			this.Prototypes.Add(new Prototype("suscribe_var", true, true, 500, true));
 			this.Prototypes.Add(new Prototype("subscribe_var", true, true, 500, true));
@@ -139,6 +149,7 @@ namespace Blk.Engine
 			//this.Prototypes.Add(new Prototype("write_var", true, true, 300, true));
 
 			commandsReceived = new ProducerConsumer<ITextCommand>(50);
+			processManager = new ProcessManager(parent.Log);
 			msc = new MachineStatusCollection(this);
 		}
 
@@ -402,6 +413,14 @@ namespace Blk.Engine
 
 					case "setupmodule":
 						SetupModuleCommand(c);
+						break;
+
+					case "start_module_app":
+						StartModuleAppCommand(c);
+						break;
+
+					case "stop_module_app":
+						StopModuleAppCommand(c);
 						break;
 
 					case "suscribe_var":
@@ -951,6 +970,60 @@ namespace Blk.Engine
 			if (running)
 				module.Start();
 			SendResponse(command, true);
+		}
+
+		/// <summary>
+		/// Executes a start_module_app command.
+		/// Request the blackboard to run the specified application module.
+		/// If the module is already connected, returns true.
+		/// </summary>
+		/// <param name="command">Command to execute</param>
+		private void StartModuleAppCommand(Command command)
+		{
+			string moduleName = command.Parameters;
+			if (!parent.Modules.Contains(moduleName))
+				SendResponse(command, false);
+			else if (parent.Modules[moduleName].IsConnected)
+				SendResponse(command, true);
+			Thread thread = new Thread(new ThreadStart(delegate()
+				{
+					bool result;
+					try
+					{
+						result = processManager.LaunchProcessIfNotRunning(parent.Modules[moduleName].ProcessInfo);
+					}
+					catch { result = false; }
+					SendResponse(command, result);
+				}));
+			thread.IsBackground = true;
+			thread.Start();
+		}
+
+		/// <summary>
+		/// Executes a stop_module_app command.
+		/// Request the blackboard to close the specified application module.
+		/// If the module is not connected, returns true.
+		/// </summary>
+		/// <param name="command">Command to execute</param>
+		private void StopModuleAppCommand(Command command)
+		{
+			string moduleName = command.Parameters;
+			if (!parent.Modules.Contains(moduleName))
+				SendResponse(command, false);
+			else if (!parent.Modules[moduleName].IsConnected)
+				SendResponse(command, true);
+			Thread thread = new Thread(new ThreadStart(delegate()
+			{
+				bool result;
+				try
+				{
+					result = processManager.CloseThenKillProcess(parent.Modules[moduleName].ProcessInfo);
+				}
+				catch { result = false; }
+				SendResponse(command, result);
+			}));
+			thread.IsBackground = true;
+			thread.Start();
 		}
 
 		/// <summary>
