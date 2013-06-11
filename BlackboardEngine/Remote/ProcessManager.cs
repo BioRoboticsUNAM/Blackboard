@@ -29,11 +29,19 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Object used to dump log
 		/// </summary>
-		protected readonly ILogWriter log;
+		protected ILogWriter log;
 
 		#endregion
 
 		#region Constructors
+
+		/// <summary>
+		/// Initialzes a new instance of the ProcessManager object
+		/// </summary>
+		public ProcessManager()
+		{
+			this.log = new LogWriter();
+		}
 
 		/// <summary>
 		/// Initialzes a new instance of the ProcessManager object
@@ -52,9 +60,15 @@ namespace Blk.Engine.Remote
 		/// <summary>
 		/// Gets the blackboard object to which this instance belongs to
 		/// </summary>
-		private ILogWriter Log
+		public ILogWriter Log
 		{
 			get { return this.log; }
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException();
+				this.log = value;
+			}
 		}
 
 		#endregion

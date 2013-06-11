@@ -494,7 +494,7 @@ namespace Blk.Engine
 		IBlackboard IModuleClient.Parent
 		{
 			get { return this.parent; }
-			set { parent = (Blackboard)value; }
+			set { Parent = (Blackboard)value; }
 		}
 
 		/// <summary>

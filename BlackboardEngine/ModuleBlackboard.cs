@@ -149,7 +149,7 @@ namespace Blk.Engine
 			//this.Prototypes.Add(new Prototype("write_var", true, true, 300, true));
 
 			commandsReceived = new ProducerConsumer<ITextCommand>(50);
-			processManager = new ProcessManager(parent.Log);
+			processManager = new ProcessManager();
 			msc = new MachineStatusCollection(this);
 		}
 
@@ -189,6 +189,21 @@ namespace Blk.Engine
 			get
 			{
 				return true;
+			}
+		}
+
+		/// <summary>
+		/// Gets the blackboard this Module is bind to
+		/// </summary>
+		public override Blackboard Parent
+		{
+			get { return base.Parent; }
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException();
+				base.Parent = value;
+				this.processManager.Log = this.parent.Log;
 			}
 		}
 
