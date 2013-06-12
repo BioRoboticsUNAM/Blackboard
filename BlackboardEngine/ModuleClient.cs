@@ -263,9 +263,10 @@ namespace Blk.Engine
 			// Shared Variable related prototypes
 			this.Prototypes.Add(new Prototype("create_var", true, true, 300, true));
 			this.Prototypes.Add(new Prototype("list_vars", false, true, 1000, true));
-			this.Prototypes.Add(new Prototype("read_var", true, true, 300, true));
-			this.Prototypes.Add(new Prototype("write_var", true, true, 300, true));
-			this.Prototypes.Add(new Prototype("read_vars", true, true, 1000, true));
+			this.Prototypes.Add(new Prototype("read_var", true, true, 500, true));
+			this.Prototypes.Add(new Prototype("write_var", true, true, 500, true));
+			this.Prototypes.Add(new Prototype("read_vars", true, true, 3000, true));
+			this.Prototypes.Add(new Prototype("stat_var", true, true, 500, true));
 
 			this.readyEvent = new ManualResetEvent(false);
 		}
@@ -1143,6 +1144,10 @@ namespace Blk.Engine
 					ReadVarsCommand(command);
 					break;
 
+				case "stat_var":
+					StatVarCommand(command);
+					break;
+
 				//case "suscribe_var":
 				//case "subscribe_var":
 				//	SubscribeVarCommand(command);
@@ -1747,6 +1752,34 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
+		/// Gets all the information related to a shared variable
+		/// </summary>
+		/// <param name="command">Command to execute</param>
+		protected virtual void StatVarCommand(Command command)
+		{
+			Robotics.API.SharedVariableInfo svInfo;
+			string serialized;
+			string varName = command.Parameters;
+			if (!parent.VirtualModule.SharedVariables.Contains(varName))
+			{
+				SendResponse(command, false);
+				this.Parent.Log.WriteLine(7, this.Name + ": attempt to get status of variable " + varName + " failed (variable does not exist)");
+				return;
+			}
+
+			svInfo = parent.VirtualModule.SharedVariables[varName].GetInfo();
+			if (!Robotics.API.SharedVariableInfo.Serialize(svInfo, out serialized))
+			{
+				SendResponse(command, false);
+				this.Parent.Log.WriteLine(7, this.Name + ": attempt to get status of variable " + varName + " failed (serialization error)");
+				return;
+			}
+			command.Parameters = serialized;
+			SendResponse(command, true);
+			this.Parent.Log.WriteLine(7, this.Name + ": status of variable " + varName + " obtained successfully");
+		}
+
+		/// <summary>
 		/// Executes a write_var command.
 		/// Requests the blackboard to write to a stored a variable the content provided
 		/// </summary>
@@ -1983,6 +2016,8 @@ namespace Blk.Engine
 			// Send startup commands
 			// This section is to allow to send the startup actions on first time connection.
 			SendStartupCommands();
+
+			CheckAlive(ref sendNextAliveTime);
 
 			while (running && !stopMainThread)
 			{

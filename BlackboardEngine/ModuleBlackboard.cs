@@ -139,7 +139,6 @@ namespace Blk.Engine
 			this.Prototypes.Add(new Prototype("suscribe_var", true, true, 500, true));
 			this.Prototypes.Add(new Prototype("subscribe_var", true, true, 500, true));
 			this.Prototypes.Add(new Prototype("unsubscribe_var", true, true, 500, true));
-			this.Prototypes.Add(new Prototype("stat_var", true, true, 500, true));
 
 			// Moved to parent class
 			//this.Prototypes.Add(new Prototype("create_var", true, true, 300, true));
@@ -434,6 +433,10 @@ namespace Blk.Engine
 						StartModuleAppCommand(c);
 						break;
 
+					case "stat_var":
+						StatVarCommand(c);
+						break;
+
 					case "stop_module_app":
 						StopModuleAppCommand(c);
 						break;
@@ -441,10 +444,6 @@ namespace Blk.Engine
 					case "suscribe_var":
 					case "subscribe_var":
 						SubscribeVarCommand(c);
-						break;
-
-					case "stat_var":
-						StatVarCommand(c);
 						break;
 
 					case "unsubscribe_var":
@@ -1077,31 +1076,6 @@ namespace Blk.Engine
 				sharedVariables[subscription.VariableName].Subscriptions.Add(subscription);
 				SendResponse(command, true);
 			}			
-		}
-
-		/// <summary>
-		/// Gets all the information related to a shared variable
-		/// </summary>
-		/// <param name="command"></param>
-		private void StatVarCommand(Command command)
-		{
-			Robotics.API.SharedVariableInfo svInfo;
-			string serialized;
-			string variableName = command.Parameters;
-			if (!sharedVariables.Contains(variableName))
-			{
-				SendResponse(command, false);
-				return;
-			}
-
-			svInfo = sharedVariables[variableName].GetInfo();
-			if (!Robotics.API.SharedVariableInfo.Serialize(svInfo, out serialized))
-			{
-				SendResponse(command, false);
-				return;
-			}
-			command.Parameters = serialized;
-			SendResponse(command, true);
 		}
 
 		/// <summary>
