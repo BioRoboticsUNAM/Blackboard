@@ -104,15 +104,16 @@
 			<aliveCheck>true</aliveCheck>
 			<simulate>false</simulate>
 			<commands>
-				<command name="pf_find" answer="True" timeout="7500" parameters="true" priority="false" />
-				<command name="pf_remember" answer="True" timeout="5000" parameters="true" priority="false" />
-				<command name="pf_auto" answer="True" timeout="500" parameters="false" priority="true" />
-				<command name="pf_sleep" answer="True" timeout="500" parameters="false" priority="true" />
-				<command name="pf_shutdown" answer="False" timeout="500" parameters="false" priority="true" />
-				<command name="pf_source" answer="True" timeout="500" parameters="true" priority="false" />
-				<command name="pf_resolution" answer="True" timeout="500" parameters="false" priority="false" />
-				<command name="pf_forget" answer="True" timeout="1000" parameters="true" priority="false" />
 				<command name="pf_amnesia" answer="True" timeout="1000" parameters="false" priority="false" />
+				<command name="pf_auto" answer="True" timeout="500" parameters="false" priority="true" />
+				<command name="pf_find" answer="True" timeout="7500" parameters="true" priority="false" />
+				<command name="pf_forget" answer="True" timeout="1000" parameters="true" priority="false" />
+				<command name="pf_knownnames" answer="True" timeout="500" parameters="false" priority="false" />
+				<command name="pf_remember" answer="True" timeout="5000" parameters="true" priority="false" />
+				<command name="pf_resolution" answer="True" timeout="1000" parameters="false" priority="false" />
+				<command name="pf_shutdown" answer="False" timeout="500" parameters="false" priority="true" />
+				<command name="pf_sleep" answer="True" timeout="500" parameters="false" priority="true" />
+				<command name="pf_source" answer="True" timeout="1000" parameters="false" priority="false" />
 			</commands>
 		</module>
 

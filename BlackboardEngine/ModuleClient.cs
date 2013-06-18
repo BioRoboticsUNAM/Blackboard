@@ -1340,9 +1340,9 @@ namespace Blk.Engine
 			#region Simulation Mode
 			if (simOptions.SimulationEnabled)
 			{
-				Response r = Response.CreateFromCommand(command, rnd.NextDouble() > simOptions.SuccessRatio);
+				Response r = Response.CreateFromCommand(command, rnd.NextDouble() <= simOptions.SuccessRatio);
 				command.SentStatus = SentStatus.SentSuccessfull;
-
+				this.ParseResponse(r);
 				return true;
 			}
 			#endregion
