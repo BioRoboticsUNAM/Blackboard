@@ -32,6 +32,14 @@ namespace Blk.Engine
 		/// </summary>
 		private ModuleCollection modules;
 		/// <summary>
+		/// Stores the list of prototypes registered in the system
+		/// </summary>
+		private Dictionary<string, IPrototype> prototypes;
+		/// <summary>
+		/// Lock for the list of prototypes
+		/// </summary>
+		private ReaderWriterLock prototypesLock;
+		/// <summary>
 		/// A LogWriter to log all operations
 		/// </summary>
 		private ILogWriter log;
@@ -160,7 +168,9 @@ namespace Blk.Engine
 		/// </summary>
 		private Blackboard()
 		{
-			this.modules = new ModuleCollection(this, 6);
+			this.modules = new ModuleCollection(this, 20);
+			this.prototypes = new Dictionary<string, IPrototype>(1000);
+			this.prototypesLock = new ReaderWriterLock();
 			//modules.ModuleAdded += new ModuleClientAddRemoveEH(modules_ModuleAdded);
 			//modules.ModuleRemoved += new ModuleClientAddRemoveEH(modules_ModuleRemoved);
 			this.modules.ModuleAdded += new IModuleAddRemoveEH(modules_ModuleAdded);
@@ -469,6 +479,35 @@ namespace Blk.Engine
 		#region Methods
 
 		/// <summary>
+		/// Safely adds support for a new command to the system, avoiding duplicates in a thread-safe way
+		/// </summary>
+		/// <param name="module">The module which will host the new command</param>
+		/// <param name="proto">The prototype which contains command information</param>
+		/// <returns>true if the new prototype was added, false otherwise</returns>
+		internal bool AddPrototype(IModuleClient module, IPrototype proto)
+		{
+			if ((proto == null) || (module == null) || !module.Enabled || ((proto is Prototype) && ((Prototype)proto).IsSystem) || !modules.Contains(module))
+				return false;
+
+			prototypesLock.AcquireWriterLock(-1);
+			if (this.prototypes.ContainsKey(proto.Command))
+			{
+				//if (this.prototypes[proto.Command] == proto)
+				//    return;
+				//if ((proto.Parent != null) && this.prototypes[proto.Command].Parent != proto.Parent)
+				//    proto.Parent.Prototypes.Remove(proto.Command);
+				//return;
+				prototypesLock.ReleaseWriterLock();
+				return false;
+
+			}
+			module.Prototypes.Add(proto);
+			this.prototypes.Add(proto.Command, proto);
+			prototypesLock.ReleaseWriterLock();
+			return true;
+		}
+
+		/// <summary>
 		/// Asynchronously starts the Blackboard.
 		/// If the Blackboard is running, it has no effect.
 		/// </summary>
@@ -562,6 +601,22 @@ namespace Blk.Engine
 
 			BeginStop();
 			while (!threadMessageParser.IsAlive || !mainThread.IsAlive) Thread.Sleep(1);
+		}
+		
+		/// <summary>
+		/// Safely removes support for a existing command from the system
+		/// </summary>
+		/// <param name="module">The module which will host the new command</param>
+		/// <param name="proto">The prototype which contains command information</param>
+		internal void RemovePrototype(IPrototype proto)
+		{
+			if ((proto == null) || (modules.Contains(proto.Parent) && proto.Parent.Enabled))
+				return;
+			prototypesLock.AcquireWriterLock(-1);
+			if (prototypes.ContainsKey(proto.Command))
+				prototypes[proto.Command].Parent.Prototypes.Remove(proto.Command);
+			prototypes.Remove(proto.Command);
+			prototypesLock.ReleaseWriterLock();
 		}
 
 		/// <summary>
@@ -804,23 +859,18 @@ namespace Blk.Engine
 		{
 			destination = null;
 			prototype = null;
-			if ((commandName == null) || !Regex.IsMatch(commandName, @"[A-Za-z_]+")) return false;
+			if (commandName == null) return false;
 			if (VirtualModule.SupportCommand(commandName, out prototype))
 			{
 				destination = VirtualModule;
 				return true;
 			}
-			foreach (ModuleClient m in modules)
-			{
-				if (!m.Enabled || (m == VirtualModule))
-					continue;
-				if (m.SupportCommand(commandName, out prototype))
-				{
-					destination = m;
-					return true;
-				}
-			}
-			return false;
+			this.prototypesLock.AcquireReaderLock(-1);
+			if (!this.prototypes.ContainsKey(commandName))
+				return false;
+			prototype = this.prototypes[commandName];
+			destination = prototype.Parent;
+			return destination.Enabled;
 		}
 
 		/// <summary>
@@ -1700,6 +1750,9 @@ namespace Blk.Engine
 				((ModuleClient)module).Disconnected += new ModuleConnectionEH(module_Disconnected);
 				((ModuleClient)module).ActionExecuted += new ActionExecutedEH(module_ActionExecuted);
 			}
+			IPrototype[] aProto = module.Prototypes.ToArray();
+			foreach (IPrototype proto in aProto)
+				AddPrototype(module, proto);
 			module.CommandReceived += new CommandReceivedEH(module_CommandReceived);
 			module.ResponseReceived += new ResponseReceivedEH(module_ResponseReceived);
 			module.Started += new StatusChangedEH(module_Started);
@@ -1719,6 +1772,9 @@ namespace Blk.Engine
 				((ModuleClient)module).Disconnected -= new ModuleConnectionEH(module_Disconnected);
 				((ModuleClient)module).ActionExecuted -= new ActionExecutedEH(module_ActionExecuted);
 			}
+			IPrototype[] aProto = module.Prototypes.ToArray();
+			foreach (IPrototype proto in aProto)
+				RemovePrototype(proto);
 			module.CommandReceived -= new CommandReceivedEH(module_CommandReceived);
 			module.ResponseReceived -= new ResponseReceivedEH(module_ResponseReceived);
 			Log.WriteLine(1, "Removed module: " + module.Name);
@@ -1847,7 +1903,7 @@ namespace Blk.Engine
 
 		#endregion
 
-		#region Methods de Clase (Estáticos)
+		#region Static Methods
 
 		/// <summary>
 		/// Creates a blackboard from a XML configuration file
@@ -1873,39 +1929,7 @@ namespace Blk.Engine
 			Blackboard blackboard;
 			XmlDocument doc;
 			XmlDocument tmpDoc;
-			XmlNodeList modules;
-			XmlNodeList commands;
-			XmlNode node;
-			int i, j;//, cmdCount;
 			int clientModulesAddedd;
-
-			string moduleName;
-			bool moduleEnabled;
-			string processName;
-			string programPath;
-			string programArgs;
-			string moduleAlias;
-			string moduleAuthor;
-			bool aliveCheck;
-			string cmdName;
-			bool cmdParams;
-			bool cmdAnswer;
-			bool cmdPriority;
-			int cmdTimeOut;
-			bool requirePrefix;
-			int sendDelay;
-			bool simulate;
-			double simulationSuccessRatio;
-			ModuleSimulationOptions simOptions;
-			//Command startupCommand;o
-			Prototype proto;
-			List<Prototype> protoList;
-			ModuleClient mod;
-			List<IPAddress> ips;
-			SortedList<string, ModuleClient> disabledModules;
-
-			int port;
-			int checkInterval;
 
 			#endregion
 
@@ -1931,288 +1955,9 @@ namespace Blk.Engine
 				throw new FileLoadException("Incorrect format");
 			}
 
-			#region Load Blackboard Configuration
-
 			LoadBlackboardConfiguration(blackboard, doc, log);
 
-			#endregion
-
-			#region Load Blackboard Modules
-
-			if (doc.GetElementsByTagName("modules").Count < 1)
-			{
-				log.WriteLine(0, "No modules to load");
-				throw new Exception("No modules to load");
-			}
-			modules = doc.GetElementsByTagName("modules")[0].ChildNodes;
-
-			#endregion
-
-			#region Module extraction
-			tmpDoc = new XmlDocument();
-			clientModulesAddedd = 0;
-			disabledModules = new SortedList<string, ModuleClient>();
-			for (i = 0; i < modules.Count; ++i)
-			{
-				try
-				{
-					// Module check
-					if ((modules[i].Name != "module") ||
-						(modules[i].Attributes.Count < 1) ||
-						(modules[i].Attributes["name"] == null) ||
-						(modules[i].Attributes["name"].Value.Length < 1))
-						continue;
-
-					#region Module information extraction
-					// Name
-					moduleName = modules[i].Attributes["name"].Value.ToUpper();
-
-					// Enabled
-					//moduleEnabled = true;
-					//if((modules[i].Attributes["enabled"] != null) &&
-					//    Boolean.TryParse(modules[i].Attributes["enabled"].Value, out moduleEnabled) &&
-					//    !moduleEnabled)
-					//    continue;
-					if ((modules[i].Attributes["enabled"] == null) ||
-						!Boolean.TryParse(modules[i].Attributes["enabled"].Value, out moduleEnabled))
-						moduleEnabled = true;
-
-					// Alias
-					if(modules[i].Attributes["alias"] != null)
-						moduleAlias = modules[i].Attributes["alias"].Value;
-					else moduleAlias = moduleName;
-
-					// Author
-					if (modules[i].Attributes["author"] != null)
-						moduleAuthor = modules[i].Attributes["author"].Value;
-					else
-						moduleAuthor = null;
-
-					log.WriteLine(1, "Loading module " + moduleName + (moduleAlias != moduleName ? " alias " + moduleAlias : ""));
-					// Create a XML sub-document XML
-					tmpDoc.LoadXml(modules[i].OuterXml);
-
-					#region Get program path and program arguments
-
-					FetchProgramInfo(tmpDoc, out processName, out programPath, out programArgs);
-
-					#endregion
-
-					// Leo el comando de inicio
-					//if (tmpDoc.GetElementsByTagName("startupCommand").Count != 0)
-					//	startupMessage = Command.Parse(tmpDoc.GetElementsByTagName("startupCommand")[0].InnerText);
-
-					// Get the array of ip addresses where the module can be
-					ips = FetchIpAddresses(tmpDoc);
-					if((ips == null) || (ips.Count < 1))
-					{
-						log.WriteLine(2, "\tNo valid IP Address provided");
-						log.WriteLine(1, "Module skipped");
-						continue;
-					}
-
-					// Leo el puerto de conexion del modulo
-					if (
-						(tmpDoc.GetElementsByTagName("port").Count == 0) ||
-						!Int32.TryParse(tmpDoc.GetElementsByTagName("port")[0].InnerText, out port) ||
-						(port <= 1024))
-					{
-						log.WriteLine(2, "\tInvalid port");
-						log.WriteLine(1, "Module skipped");
-						continue;
-					}
-					log.WriteLine("\t" + ips[0].ToString() + ":" + port);
-
-					// Veify if Blackbard must check Module's alive status
-					checkInterval = ModuleClient.GlobalCheckInterval;
-					if(tmpDoc.GetElementsByTagName("aliveCheck").Count != 0)
-					{
-						node=tmpDoc.GetElementsByTagName("aliveCheck")[0];
-						if(!Boolean.TryParse(node.InnerText, out aliveCheck))
-							aliveCheck = true;
-						// Read alive/busy/ready check interval
-						if ((node.Attributes["interval"] == null) ||
-							!Int32.TryParse(node.Attributes["interval"].InnerText, out checkInterval) ||
-							(checkInterval < ModuleClient.MinCheckInterval) ||
-							(checkInterval > ModuleClient.MaxCheckInterval))
-							checkInterval = ModuleClient.GlobalCheckInterval;
-
-					}
-					else aliveCheck = true;
-					// Verify if the Module requires SOURCE DESTINATION prefix
-					if (
-						(tmpDoc.GetElementsByTagName("requirePrefix").Count == 0) ||
-						!Boolean.TryParse(tmpDoc.GetElementsByTagName("requirePrefix")[0].InnerText, out requirePrefix)
-						) requirePrefix = false;
-					// Delay between send operations
-					if (
-						(tmpDoc.GetElementsByTagName("sendDelay").Count == 0) ||
-						!Int32.TryParse(tmpDoc.GetElementsByTagName("sendDelay")[0].InnerText, out sendDelay)
-						) sendDelay = -1;
-					// Simulation options
-					simOptions = ModuleSimulationOptions.SimulationDisabled;
-					if(tmpDoc.GetElementsByTagName("simulate").Count != 0)
-					{
-						node =tmpDoc.GetElementsByTagName("simulate")[0];
-						simulationSuccessRatio = -1;
-						if ((node.Attributes["successRatio"] == null) || !Double.TryParse(node.Attributes["successRatio"].InnerText, out simulationSuccessRatio) || (simulationSuccessRatio < 0) || (simulationSuccessRatio > 1))
-							simulationSuccessRatio = -1;
-						if(Boolean.TryParse(node.InnerText, out simulate))
-							simOptions = (simulationSuccessRatio != -1) ?
-								new ModuleSimulationOptions(simulationSuccessRatio):
-								new ModuleSimulationOptions(simulate);						
-					}
-					
-
-					#endregion
-
-					#region Module Validation
-					// Module validation.
-					// If a module with the same name exists, rename the current module and disable it
-					if (blackboard.Modules.Contains(moduleName) || disabledModules.ContainsKey(moduleName))
-					{
-						int n = 1;
-						string newModuleName = moduleName + n.ToString().PadLeft(2, '0');
-						
-						while (blackboard.Modules.Contains(newModuleName) || disabledModules.ContainsKey(newModuleName))
-						{
-							++n;
-							newModuleName = moduleName + n.ToString().PadLeft(2, '0');
-						}
-						log.WriteLine(1, "Module " + moduleName + " already exists. Renamed to " + newModuleName + (moduleAlias != moduleName ? " alias " + moduleAlias : ""));
-						moduleName = newModuleName;
-						moduleEnabled = false;
-					}
-
-					#endregion
-
-					// Module Creation
-					mod = new ModuleClientTcp(moduleName, ips, port);
-					mod.Enabled = moduleEnabled;
-					mod.Author = moduleAuthor;
-					mod.ProcessInfo.ProcessName = processName;
-					mod.ProcessInfo.ProgramPath = programPath;
-					mod.ProcessInfo.ProgramArgs = programArgs;
-					mod.AliveCheck = aliveCheck;
-					mod.RequirePrefix = requirePrefix;
-					mod.SendDelay = sendDelay;
-					mod.Simulation = simOptions;
-					mod.Alias = moduleAlias;
-					mod.CheckInterval = checkInterval;
-
-					#region Actions Extraction
-
-					// Startup actions extraction
-					LoadModuleActions("onStart", "Startup", tmpDoc, mod.StartupActions, log);
-					// Restart actions extraction
-					LoadModuleActions("onRestart", "Restart", tmpDoc, mod.RestartActions, log);
-					// Restart Test actions extraction
-					LoadModuleActions("onRestartTest", "Restart-Test", tmpDoc, mod.RestartTestActions, log);
-					// Stop actons extraction
-					LoadModuleActions("onStop", "Stop", tmpDoc, mod.StopActions, log);
-					// Test Timeout actons extraction
-					LoadModuleActions("onTestTimeOut", "Test Timeout", tmpDoc, mod.TestTimeOutActions, log);
-
-					#endregion
-
-					#region Module Commands Extraction
-
-					// Leo lista de comandos.
-					log.WriteLine(2, "\tLoading module commands...");
-					if (doc.GetElementsByTagName("commands").Count < 1)
-					{
-						log.WriteLine(3, "\tNo commands to load");
-						log.WriteLine(2, "\tModule skipped");
-						continue;
-					}
-					commands = tmpDoc.GetElementsByTagName("commands")[0].ChildNodes;
-					protoList = new List<Prototype>(commands.Count);
-
-					#region Extraccion de Comandos de modulo
-
-					for (j = 0; j < commands.Count; ++j)
-					{
-						// Verifico que sea un comando
-						cmdTimeOut = 0;
-						if ((commands[j].Name == "command") &&
-						(commands[j].Attributes.Count >= 3) &&
-						(commands[j].Attributes["name"].Value.Length > 1) &&
-						Boolean.TryParse(commands[j].Attributes["answer"].Value, out cmdAnswer) &&
-						(
-							(cmdAnswer && Int32.TryParse(commands[j].Attributes["timeout"].Value, out cmdTimeOut) && (cmdTimeOut >= 0)) || !cmdAnswer
-						))
-						{
-							// Leo nombre de comando
-							cmdName = commands[j].Attributes["name"].Value;
-							log.WriteLine(2, "\t\tAdded command " + cmdName);
-							// Verifico si requiere parametros
-							if ((commands[j].Attributes["parameters"] == null) || !Boolean.TryParse(commands[j].Attributes["parameters"].Value, out cmdParams))
-								cmdParams = true;
-							// Verifico si tiene prioridad
-							if ((commands[j].Attributes["priority"] == null) || !Boolean.TryParse(commands[j].Attributes["priority"].Value, out cmdPriority))
-								cmdPriority = false;
-							// Creo el prototipo
-							proto = new Prototype(cmdName, cmdParams, cmdAnswer, cmdTimeOut, cmdPriority);
-							// Agrego el prototipo al modulo
-							mod.Prototypes.Add(proto);
-							protoList.Add(proto);
-						}
-						else log.WriteLine(4, "\t\tInvalid Command ");
-					}
-					#endregion
-					// Si no hay comandos soportados por el modulo, salto el modulo
-					if (protoList.Count < 1)
-					{
-						log.WriteLine(3, "\tAll commands rejected.");
-						log.WriteLine(2, "Module skipped");
-						continue;
-					}
-
-					#endregion
-
-					// Add module to blackboard
-					#region Add module to Blackboard
-
-					if (mod.Enabled)
-					{
-						blackboard.modules.Add(mod);
-						++clientModulesAddedd;
-						log.WriteLine(2, "Loading module complete!");
-					}
-					else
-					{
-						disabledModules.Add(mod.Name, mod);
-						log.WriteLine(2, "Disabled module enqueued!");
-					}
-
-					#endregion
-				}
-				catch
-				{
-					// Error al cargar el modulo
-					log.WriteLine(2, "Invalid module");
-					// Continuo con el siguiente
-					continue;
-				}
-			}
-
-			#region Add disabled modules
-
-			log.WriteLine(2, "Adding disabled modules");
-			for (i = 0; i < disabledModules.Count; ++i)
-			{
-				try
-				{
-					mod = disabledModules.Values[i];
-					blackboard.Modules.Add(mod);
-					log.WriteLine(3, "Added module " + mod.Name + (mod.Alias != mod.Name ? " alias " + mod.Alias : String.Empty));
-				}
-				catch { }
-			}
-
-			#endregion
-
-			#endregion
+			clientModulesAddedd = LoadBlackboardModules(blackboard, doc, log);
 
 			#region Move program start actions to be executed by the virtual module
 
@@ -2233,6 +1978,7 @@ namespace Blk.Engine
 
 			if (doc.GetElementsByTagName("sharedVariables").Count == 1)
 			{
+				tmpDoc = new XmlDocument();
 				tmpDoc.LoadXml(doc.GetElementsByTagName("sharedVariables")[0].OuterXml);
 				SetupSharedVariables(tmpDoc, blackboard);
 			}
@@ -2254,11 +2000,7 @@ namespace Blk.Engine
 		private static void LoadBlackboardConfiguration(Blackboard blackboard, XmlDocument doc, ILogWriter log)
 		{
 			XmlDocument tmpDoc;
-			string moduleName;
 			ModuleClient mod;
-			string sTime;
-			int iTime;
-			TimeSpan time;
 			int sendAttempts;
 			int globalCheckInterval;
 			int moduleLoadDelay;
@@ -2267,76 +2009,15 @@ namespace Blk.Engine
 			tmpDoc = new XmlDocument();
 			tmpDoc.LoadXml(doc.GetElementsByTagName("configuration")[0].OuterXml);
 
-			#region Blackboard Input port
+			#region Blackboard Input port, Auto-Stop Time, Test Timeout and Name
 
-			// Leo puerto
-			if ((tmpDoc.GetElementsByTagName("port").Count != 1) ||
-				!Int32.TryParse(tmpDoc.GetElementsByTagName("port")[0].InnerText, out blackboard.port))
-			{
-				blackboard.port = 2300;
-				log.WriteLine(1, "No Blackboard port specified, using default: " + blackboard.Port);
-			}
-			else log.WriteLine(1, "Blackboard port: " + blackboard.Port);
+			LoadBlackboardPort(tmpDoc, blackboard, log);
 
-			#endregion
+			LoadBlackboardAutoStopTime(tmpDoc, blackboard, log);
 
-			#region Blackboard Auto-Stop Time
+			LoadBlackboardTestTimeOut(doc, blackboard, log);
 
-			if (tmpDoc.GetElementsByTagName("autoStopTime").Count == 1)
-			{
-				sTime = tmpDoc.GetElementsByTagName("autoStopTime")[0].InnerText.Trim();
-				if (Int32.TryParse(sTime, out iTime) && (iTime > 0))
-				{
-					blackboard.AutoStopTime = new TimeSpan(0, 0, iTime);
-					log.WriteLine(1, "Blackboard Auto-Stop: " + blackboard.AutoStopTime);
-				}
-				else if (TimeSpan.TryParse(sTime, out time) && (time > TimeSpan.Zero))
-				{
-					blackboard.AutoStopTime = time;
-					log.WriteLine(1, "Blackboard Auto-Stop: " + time);
-				}
-				else log.WriteLine(1, "Blackboard Auto-Stop disabled");
-			}
-			else log.WriteLine(1, "Blackboard Auto-Stop disabled");
-
-			#endregion
-
-			#region Blackboard Test Timeout
-
-			if (tmpDoc.GetElementsByTagName("testTimeOut").Count == 1)
-			{
-				sTime = tmpDoc.GetElementsByTagName("testTimeOut")[0].InnerText.Trim();
-				if (Int32.TryParse(sTime, out iTime) && (iTime > 0))
-				{
-					blackboard.TestTimeOut = new TimeSpan(0, 0, iTime);
-					log.WriteLine(1, "Blackboard  Test Timeout: " + blackboard.TestTimeOut);
-				}
-				else if (TimeSpan.TryParse(sTime, out time) && (time > TimeSpan.Zero))
-				{
-					blackboard.TestTimeOut = time;
-					log.WriteLine(1, "Blackboard Test Timeout: " + time);
-				}
-				else log.WriteLine(1, "Blackboard  Test Timeout disabled");
-			}
-			else log.WriteLine(1, "Blackboard  Test Timeout disabled");
-
-			#endregion
-
-			#region Load Blackboard Virtual Module
-			
-			if ((doc.GetElementsByTagName("name").Count != 1) || ((moduleName = doc.GetElementsByTagName("name")[0].InnerText.Trim()).Length < 3))
-			{
-				log.WriteLine(1, "No Virtual module name specified.");
-				log.WriteLine(1, "\tUsing virtual module name: BLACKBOARD");
-				blackboard.VirtualModule = new ModuleBlackboard("BLACKBOARD");
-			}
-			else
-			{
-				moduleName = moduleName.ToUpper();
-				blackboard.VirtualModule = new ModuleBlackboard(moduleName.ToUpper());
-				log.WriteLine(1, "Blackboard virtual module name: " + moduleName);
-				moduleName = null;
-			}
+			LoadBlackboardName(doc, blackboard, log);
 
 			#endregion
 
@@ -2409,9 +2090,484 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
+		/// Fetch the blackboard input port
+		/// </summary>
+		/// <param name="doc">XML document which contains the Blackboard data</param>
+		/// <param name="blackboard">The blackboard which data will be set</param>
+		/// <param name="log">The log writer</param>
+		private static void LoadBlackboardPort(XmlDocument doc, Blackboard blackboard, ILogWriter log)
+		{
+			// Leo puerto
+			if ((doc.GetElementsByTagName("port").Count != 1) ||
+				!Int32.TryParse(doc.GetElementsByTagName("port")[0].InnerText, out blackboard.port))
+			{
+				blackboard.port = 2300;
+				log.WriteLine(1, "No Blackboard port specified, using default: " + blackboard.Port);
+			}
+			else log.WriteLine(1, "Blackboard port: " + blackboard.Port);
+		}
+
+		/// <summary>
+		/// Fetch the blackboard auto-stop time
+		/// </summary>
+		/// <param name="doc">XML document which contains the Blackboard data</param>
+		/// <param name="blackboard">The blackboard which data will be set</param>
+		/// <param name="log">The log writer</param>
+		private static void LoadBlackboardAutoStopTime(XmlDocument doc, Blackboard blackboard, ILogWriter log)
+		{
+			string sTime;
+			int iTime;
+			TimeSpan time;
+
+			if (doc.GetElementsByTagName("autoStopTime").Count == 1)
+			{
+				sTime = doc.GetElementsByTagName("autoStopTime")[0].InnerText.Trim();
+				if (Int32.TryParse(sTime, out iTime) && (iTime > 0))
+				{
+					blackboard.AutoStopTime = new TimeSpan(0, 0, iTime);
+					log.WriteLine(1, "Blackboard Auto-Stop: " + blackboard.AutoStopTime);
+				}
+				else if (TimeSpan.TryParse(sTime, out time) && (time > TimeSpan.Zero))
+				{
+					blackboard.AutoStopTime = time;
+					log.WriteLine(1, "Blackboard Auto-Stop: " + time);
+				}
+				else log.WriteLine(1, "Blackboard Auto-Stop disabled");
+			}
+			else log.WriteLine(1, "Blackboard Auto-Stop disabled");
+		}
+
+		/// <summary>
+		/// Fetch the blackboard test time out
+		/// </summary>
+		/// <param name="doc">XML document which contains the Blackboard data</param>
+		/// <param name="blackboard">The blackboard which data will be set</param>
+		/// <param name="log">The log writer</param>
+		private static void LoadBlackboardTestTimeOut(XmlDocument doc, Blackboard blackboard, ILogWriter log)
+		{
+			string sTime;
+			int iTime;
+			TimeSpan time;
+
+			if (doc.GetElementsByTagName("testTimeOut").Count == 1)
+			{
+				sTime = doc.GetElementsByTagName("testTimeOut")[0].InnerText.Trim();
+				if (Int32.TryParse(sTime, out iTime) && (iTime > 0))
+				{
+					blackboard.TestTimeOut = new TimeSpan(0, 0, iTime);
+					log.WriteLine(1, "Blackboard  Test Timeout: " + blackboard.TestTimeOut);
+				}
+				else if (TimeSpan.TryParse(sTime, out time) && (time > TimeSpan.Zero))
+				{
+					blackboard.TestTimeOut = time;
+					log.WriteLine(1, "Blackboard Test Timeout: " + time);
+				}
+				else log.WriteLine(1, "Blackboard  Test Timeout disabled");
+			}
+			else log.WriteLine(1, "Blackboard  Test Timeout disabled");
+		}
+
+		/// <summary>
+		/// Fetch the blackboard virtual module name
+		/// </summary>
+		/// <param name="doc">XML document which contains the Blackboard data</param>
+		/// <param name="blackboard">The blackboard which data will be set</param>
+		/// <param name="log">The log writer</param>
+		private static void LoadBlackboardName(XmlDocument doc, Blackboard blackboard, ILogWriter log)
+		{
+			string moduleName;
+			if ((doc.GetElementsByTagName("name").Count != 1) || ((moduleName = doc.GetElementsByTagName("name")[0].InnerText.Trim()).Length < 3))
+			{
+				log.WriteLine(1, "No Virtual module name specified.");
+				log.WriteLine(1, "\tUsing virtual module name: BLACKBOARD");
+				blackboard.VirtualModule = new ModuleBlackboard("BLACKBOARD");
+			}
+			else
+			{
+				moduleName = moduleName.ToUpper();
+				blackboard.VirtualModule = new ModuleBlackboard(moduleName.ToUpper());
+				log.WriteLine(1, "Blackboard virtual module name: " + moduleName);
+				moduleName = null;
+			}
+		}
+
+		/// <summary>
+		/// Loads modules configuration from the provided XML document
+		/// </summary>
+		/// <param name="blackboard">The blackboard where will be loaded the modules</param>
+		/// <param name="doc">The xml document from which the modules will be loaded</param>
+		/// <param name="log">The log writer</param>
+		/// <returns>The number of enabled modules loaded</returns>
+		private static int LoadBlackboardModules(Blackboard blackboard, XmlDocument doc, ILogWriter log)
+		{
+			XmlNodeList modules;
+			int i;
+			//Command startupCommand;
+			SortedList<string, ModuleClient> disabledModules;
+			int clientModulesAdded;
+
+			if (doc.GetElementsByTagName("modules").Count < 1)
+			{
+				log.WriteLine(0, "No modules to load");
+				throw new Exception("No modules to load");
+			}
+			modules = doc.GetElementsByTagName("modules")[0].ChildNodes;
+
+			clientModulesAdded = 0;
+			disabledModules = new SortedList<string, ModuleClient>();
+			for (i = 0; i < modules.Count; ++i)
+			{
+				if(LoadModule(blackboard, modules[i], log, disabledModules))
+					++clientModulesAdded;
+			}
+
+			// Add disabled modules
+			AddDisabledModules(blackboard, disabledModules, log);
+			return clientModulesAdded;
+		}
+
+		private static void AddDisabledModules(Blackboard blackboard, SortedList<string, ModuleClient> disabledModules, ILogWriter log)
+		{
+			log.WriteLine(2, "Adding disabled modules");
+			for (int i = 0; i < disabledModules.Count; ++i)
+			{
+				try
+				{
+
+					ModuleClient mod = disabledModules.Values[i];
+					blackboard.Modules.Add(mod);
+					log.WriteLine(3, "Added module " + mod.Name + (mod.Alias != mod.Name ? " alias " + mod.Alias : String.Empty));
+				}
+				catch { }
+			}
+		}
+
+		private static bool LoadModule(Blackboard blackboard, XmlNode modules, ILogWriter log, SortedList<string, ModuleClient> disabledModules)
+		{
+			
+			XmlNode node;
+			string moduleName;
+			bool moduleEnabled;
+			string processName;
+			string programPath;
+			string programArgs;
+			string moduleAlias;
+			string moduleAuthor;
+			bool aliveCheck;
+			bool requirePrefix;
+			int sendDelay;
+			bool simulate;
+			double simulationSuccessRatio;
+			ModuleSimulationOptions simOptions;
+			List<IPAddress> ips;
+			int port;
+			int checkInterval;
+			ModuleClient mod;
+			XmlDocument tmpDoc;
+
+			try
+			{
+				// Module check
+				if ((modules.Name != "module") ||
+					(modules.Attributes.Count < 1) ||
+					(modules.Attributes["name"] == null) ||
+					(modules.Attributes["name"].Value.Length < 1))
+					return false;
+
+				#region Module information extraction
+				FetchModuleInfo(modules, out moduleName, out moduleEnabled, out moduleAlias, out moduleAuthor);
+
+				log.WriteLine(1, "Loading module " + moduleName + (moduleAlias != moduleName ? " alias " + moduleAlias : ""));
+				// Create a XML sub-document XML
+				tmpDoc = new XmlDocument();
+				tmpDoc.LoadXml(modules.OuterXml);
+
+				#region Get program path and program arguments
+
+				FetchProgramInfo(tmpDoc, out processName, out programPath, out programArgs);
+
+				#endregion
+
+				// Leo el comando de inicio
+				//if (tmpDoc.GetElementsByTagName("startupCommand").Count != 0)
+				//	startupMessage = Command.Parse(tmpDoc.GetElementsByTagName("startupCommand")[0].InnerText);
+
+				// Get the array of ip addresses where the module can be
+				if (!FetchModuleConnectionSettings(tmpDoc, log, out ips, out port))
+					return false;
+
+				// Veify if Blackbard must check Module's alive status
+				FetchModuleStatusCheckSettings(tmpDoc, out aliveCheck, out checkInterval);
+				// Verify if the Module requires SOURCE DESTINATION prefix
+				if (
+					(tmpDoc.GetElementsByTagName("requirePrefix").Count == 0) ||
+					!Boolean.TryParse(tmpDoc.GetElementsByTagName("requirePrefix")[0].InnerText, out requirePrefix)
+					) requirePrefix = false;
+				// Delay between send operations
+				if (
+					(tmpDoc.GetElementsByTagName("sendDelay").Count == 0) ||
+					!Int32.TryParse(tmpDoc.GetElementsByTagName("sendDelay")[0].InnerText, out sendDelay)
+					) sendDelay = -1;
+				// Simulation options
+				simOptions = ModuleSimulationOptions.SimulationDisabled;
+				if (tmpDoc.GetElementsByTagName("simulate").Count != 0)
+				{
+					node = tmpDoc.GetElementsByTagName("simulate")[0];
+					simulationSuccessRatio = -1;
+					if ((node.Attributes["successRatio"] == null) || !Double.TryParse(node.Attributes["successRatio"].InnerText, out simulationSuccessRatio) || (simulationSuccessRatio < 0) || (simulationSuccessRatio > 1))
+						simulationSuccessRatio = -1;
+					if (Boolean.TryParse(node.InnerText, out simulate))
+						simOptions = (simulationSuccessRatio != -1) ?
+							new ModuleSimulationOptions(simulationSuccessRatio) :
+							new ModuleSimulationOptions(simulate);
+				}
+
+
+				#endregion
+
+				#region Module Validation
+				ValidateModuleName(blackboard, log, ref moduleName, ref moduleEnabled, moduleAlias, disabledModules);
+
+				#endregion
+
+				// Module Creation
+				mod = new ModuleClientTcp(moduleName, ips, port);
+				mod.Enabled = moduleEnabled;
+				mod.Author = moduleAuthor;
+				mod.ProcessInfo.ProcessName = processName;
+				mod.ProcessInfo.ProgramPath = programPath;
+				mod.ProcessInfo.ProgramArgs = programArgs;
+				mod.AliveCheck = aliveCheck;
+				mod.RequirePrefix = requirePrefix;
+				mod.SendDelay = sendDelay;
+				mod.Simulation = simOptions;
+				mod.Alias = moduleAlias;
+				mod.CheckInterval = checkInterval;
+
+				#region Actions Extraction
+
+				// Startup actions extraction
+				LoadModuleActions("onStart", "Startup", tmpDoc, mod.StartupActions, log);
+				// Restart actions extraction
+				LoadModuleActions("onRestart", "Restart", tmpDoc, mod.RestartActions, log);
+				// Restart Test actions extraction
+				LoadModuleActions("onRestartTest", "Restart-Test", tmpDoc, mod.RestartTestActions, log);
+				// Stop actons extraction
+				LoadModuleActions("onStop", "Stop", tmpDoc, mod.StopActions, log);
+				// Test Timeout actons extraction
+				LoadModuleActions("onTestTimeOut", "Test Timeout", tmpDoc, mod.TestTimeOutActions, log);
+
+				#endregion
+
+				//Extract Module Commands
+				ExtractPrototypes(mod, tmpDoc, log);
+				//if(mod.Prototypes.Count < 1)
+				//	return false;
+				
+				// Add module to blackboard
+				AddModuleToBlackboard(blackboard, log, mod, disabledModules);
+			}
+			catch
+			{
+				// Error al cargar el modulo
+				log.WriteLine(2, "Invalid module");
+				// Continuo con el siguiente
+				return false;
+			}
+			return mod.Enabled;
+		}
+
+		private static void ExtractPrototypes(ModuleClient mod, XmlDocument tmpDoc, ILogWriter log)
+		{
+			XmlNodeList commands;
+			Prototype proto;
+			List<Prototype> protoList;
+			string cmdName;
+			bool cmdParams;
+			bool cmdAnswer;
+			int cmdPriority = 1;
+			bool cmdPriorityB;
+			int cmdTimeOut;
+
+			#region Module Commands Extraction
+
+			// Leo lista de comandos.
+			log.WriteLine(2, "\tLoading module commands...");
+			if (tmpDoc.GetElementsByTagName("commands").Count < 1)
+			{
+				log.WriteLine(3, "\tNo commands to load");
+				log.WriteLine(2, "\tModule skipped");
+				return;
+			}
+			commands = tmpDoc.GetElementsByTagName("commands")[0].ChildNodes;
+			protoList = new List<Prototype>(commands.Count);
+
+			#region Extraccion de Comandos de modulo
+
+			for (int j = 0; j < commands.Count; ++j)
+			{
+				// Verifico que sea un comando
+				cmdTimeOut = 0;
+				if ((commands[j].Name == "command") &&
+				(commands[j].Attributes.Count >= 3) &&
+				(commands[j].Attributes["name"].Value.Length > 1) &&
+				Boolean.TryParse(commands[j].Attributes["answer"].Value, out cmdAnswer) &&
+				(
+					(cmdAnswer && Int32.TryParse(commands[j].Attributes["timeout"].Value, out cmdTimeOut) && (cmdTimeOut >= 0)) || !cmdAnswer
+				))
+				{
+					// Leo nombre de comando
+					cmdName = commands[j].Attributes["name"].Value;
+					log.WriteLine(2, "\t\tAdded command " + cmdName);
+					// Verifico si requiere parametros
+					if ((commands[j].Attributes["parameters"] == null) || !Boolean.TryParse(commands[j].Attributes["parameters"].Value, out cmdParams))
+						cmdParams = true;
+					// Verifico si tiene prioridad
+					if (commands[j].Attributes["priority"] != null)
+					{
+						if(Boolean.TryParse(commands[j].Attributes["priority"].Value, out cmdPriorityB))
+							cmdPriority = cmdPriorityB ? 0 : 1;
+						else if (!Int32.TryParse(commands[j].Attributes["priority"].Value, out cmdPriority))
+							cmdPriority = 1;
+					}
+					// Creo el prototipo
+					proto = new Prototype(cmdName, cmdParams, cmdAnswer, cmdTimeOut, cmdPriority);
+					// Agrego el prototipo al modulo
+					mod.Prototypes.Add(proto);
+					protoList.Add(proto);
+				}
+				else log.WriteLine(4, "\t\tInvalid Command ");
+			}
+			#endregion
+			// Si no hay comandos soportados por el modulo, salto el modulo
+			if (protoList.Count < 1)
+			{
+				log.WriteLine(3, "\tAll commands rejected.");
+				//log.WriteLine(2, "Module skipped");
+				return;
+			}
+
+			#endregion
+		}
+
+		private static void FetchModuleStatusCheckSettings(XmlDocument doc, out bool aliveCheck, out int checkInterval)
+		{
+			XmlNode node;
+
+			checkInterval = ModuleClient.GlobalCheckInterval;
+			if (doc.GetElementsByTagName("aliveCheck").Count != 0)
+			{
+				node = doc.GetElementsByTagName("aliveCheck")[0];
+				if (!Boolean.TryParse(node.InnerText, out aliveCheck))
+					aliveCheck = true;
+				// Read alive/busy/ready check interval
+				if ((node.Attributes["interval"] == null) ||
+					!Int32.TryParse(node.Attributes["interval"].InnerText, out checkInterval) ||
+					(checkInterval < ModuleClient.MinCheckInterval) ||
+					(checkInterval > ModuleClient.MaxCheckInterval))
+					checkInterval = ModuleClient.GlobalCheckInterval;
+
+			}
+			else aliveCheck = true;
+		}
+
+		/// <summary>
+		/// Reads connection settings from the module XML node
+		/// </summary>
+		private static bool FetchModuleConnectionSettings(XmlDocument doc, ILogWriter log, out List<IPAddress> ips, out int port)
+		{
+			port = -1;
+			ips = FetchIpAddresses(doc);
+			if ((ips == null) || (ips.Count < 1))
+			{
+				log.WriteLine(2, "\tNo valid IP Address provided");
+				log.WriteLine(1, "Module skipped");
+				return false;
+			}
+
+			// Leo el puerto de conexion del modulo
+			if (
+				(doc.GetElementsByTagName("port").Count == 0) ||
+				!Int32.TryParse(doc.GetElementsByTagName("port")[0].InnerText, out port) ||
+				(port <= 1024))
+			{
+				log.WriteLine(2, "\tInvalid port");
+				log.WriteLine(1, "Module skipped");
+				return false;
+			}
+			log.WriteLine("\t" + ips[0].ToString() + ":" + port);
+			return true;
+		}
+
+		/// <summary>
+		/// Reads module information from the provided module XML node
+		/// </summary>
+		private static void FetchModuleInfo(XmlNode moduleNode, out string moduleName, out bool moduleEnabled, out string moduleAlias, out string moduleAuthor)
+		{
+			// Name
+			moduleName = moduleNode.Attributes["name"].Value.ToUpper();
+
+			// Enabled
+			if ((moduleNode.Attributes["enabled"] == null) ||
+				!Boolean.TryParse(moduleNode.Attributes["enabled"].Value, out moduleEnabled))
+				moduleEnabled = true;
+
+			// Alias
+			if (moduleNode.Attributes["alias"] != null)
+				moduleAlias = moduleNode.Attributes["alias"].Value;
+			else moduleAlias = moduleName;
+
+			// Author
+			if (moduleNode.Attributes["author"] != null)
+				moduleAuthor = moduleNode.Attributes["author"].Value;
+			else
+				moduleAuthor = null;
+		}
+
+		/// <summary>
+		/// Adds a module to the blackboard
+		/// </summary>
+		private static void AddModuleToBlackboard(Blackboard blackboard, ILogWriter log, ModuleClient mod, SortedList<string, ModuleClient> disabledModules)
+		{
+			if (mod.Enabled)
+			{
+				blackboard.modules.Add(mod);
+				log.WriteLine(2, "Loading module complete!");
+			}
+			else
+			{
+				disabledModules.Add(mod.Name, mod);
+				log.WriteLine(2, "Disabled module enqueued!");
+			}
+		}
+
+		/// <summary>
+		/// Validates the name of a module and renames it until a valid name is found
+		/// </summary>
+		private static void ValidateModuleName(Blackboard blackboard, ILogWriter log, ref string moduleName, ref bool moduleEnabled, string moduleAlias, SortedList<string, ModuleClient> disabledModules)
+		{
+			// Module validation.
+			// If a module with the same name exists, rename the current module and disable it
+			if (blackboard.Modules.Contains(moduleName) || disabledModules.ContainsKey(moduleName))
+			{
+				int n = 1;
+				string newModuleName = moduleName + n.ToString().PadLeft(2, '0');
+
+				while (blackboard.Modules.Contains(newModuleName) || disabledModules.ContainsKey(newModuleName))
+				{
+					++n;
+					newModuleName = moduleName + n.ToString().PadLeft(2, '0');
+				}
+				log.WriteLine(1, "Module " + moduleName + " already exists. Renamed to " + newModuleName + (moduleAlias != moduleName ? " alias " + moduleAlias : ""));
+				moduleName = newModuleName;
+				moduleEnabled = false;
+			}
+		}
+
+		/// <summary>
 		/// Creates a module using data contained in a xml module
 		/// </summary>
-		/// <param name="blackboard">The blackboard which will contin the module</param>
+		/// <param name="blackboard">The blackboard which will contain the module</param>
 		/// <param name="xmlModuleNode">Xml node used to fetch the required module information.</param>
 		/// <param name="log">The log writer</param>
 		/// <returns>The module created with the data contained in the xml document</returns>

@@ -139,7 +139,7 @@ namespace ConfigUtil
 			chkModuleSimulate.Checked = selectedModule.Simulation.SimulationEnabled;
 			dgvModuleCommands.Rows.Clear();
 
-			for (int i = 0; i < selectedModule.Prototypes.Count; ++i)
+			foreach (Blk.Api.IPrototype proto in selectedModule.Prototypes)
 			{
 				//DataGridViewRow r = dgvModuleCommands.co;
 				//r.Cells["colCommandName"].Value = selectedModule.Prototypes[i].Command;
@@ -151,13 +151,13 @@ namespace ConfigUtil
 				int n = dgvModuleCommands.Rows.Add();
 				DataGridViewRow r = dgvModuleCommands.Rows[n];
 
-				r.Cells[0].Value = selectedModule.Prototypes[i].Command;
-				r.Cells[3].Value = selectedModule.Prototypes[i].HasPriority;
-				r.Cells[2].Value = selectedModule.Prototypes[i].ResponseRequired;
-				r.Cells[1].Value = selectedModule.Prototypes[i].ParamsRequired;
-				r.Cells[4].Value = selectedModule.Prototypes[i].Timeout;
+				r.Cells[0].Value = proto.Command;
+				r.Cells[3].Value = proto.HasPriority;
+				r.Cells[2].Value = proto.ResponseRequired;
+				r.Cells[1].Value = proto.ParamsRequired;
+				r.Cells[4].Value = proto.Timeout;
 
-				r.Tag = selectedModule.Prototypes[i];
+				r.Tag = proto;
 			}
 			dgvModuleCommands.Visible = true;
 			this.Enabled = true;

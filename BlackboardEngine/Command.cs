@@ -85,14 +85,7 @@ namespace Blk.Engine
 
 			if (source.Parent != destination.Parent)
 				throw new Exception("Source and destination modules does not belong to the same blackboard");
-			for (int i = 0; i < destination.Prototypes.Count; ++i)
-			{
-				if (destination.Prototypes[i].Command == command)
-				{
-					this.prototype = destination.Prototypes[i];
-					break;
-				}
-			}
+			this.prototype = destination.Prototypes[command];
 			// Check if command matchs a prototype
 			if (this.prototype.ParamsRequired && ((param == null) || (param.Length < 1)))
 				throw new Exception("Invalid string. The Command requires parameters");
@@ -973,14 +966,8 @@ namespace Blk.Engine
 			
 			// Browse for an adequate prototype
 			proto = null;
-			for (int i = 0; i < destination.Prototypes.Count; ++i)
-			{
-				if (destination.Prototypes[i].Command == sCommand)
-				{
-					proto = destination.Prototypes[i];
-					break;
-				}
-			}
+			if (destination.Prototypes.Contains(sCommand))
+				proto = destination.Prototypes[sCommand];
 			// Check if command matchs a prototype. If no prototype found, asume redirection
 			if ((proto != null) && proto.ParamsRequired && ((sParams == null) || (sParams.Length < 1)))
 			{

@@ -22,12 +22,14 @@ namespace Blk.Api
 
 		#region Indexers
 
+		/*
 		/// <summary>
 		/// Gets the element at the specified index position
 		/// </summary>
 		/// <param name="i">The zero based index of the element to get or set</param>
 		/// <returns>The module at position i</returns>
 		IPrototype this[int i] { get; set; }
+		*/
 
 		/// <summary>
 		/// Gets the element with the specified name
@@ -35,6 +37,15 @@ namespace Blk.Api
 		/// <param name="commandName">The name of the module element to get or set</param>
 		/// <returns>The module with specified name</returns>
 		IPrototype this[string commandName] { get; set; }
+
+		#endregion
+
+		#region Events
+
+		/// <summary>
+		/// Occurs when the content of the collection changes
+		/// </summary>
+		event PrototypeCollectionStatusChangedEH PrototypeCollectionStatusChanged;
 
 		#endregion
 
@@ -48,24 +59,17 @@ namespace Blk.Api
 		bool Contains(string commandName);
 
 		/// <summary>
-		/// Retrieves the index of a specified IPrototype object in the collection
+		/// Copies the content of the collection to a fixed length array
 		/// </summary>
-		/// <param name="m">The IPrototype for which the index is returned</param>
-		/// <returns>The index of the specified IPrototype. If the IPrototype is not currently a member of the collection, it returns -1</returns>
-		int IndexOf(IPrototype m);
-
+		/// <returns>A copy of the content of the collection</returns>
+		IPrototype[] ToArray();
+		
 		/// <summary>
-		/// Retrieves the index of a specified IPrototype object in the collection
+		/// Removes the specified Prototype from the parent Module's PrototypeCollection object
 		/// </summary>
-		/// <param name="commandName">The name of the IPrototype for which the index is returned</param>
-		/// <returns>The index of the Movule with the specified name If the IPrototype is not currently a member of the collection, it returns -1</returns>
-		int IndexOf(string commandName);
-
-		/// <summary>
-		/// Removes a IPrototype, at the specified index location, from the IPrototypeCollection object
-		/// </summary>
-		/// <param name="index">The ordinal index of the IPrototype to be removed from the collection</param>
-		void RemoveAt(int index);
+		/// <param name="commandName">The Prototype's name to be removed</param>
+		/// <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
+		bool Remove(string commandName);
 
 		#endregion
 	}

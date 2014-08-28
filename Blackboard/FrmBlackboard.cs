@@ -680,7 +680,7 @@ namespace Blk.Gui
 		private void LoadPlugins()
 		{
 			string pluginsPath;
-			pluginsPath = Application.StartupPath + "\\Plugins";
+			pluginsPath = Path.Combine(Application.StartupPath, "Plugins");
 			LoadPlugins(pluginsPath);
 		}
 
@@ -999,12 +999,14 @@ namespace Blk.Gui
 		{
 			if (chkAutoLog.Checked)
 			{
-				string logPath = Application.StartupPath + "\\Logs\\" + DateTime.Today.ToString("yyyy-MM-dd");
-				if (!Directory.Exists(Application.StartupPath + "\\Logs"))
-					Directory.CreateDirectory(Application.StartupPath + "\\Logs");
+
+				string logPath = Path.Combine(Application.StartupPath, "Logs");
 				if (!Directory.Exists(logPath))
 					Directory.CreateDirectory(logPath);
-				LogFile = logPath + "\\Log_" + DateTime.Now.ToString("HH\\hmm\\mss\\s") + ".log.xml";
+				logPath = Path.Combine(logPath, DateTime.Today.ToString("yyyy-MM-dd"));
+				if (!Directory.Exists(logPath))
+					Directory.CreateDirectory(logPath);
+				LogFile = Path.Combine(logPath, "Log_" + DateTime.Now.ToString("HH\\hmm\\mss\\s") + ".log.xml");
 			}
 			
 			if (bbLogFile != (string)txtLogFile.Tag)
@@ -1206,7 +1208,7 @@ namespace Blk.Gui
 		{
 			FrmHumanCheckList frm = new FrmHumanCheckList();
 			FileInfo cfgFileInfo = new FileInfo(this.ConfigFile);
-			if (frm.LoadList(cfgFileInfo.DirectoryName + "\\HumanCheckList.txt") < 1)
+			if (frm.LoadList(Path.Combine(cfgFileInfo.DirectoryName, "HumanCheckList.txt")) < 1)
 				return;
 			if (frm.ShowDialog(this) == DialogResult.OK)
 				return;
@@ -1486,7 +1488,7 @@ namespace Blk.Gui
 				LoadBlackboard(bbConfigFile);
 			frmBbss.Show();
 
-			//LoadPluginsFromManagedDll("Plugins\\PluginExample.dll");
+			//LoadPluginsFromManagedDll(Path.Combine("Plugins", "PluginExample.dll"));
 		}
 
 		private void chkAutoLog_CheckedChanged(object sender, EventArgs e)
@@ -2305,7 +2307,7 @@ namespace Blk.Gui
 			IBlackboardPlugin instance;
 
 			//assembly = System.Reflection.Assembly.LoadFrom(path);
-			assembly = System.Reflection.Assembly.LoadFile(Application.StartupPath + "\\"+ path);
+			assembly = System.Reflection.Assembly.LoadFile(Path.Combine(Application.StartupPath, path));
 
 			if (assembly.ManifestModule.Name == "Robotics.dll")
 				return;

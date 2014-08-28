@@ -23,6 +23,11 @@ namespace Blk.Api
 		bool HasPriority { get; }
 
 		/// <summary>
+		/// Gets a value indicating the priority of the command
+		/// </summary>
+		int Priority { get; }
+
+		/// <summary>
 		/// Gets a value indicating if parameters are required
 		/// </summary>
 		bool ParamsRequired { get; }

@@ -98,14 +98,7 @@ namespace Blk.Engine
 
 			if ((destination != null) && (source.Parent != destination.Parent))
 				throw new Exception("Source and destination modules does not belong to the same blackboard");
-			for (int i = 0; i < source.Prototypes.Count; ++i)
-			{
-				if (source.Prototypes[i].Command == response)
-				{
-					this.prototype = source.Prototypes[i];
-					break;
-				}
-			}
+			this.prototype = source.Prototypes[response];
 			// Check if response matchs a prototype
 			if (this.prototype.ParamsRequired && ((param == null) || (param.Length < 1)))
 				throw new Exception("Invalid string. The Response requires parameters");
@@ -962,14 +955,8 @@ namespace Blk.Engine
 
 			// Browse for an adequate prototype
 			proto = null;
-			for (int i = 0; i < destination.Prototypes.Count; ++i)
-			{
-				if (destination.Prototypes[i].Command == sCommand)
-				{
-					proto = destination.Prototypes[i];
-					break;
-				}
-			}
+			if (destination.Prototypes.Contains(sCommand))
+				proto = destination.Prototypes[sCommand];
 			// Check if response matchs a prototype. If no prototype found, asume redirection
 			if ((proto != null) && proto.ParamsRequired && ((sParams == null) || (sParams.Length < 1)))
 			{
@@ -1098,7 +1085,7 @@ namespace Blk.Engine
 		{
 			Regex rx;
 
-			rx = new Regex(@"^([\w\-]+(\s+[\w\-]+)?\s+)?[A-Za-z_]+(\s+""[^""]*"")?\s+[10](\s+@\d+)?$");
+			rx = new Regex(@"^([\w\-]+(\s+[\w\-]+)?\s+)?[A-Za-z_]+(\s+""((\\.)|[^""])*"")?\s+[10](\s+@\d+)?$");
 			return rx.IsMatch(s);
 		}
 

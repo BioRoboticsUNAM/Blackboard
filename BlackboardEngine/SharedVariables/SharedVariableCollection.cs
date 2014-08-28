@@ -23,7 +23,7 @@ namespace Blk.Engine.SharedVariables
 		/// <summary>
 		/// Stores the shared variables ordered by name
 		/// </summary>
-		private SortedList<string, SharedVariable> variables;
+		private Dictionary<string, SharedVariable> variables;
 
 		/// <summary>
 		/// Multiple readers, single writer monitor lock
@@ -40,7 +40,7 @@ namespace Blk.Engine.SharedVariables
 		public SharedVariableCollection()
 		{
 			this.rwLock = new ReaderWriterLock();
-			this.variables = new SortedList<string, SharedVariable>(100);
+			this.variables = new Dictionary<string, SharedVariable>(100);
 		}
 
 		#endregion
@@ -93,38 +93,6 @@ namespace Blk.Engine.SharedVariables
 		#endregion
 
 		#region Indexers
-
-		/// <summary>
-		/// Gets the element at the specified index position
-		/// </summary>
-		/// <param name="index">The zero based index of the element to get</param>
-		/// <returns>The module at position i</returns>
-		public SharedVariable this[int index]
-		{
-			get
-			{
-				SharedVariable shv = null;
-				rwLock.AcquireReaderLock(-1);
-				if ((index < 0) || (index >= variables.Count))
-				{
-					rwLock.ReleaseReaderLock();
-					throw new ArgumentOutOfRangeException();
-				}
-				shv = variables.Values[index];
-				rwLock.ReleaseReaderLock();
-				return shv;
-			}
-		}
-
-		/// <summary>
-		/// Gets the element at the specified index position
-		/// </summary>
-		/// <param name="index">The zero based index of the element to get</param>
-		/// <returns>The module at position i</returns>
-		ISharedVariable ISharedVariableCollection.this[int index]
-		{
-			get { return this[index]; }
-		}
 
 		/// <summary>
 		/// Gets the element with the specified name
@@ -247,7 +215,7 @@ namespace Blk.Engine.SharedVariables
 			if (item == null)
 				ex = new ArgumentNullException();
 			else if (variables.ContainsKey(item.Name))
-				ex = new ArgumentException("An element with the specified key already exists in the SortedList");
+				ex = new ArgumentException("An element with the specified key already exists in the Collection");
 			else
 				variables.Add(item.Name, item);
 			rwLock.ReleaseWriterLock();
@@ -326,12 +294,11 @@ namespace Blk.Engine.SharedVariables
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		IEnumerator<ISharedVariable> IEnumerable<ISharedVariable>.GetEnumerator()
 		{
-
-			List<ISharedVariable> vars;
 			rwLock.AcquireReaderLock(-1);
-			vars = new List<ISharedVariable>(variables.Count);
-			for (int i = 0; i < vars.Count; ++i)
-				vars[i] = variables.Values[i];
+			List<ISharedVariable> vars = new List<ISharedVariable>(this.variables.Count);
+			int i = 0;
+			foreach (SharedVariable sv in variables.Values)
+				vars.Add(sv);
 			rwLock.ReleaseReaderLock();
 			return vars.GetEnumerator();
 		}

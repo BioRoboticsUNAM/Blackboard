@@ -44,12 +44,50 @@
 	
 	<modules>
 
-		<module name="ALEX">
-			<ip>192.168.190.100</ip>
-			<port>1500</port>
+		<module name="SIMBOT-CTRL">
+			<ip>127.0.0.1</ip>
+			<port>2016</port>
 			<aliveCheck>true</aliveCheck>
 			<commands>
-				<command name="kc_route" answer="true" timeout="20000" priority="True" />
+				<command name="foo" answer="true" timeout="20000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="SIMHMN-CTRL">
+			<ip>127.0.0.1</ip>
+			<port>2018</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="foo2" answer="true" timeout="20000" priority="True" />
+			</commands>
+		</module>
+
+		<module name="SIMHMN">
+			<ip>192.168.56.101</ip>
+			<port>2019</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="smh_setjoint" answer="true" timeout="60000" parameters="true" priority="False" />
+				<command name="smh_getjoint" answer="true" timeout="1000" parameters="true" priority="True" />
+				<command name="smh_move" answer="true" timeout="1000" parameters="true" priority="True" />
+				<command name="smh_movejoint" answer="true" timeout="1000" parameters="true" priority="True" />
+				<command name="smh_getposition" answer="true" timeout="1000" parameters="false" priority="True" />
+				<command name="smh_setposition" answer="true" timeout="1000" parameters="true" priority="True" />
+			</commands>
+		</module>
+
+		<module name="SIMBOT">
+			<ip>192.168.56.101</ip>
+			<port>2017</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="smb_stop" answer="true" timeout="1000" parameters="false" priority="True" />
+				<command name="smb_set_speeds" answer="true" timeout="1000" parameters="true" priority="False" />
+				<command name="smb_ra_setangles" answer="true" timeout="60000" parameters="true" priority="False" />
+				<command name="smb_ra_getangles" answer="true" timeout="1000" parameters="false" priority="True" />
+				<command name="smb_getjoint" answer="true" timeout="1000" parameters="true" priority="True" />
+				<command name="smb_movejoint" answer="true" timeout="60000" parameters="true" priority="False" />
+				
 			</commands>
 		</module>
 
@@ -62,7 +100,7 @@
 			</commands>
 		</module>
 
-		<module name="ACT-PLN" author="Jesus Savage" enabled="True" alias="ACT-PLN">
+		<module name="ACT-PLN" author="Jesus Savage" enabled="false" alias="ACT-PLN">
 			<!--<ip>192.168.190.102</ip>//-->
 			<ip>127.0.0.1</ip>
 			<port>2025</port>
@@ -72,7 +110,7 @@
 			</commands>
 		</module>
 
-		<module name="ACT-PLN" author="Dummy" enabled="True" alias="ACT-PLN">
+		<module name="ACT-PLN" author="Dummy" enabled="false" alias="ACT-PLN">
 			<!--<ip>192.168.190.102</ip>//-->
 			<ip>127.0.0.1</ip>
 			<port>2025</port>
@@ -83,7 +121,7 @@
 			</commands>
 		</module>
 		
-		<module name="MVN-PLN" author="Marco Negrete" enabled="True" alias="MVN-PLN">
+		<module name="MVN-PLN" author="Marco Negrete" enabled="false" alias="MVN-PLN">
 			<ip>127.0.0.1</ip>
 			<ip>192.168.190.205</ip>
 			<port>2011</port>
@@ -130,6 +168,16 @@
 			</commands>
 		</module>
 
+		<module name="REPORTER-TOOL">
+			<ip>127.0.0.1</ip>
+			<port>2031</port>
+			<aliveCheck>true</aliveCheck>
+			<!--<simulate>true</simulate>//-->
+			<commands>
+				<command name="ert_add" answer="True" parameters="True" priority="True" timeout="500" />
+			</commands>
+		</module>
+
 		<module name="SP-GEN">
 			<onTestTimeOut>
 				<send command="spg_say" params="I have ran out of time. It is time to leave the arena" id="1" />
@@ -139,8 +187,8 @@
 			<aliveCheck>true</aliveCheck>
 			<program processName="SocketSpeech3" path="D:\Robocup Apps\SocketSpeech3\SocketSpeech3\bin\x86\Release\SocketSpeech3.exe" />
 			<commands>
-				<command name="spg_say" answer="true" timeout="20000" priority="True" />
 				<command name="say" answer="true" timeout="20000" priority="True" />
+				<!--<command name="spg_say" answer="true" timeout="20000" priority="True" />
 				<command name="spg_asay" answer="true" timeout="500" priority="True" />
 				<command name="spg_read" answer="true" timeout="120000" priority="True" />
 				<command name="read" answer="true" timeout="120000" priority="True" />
@@ -149,7 +197,7 @@
 				<command name="spg_playloop" answer="true" timeout="500" priority="True" />
 				<command name="spg_shutup" answer="true" timeout="500"  parameters="False" />
 				<command name="spg_play" answer="true" timeout="120000" priority="True" />
-				<command name="spg_voice" answer="True" timeout="500" parameters="True" />
+				<command name="spg_voice" answer="True" timeout="500" parameters="True" />-->
 			</commands>
 		</module>
 

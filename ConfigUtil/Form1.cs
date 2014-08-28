@@ -100,10 +100,10 @@ namespace ConfigUtil
 				ConfigurationHelper.Blackboard.Modules.Remove(module);
 			if (lstBBModules.Items.Contains(module))
 				lstBBModules.Items.Remove(module);
-			for (int i = 0; i < module.Prototypes.Count; ++i)
+			foreach (Prototype proto in module.Prototypes)
 			{
-				if (prototypes.ContainsKey(module.Prototypes[i].Command))
-					prototypes.Remove(module.Prototypes[i].Command);
+				if (prototypes.ContainsKey(proto.Command))
+					prototypes.Remove(proto.Command);
 			}
 		}
 

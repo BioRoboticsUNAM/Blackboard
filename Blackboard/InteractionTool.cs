@@ -101,7 +101,20 @@ namespace Blk.Gui
 			btnSendToModule.Enabled = selectedModule.IsConnected;
 			string[] acs= new string[0];
 			if (this.AutoCompleteList.ContainsKey(selectedModule.Name))
-				acs = this.AutoCompleteList[selectedModule.Name].ToArray();
+			{
+				string suggestion;
+				List<string> acl = this.AutoCompleteList[selectedModule.Name];
+				IPrototype[] aproto = selectedModule.Prototypes.ToArray();
+				foreach (IPrototype p in aproto)
+				{
+					suggestion = p.Command;
+					if (p.ParamsRequired) suggestion += " \"params\"";
+					suggestion += " @1";
+					if (!acl.Contains(suggestion))
+						acl.Add(suggestion);
+				}
+				acs = acl.ToArray();
+			}
 			txtSendToModule.AutoCompleteCustomSource.AddRange(acs);
 			txtSendToModule.Clear();
 			txtSendToModule.Focus();
@@ -129,12 +142,10 @@ namespace Blk.Gui
 			foreach (IModuleClient im in blackboard.Modules)
 			{
 				string suggestion;
-				IPrototype p;
 				List<string> moduleAutoCompleteList = new List<string>(im.Prototypes.Count);
 				stmAutoCompleteList.Add(im.Name, moduleAutoCompleteList);
-				for (int i = 0; i < im.Prototypes.Count; ++i)
+				foreach (IPrototype p in im.Prototypes)
 				{
-					p = im.Prototypes[i];
 					suggestion = p.Command;
 					if (p.ParamsRequired) suggestion += " \"params\"";
 					suggestion += " @1";
@@ -170,8 +181,7 @@ namespace Blk.Gui
 			if (this.selectedModule == null)
 				return false;
 
-			if ((Response.IsResponse(s) && Response.TryParse(s, selectedModule, out rsp)) ||
-			Command.IsCommand(s) && Command.TryParse(s, selectedModule, out cmd))
+			if (Response.TryParse(s, selectedModule, out rsp) || Command.TryParse(s, selectedModule, out cmd))
 				return true;
 			return false;
 		}

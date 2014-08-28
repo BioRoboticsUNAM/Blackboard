@@ -33,13 +33,6 @@ namespace Blk.Api.SharedVariables
 		#region Indexers
 
 		/// <summary>
-		/// Gets the element at the specified index position
-		/// </summary>
-		/// <param name="index">The zero based index of the element to get</param>
-		/// <returns>The module at position i</returns>
-		ISharedVariable this[int index] { get; }
-
-		/// <summary>
 		/// Gets the element with the specified name
 		/// </summary>
 		/// <param name="variableName">The name of the element to get</param>

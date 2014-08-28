@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Blk.Api;
 
 namespace Blk.Engine
@@ -16,6 +17,8 @@ namespace Blk.Engine
 
 		private Blackboard owner;
 		private List<IModuleClient> modules;
+		private Dictionary<string, int> modulesDicc;
+		private ReaderWriterLock rwLock;
 
 		#endregion
 
@@ -31,13 +34,15 @@ namespace Blk.Engine
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
 			this.modules = new List<IModuleClient>(capacity);
+			this.modulesDicc = new Dictionary<string, int>(capacity);
+			this.rwLock = new ReaderWriterLock();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the ModuleCollection class for the specified parent blackboard.
 		/// </summary>
 		/// <param name="owner">The blackboard that the module collection is created for</param>
-		internal ModuleCollection(Blackboard owner) : this(owner, 10)
+		internal ModuleCollection(Blackboard owner) : this(owner, 20)
 		{
 		}
 
@@ -92,8 +97,32 @@ namespace Blk.Engine
 		/// <returns>The module at position i</returns>
 		public IModuleClient this[int i]
 		{
-			get { return modules[i]; }
-			set { modules[i] = value; }
+			get
+			{
+				this.rwLock.AcquireReaderLock(-1);
+				if ((i < 0) || (i >= this.modules.Count))
+				{
+					this.rwLock.ReleaseReaderLock();
+					throw new ArgumentOutOfRangeException();
+				}
+				IModuleClient mc = this.modules[i];
+				this.rwLock.ReleaseReaderLock();
+				return mc;
+			}
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException();
+				this.rwLock.AcquireWriterLock(-1);
+				IModuleClient old = modules[i];
+				if (old == value)
+				{
+					this.rwLock.ReleaseWriterLock();
+					return;
+				}
+				this.modules[i] = value;
+				this.rwLock.ReleaseWriterLock();
+			}
 		}
 
 		/// <summary>
@@ -105,16 +134,28 @@ namespace Blk.Engine
 		{
 			get
 			{
-				int ix;
-				if((ix = IndexOf(moduleName.ToUpper())) == -1)
+				this.rwLock.AcquireReaderLock(-1);
+				if (!this.modulesDicc.ContainsKey(moduleName))
+				{
+					this.rwLock.ReleaseReaderLock();
 					throw new ArgumentException("The module is not currently a member of the collection");
-				return modules[ix];
+				}
+				IModuleClient mc = this.modules[this.modulesDicc[moduleName]];
+				this.rwLock.ReleaseReaderLock();
+				return mc;
 			}
 			set
 			{
-				int ix;
-				if ((ix = IndexOf(moduleName)) == -1) throw new ArgumentException("The module is not currently a member of the collection");
-				modules[ix] = value;
+				if (value == null)
+					throw new ArgumentNullException();
+				this.rwLock.AcquireWriterLock(-1);
+				if (!this.modulesDicc.ContainsKey(moduleName))
+				{
+					this.rwLock.ReleaseWriterLock();
+					throw new ArgumentException("The module is not currently a member of the collection");
+				}
+				this.modules[this.modulesDicc[moduleName]] = value;
+				this.rwLock.ReleaseWriterLock();
 			}
 		}
 
@@ -142,13 +183,10 @@ namespace Blk.Engine
 		/// <returns>true if the specified Module exists in the collection; otherwise, false</returns>
 		public bool Contains(string moduleName)
 		{
-			int i;
-			for (i = 0; i < modules.Count; ++i)
-			{
-				if (modules[i].Name.ToUpper() == moduleName.ToUpper())
-					return true;
-			}
-			return false;
+			this.rwLock.AcquireReaderLock(-1);
+			bool result = this.modulesDicc.ContainsKey(moduleName);
+			this.rwLock.ReleaseReaderLock();
+			return result;
 		}
 
 		/// <summary>
@@ -158,7 +196,15 @@ namespace Blk.Engine
 		/// <returns>The index of the specified Module. If the Module is not currently a member of the collection, it returns -1</returns>
 		public virtual int IndexOf(IModuleClient m)
 		{
-			return modules.IndexOf(m);
+			this.rwLock.AcquireReaderLock(-1);
+			if ((m == null) || !this.modulesDicc.ContainsKey(m.Name))
+			{
+				this.rwLock.ReleaseReaderLock();
+				return -1;
+			}
+			int result = this.modulesDicc[m.Name];
+			this.rwLock.ReleaseReaderLock();
+			return result;
 		}
 
 		/// <summary>
@@ -168,13 +214,15 @@ namespace Blk.Engine
 		/// <returns>The index of the Movule with the specified name If the Module is not currently a member of the collection, it returns -1</returns>
 		public virtual int IndexOf(string moduleName)
 		{
-			if (!Contains(moduleName)) return -1;
-			for (int i = 0; i < modules.Count; ++i)
+			this.rwLock.AcquireReaderLock(-1);
+			if (!this.modulesDicc.ContainsKey(moduleName))
 			{
-				if (modules[i].Name.ToUpper() == moduleName.ToUpper())
-					return i;
+				this.rwLock.ReleaseReaderLock();
+				return -1;
 			}
-			return -1;
+			int result = this.modulesDicc[moduleName];
+			this.rwLock.ReleaseReaderLock();
+			return result;
 		}
 
 		/// <summary>
@@ -183,8 +231,19 @@ namespace Blk.Engine
 		/// <param name="index">The ordinal index of the Module to be removed from the collection</param>
 		public virtual void RemoveAt(int index)
 		{
-			if (ModuleRemoved != null) ModuleRemoved(modules[index]);
-			modules.RemoveAt(index);
+			this.rwLock.AcquireWriterLock(-1);
+			if ((index < 0) || (index >= this.modules.Count))
+			{
+				this.rwLock.ReleaseWriterLock();
+				throw new ArgumentOutOfRangeException();
+			}
+			IModuleClient mc = this.modules[index];
+			this.modulesDicc.Remove(mc.Name);
+			this.modules.RemoveAt(index);
+			for (int i = index; i < this.modules.Count; ++i)
+				this.modulesDicc[this.modules[i].Name] = i;
+			this.rwLock.ReleaseWriterLock();
+			if (ModuleRemoved != null) ModuleRemoved(mc);
 		}
 
 		/// <summary>
@@ -195,7 +254,7 @@ namespace Blk.Engine
 		{
 			int i = 0;
 			string s = string.Empty;
-
+			this.rwLock.AcquireReaderLock(-1);
 			for (i = 0; i < this.modules.Count - 1; ++i)
 			{
 				s += this.modules[i].Name;
@@ -206,6 +265,7 @@ namespace Blk.Engine
 			s += this.modules[i].Name;
 			if (!modules[i].Enabled)
 				s += " (disabled)";
+			this.rwLock.ReleaseReaderLock();
 			return s;
 		}
 
@@ -217,10 +277,23 @@ namespace Blk.Engine
 		/// <param name="item">The Module to add to the collection</param>
 		public void Add(IModuleClient item)
 		{
+			if (item == null)
+				throw new ArgumentNullException();
+
+			this.rwLock.AcquireWriterLock(-1);
+			if (this.modulesDicc.ContainsKey(item.Name))
+			{
+				this.rwLock.ReleaseWriterLock();
+				throw new ArgumentException("Another element with the same name exists in the collection");
+			}
 			item.Parent = owner;
-			if (ModuleAdded != null) ModuleAdded(item);
-			modules.Add(item);
+			this.modules.Add(item);
+			this.modulesDicc.Add(item.Name, 0);
 			modules.Sort();
+			for (int i = 0; i < this.modules.Count; ++i)
+				this.modulesDicc[this.modules[i].Name] = i;
+			this.rwLock.ReleaseWriterLock();
+			if (ModuleAdded != null) ModuleAdded(item);
 		}
 
 		/// <summary>
@@ -228,12 +301,18 @@ namespace Blk.Engine
 		/// </summary>
 		public void Clear()
 		{
-			for (int i = 0; i < modules.Count; ++i)
+			IModuleClient[] mca;
+
+			this.rwLock.AcquireWriterLock(-1);
+			mca = this.modules.ToArray();
+			this.modules.Clear();
+			this.modulesDicc.Clear();
+			this.rwLock.ReleaseWriterLock();
+			for (int i = 0; i < mca.Length; ++i)
 			{
-				if (ModuleRemoved != null) ModuleRemoved(modules[i]);
-				modules[i].Parent = null;
+				mca[i].Parent = null;
+				if (ModuleRemoved != null) ModuleRemoved(mca[i]);
 			}
-			modules.Clear();
 		}
 
 		/// <summary>
@@ -243,7 +322,12 @@ namespace Blk.Engine
 		/// <returns>true if the specified Module exists in the collection; otherwise, false</returns>
 		public bool Contains(IModuleClient item)
 		{
-			return modules.Contains(item);
+			if (item == null)
+				return false;
+			this.rwLock.AcquireReaderLock(-1);
+			bool result = this.modulesDicc.ContainsKey(item.Name);
+			this.rwLock.ReleaseReaderLock();
+			return result;
 		}
 
 		/// <summary>
@@ -253,7 +337,9 @@ namespace Blk.Engine
 		/// <param name="arrayIndex">The zero-based relative index in array where copying begins</param>
 		public void CopyTo(IModuleClient[] array, int arrayIndex)
 		{
-			modules.CopyTo(array, arrayIndex);
+			this.rwLock.AcquireReaderLock(-1);
+			this.modules.CopyTo(array, arrayIndex);
+			this.rwLock.ReleaseReaderLock();
 		}
 
 		/// <summary>
@@ -263,9 +349,22 @@ namespace Blk.Engine
 		/// <returns>true if the specified Module exists in the collection; otherwise, false</returns>
 		public bool Remove(IModuleClient item)
 		{
+			if (item == null) return false;
+			this.rwLock.AcquireWriterLock(-1);
+			if (!this.modulesDicc.ContainsKey(item.Name))
+			{
+				this.rwLock.ReleaseWriterLock(); 
+				return false;
+		}
 			item.Parent = null;
-			if (modules.Contains(item) && (ModuleRemoved != null)) ModuleRemoved(item);
-			return modules.Remove(item);
+			int index = this.modulesDicc[item.Name];
+			this.modulesDicc.Remove(item.Name);
+			this.modules.RemoveAt(index);
+			for (int i = index; i < this.modules.Count; ++i)
+				this.modulesDicc[this.modules[i].Name] = i;
+			this.rwLock.ReleaseWriterLock();
+			if (ModuleRemoved != null) ModuleRemoved(item);
+			return true;
 		}
 
 		#endregion
@@ -277,7 +376,10 @@ namespace Blk.Engine
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		public IEnumerator<IModuleClient> GetEnumerator()
 		{
-			return modules.GetEnumerator();
+			this.rwLock.AcquireReaderLock(-1);
+			IEnumerator<IModuleClient> e = this.modules.GetEnumerator();
+			this.rwLock.ReleaseReaderLock();
+			return e;
 		}
 
 		#endregion
@@ -290,7 +392,10 @@ namespace Blk.Engine
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return modules.GetEnumerator();
+			this.rwLock.AcquireReaderLock(-1);
+			IEnumerator e = this.modules.GetEnumerator();
+			this.rwLock.ReleaseReaderLock();
+			return e;
 		}
 
 		#endregion

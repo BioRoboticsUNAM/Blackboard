@@ -40,7 +40,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Stores the Regular Expression used to match the known system control commands
 		/// </summary>
-		protected const string RxControlCommandNames = "bin|busy|alive|ready|restart_test";
+		protected const string RxControlCommandNames = "alive|bin|busy|prototypes|ready|restart_test";
 
 		/// <summary>
 		/// Maximum check interval for alive, busy and ready checkup messages in milliseconds
@@ -261,12 +261,13 @@ namespace Blk.Engine
 			this.simOptions = ModuleSimulationOptions.SimulationDisabled;
 
 			// Shared Variable related prototypes
-			this.Prototypes.Add(new Prototype("create_var", true, true, 300, true));
-			this.Prototypes.Add(new Prototype("list_vars", false, true, 1000, true));
-			this.Prototypes.Add(new Prototype("read_var", true, true, 500, true));
-			this.Prototypes.Add(new Prototype("write_var", true, true, 500, true));
-			this.Prototypes.Add(new Prototype("read_vars", true, true, 3000, true));
-			this.Prototypes.Add(new Prototype("stat_var", true, true, 500, true));
+			this.Prototypes.Add(Prototype.CreateVar);
+			this.Prototypes.Add(Prototype.ListVars);
+			this.Prototypes.Add(Prototype.Prototypes);
+			this.Prototypes.Add(Prototype.ReadVar);
+			this.Prototypes.Add(Prototype.ReadVars);
+			this.Prototypes.Add(Prototype.StatVar);
+			this.Prototypes.Add(Prototype.WriteVar);
 
 			this.readyEvent = new ManualResetEvent(false);
 		}
@@ -947,6 +948,63 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
+		/// Generates a Prototypes Response which includes all the prototypes for this module
+		/// </summary>
+		/// <param name="baseCommand">A Command object used to generate the response</param>
+		/// <param name="preAppendModuleName">indicates if the name of the module will be pre-appended</param>
+		/// <returns>A Response which includes all the prototypes for this module</returns>
+		protected Response GetPrototypesResponse(Command baseCommand, bool preAppendModuleName)
+		{
+			return GetPrototypesResponse(baseCommand, this.name, preAppendModuleName);
+		}
+
+		/// <summary>
+		/// Generates a Prototypes Response which includes all the prototypes for this module
+		/// </summary>
+		/// <param name="baseCommand">A Command object used to generate the response</param>
+		/// <param name="moduleName">The name of the module from which prototypes will be fetched</param>
+		/// <param name="preAppendModuleName">indicates if the name of the module will be pre-appended</param>
+		/// <returns>A Response which includes all the prototypes for this module</returns>
+		protected Response GetPrototypesResponse(Command baseCommand, string moduleName, bool preAppendModuleName)
+		{
+			if ((baseCommand == null) || !this.parent.Modules.Contains(moduleName))
+				return null;
+			
+			ushort flags = 0;
+			Response rsp= Response.CreateFromCommand(baseCommand, true);
+			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			IModuleClient module = this.parent.Modules[moduleName];
+			IPrototype[] aProto;
+			if (module.Prototypes is PrototypeCollection)
+				aProto = ((PrototypeCollection)(module.Prototypes)).ToArray(false);
+			else
+				aProto = module.Prototypes.ToArray();
+
+			if (preAppendModuleName)
+			{
+				sb.Append(moduleName);
+				sb.Append(' ');
+			}
+
+			foreach (IPrototype proto in aProto)
+			{
+				sb.Append(proto.Command);
+				sb.Append(' ');
+				flags = (ushort)(proto.Priority & 0xFF);
+				if (proto.ResponseRequired) flags |= 0x0100;
+				if (proto.ParamsRequired) flags |= 0x0200;
+				sb.Append(flags);
+				sb.Append(' ');
+				sb.Append(proto.Timeout);
+				sb.Append(' ');
+			}
+			if (sb.Length > 0)
+				--sb.Length;
+			rsp.Parameters = sb.ToString();
+			return rsp;
+		}
+
+		/// <summary>
 		/// Marks the module as Busy and adds the command to list of blocking commands
 		/// </summary>
 		/// <param name="command"></param>
@@ -1136,6 +1194,10 @@ namespace Blk.Engine
 					ListVarsCommand(command);
 					break;
 
+				case "prototypes":
+					PrototypesCommand(command);
+					break;
+
 				case "read_var":
 					ReadVarCommand(command);
 					break;
@@ -1174,11 +1236,8 @@ namespace Blk.Engine
 			if (String.IsNullOrEmpty(message))
 				return;
 
-			if (IsControlResponse(message))
-			{
-				ParseControlResponse(message);
+			if (ParseControlResponse(message))
 				return;
-			}
 
 			// Check if message received is a response
 			if (Response.TryParse(message, this, out r))
@@ -1197,44 +1256,13 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
-		/// Parses a control command
+		/// Parses a control response
 		/// </summary>
 		/// <param name="s">String to parse</param>
-		/// <returns>true if command parsed successfully, false otherwise</returns>
+		/// <returns>true if response parsed successfully, false otherwise</returns>
 		protected bool ParseControlResponse(string s)
 		{
-			/*
-			string[] parts;
-			char[] separator = { '\t', ' ', '\r', '\n' };
-
-			if ((s == null) || (s.Length < 3)) return false;
-
-			parts = s.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-			switch (parts[0])
-			{
-				case "alive":
-					IsAlive = true;
-					return true;
-
-				case "bin":
-					if (parts.Length < 2) return false;
-					if ((parts[1] != "1") && (parts[1] != "0")) return false;
-					IsAlive = true;
-					return true;
-
-				case "busy":
-					if (parts.Length < 2) return false;
-					if ( (parts[1] != "1") && (parts[1] != "0")) return false;
-					if (!(Busy = (parts[1] == "1"))) Unlock();
-					IsAlive = true;
-					return true;
-
-				default:
-					return false;
-			}
-			*/
-
-			Regex rx = new Regex(@"(?<command>(" + RxControlCommandNames + @"))\s+(?<result>[10])(\s+@\d+)?");
+			Regex rx = rxControlResponseParser;
 			Match m;
 			string command;
 			string result;
@@ -1274,8 +1302,46 @@ namespace Blk.Engine
 					alive = true;
 					return true;
 
+				// This system command is handled by the Blackboard virtual module
+				// case "prototypes":
+				//	return true;
+
 				default:
 					return false;
+			}
+		}
+
+		/// <summary>
+		/// Parses a prototype list and updates the list of prototypes
+		/// </summary>
+		/// <param name="s">String to parse</param>
+		/// <returns>true if string parsed successfully, false otherwise</returns>
+		private void ParsePrototypeList(string prototypeListStr)
+		{
+			Prototype proto;
+			string commandName;
+			int flags;
+			int timeout;
+
+			MatchCollection mc = rxPrototypeListParser.Matches(prototypeListStr);
+			if (mc.Count < 1) return;
+			foreach (Match m in mc)
+			{
+				try
+				{
+					if (!m.Success) continue;
+					if (this.prototypes.Contains(commandName = m.Result("${command}"))) continue;
+					if (!Int32.TryParse(m.Result("${flags}"), out flags)) continue;
+					if (!Int32.TryParse(m.Result("${timeout}"), out timeout)) continue;
+					proto = new Prototype(commandName,
+						(flags & 0x0200) != 0,
+						(flags & 0x0100) != 0,
+						timeout,
+						flags & 0x00FF);
+					this.parent.AddPrototype(this, proto);
+					Parent.Log.WriteLine(3, "[" + this.name + "] Added prototype for command:" + proto.ToString());
+				}
+				catch(Exception ex) { }
 			}
 		}
 
@@ -1433,14 +1499,8 @@ namespace Blk.Engine
 		/// <returns>True if the command was found. false otherwise</returns>
 		public bool SupportCommand(string commandName)
 		{
-			if (commandName == null)
-				return false;
-			//if ((commandName == null) || !Regex.IsMatch(commandName, @"[A-Za-z_]+")) return false;
-			//commandName = commandName.ToLower();
-			foreach (Prototype p in prototypes)
-				if (p.Command == commandName)
-					return true;
-			return false;
+			IPrototype prototype;
+			return SupportCommand(commandName, out prototype);
 		}
 
 		/// <summary>
@@ -1457,17 +1517,10 @@ namespace Blk.Engine
 			prototype = null;
 			if (commandName == null)
 				return false;
-			//if ((commandName == null) || !Regex.IsMatch(commandName, @"[A-Za-z_]+")) return false;
-			//commandName = commandName.ToLower();
-			foreach (IPrototype p in prototypes)
-			{
-				if (p.Command == commandName)
-				{
-					prototype = p;
-					return true;
-				}
-			}
-			return false;
+			if (!this.prototypes.Contains(commandName))
+				return false;
+			prototype = this.prototypes[commandName];
+			return true;
 		}
 
 		/// <summary>
@@ -1585,7 +1638,7 @@ namespace Blk.Engine
 			this.readyEvent.WaitOne(timeout);
 		}
 
-		#region SharedVariable Methods
+		#region SharedVariable and Prototype Methods
 
 		/// <summary>
 		/// Executes a create_var command.
@@ -1694,6 +1747,27 @@ namespace Blk.Engine
 				else
 					this.Parent.Log.WriteLine(3, this.Name + ": readed variable " + varName + " with " + Clamper.Clamp(command.StringToSend, 256));
 			}
+		}
+
+		/// <summary>
+		/// Executes a Prototypes command.
+		/// Requests the blackboard to update the protype list of this module or requests the prototype list of another
+		/// </summary>
+		/// <param name="command">Command to execute</param>
+		protected void PrototypesCommand(Command command)
+		{
+			if (!command.HasParams)
+				return;
+			Response rsp;
+			if (this.parent.Modules.Contains(command.Parameters))
+				rsp = GetPrototypesResponse(command, command.Parameters, true);
+			else
+			{
+				ParsePrototypeList(command.Parameters);
+				rsp = GetPrototypesResponse(command, false);
+			}
+			if (rsp != null)
+				Send(rsp);
 		}
 
 		/// <summary>
@@ -2013,11 +2087,11 @@ namespace Blk.Engine
 			// First time connection
 			MainThreadFirstTimeConnect();
 
+			CheckAlive(ref sendNextAliveTime);
+
 			// Send startup commands
 			// This section is to allow to send the startup actions on first time connection.
 			SendStartupCommands();
-
-			CheckAlive(ref sendNextAliveTime);
 
 			while (running && !stopMainThread)
 			{
@@ -2199,6 +2273,11 @@ namespace Blk.Engine
 		/// </summary>
 		private static int globalCheckInterval = 10000;
 
+		private static Regex rxControlCommandNameParser = new Regex(@"^" + RxControlCommandNames + "$?", RegexOptions.Compiled);
+		private static Regex rxControlCommandParser = new Regex(@"^(" + RxControlCommandNames + @")(\s+@\d+)?$", RegexOptions.Compiled);
+		private static Regex rxControlResponseParser = new Regex(@"(?<command>(" + RxControlCommandNames + @"))(\s+(?<params>""([^""]|(\\.))*""))?\s+(?<result>[10])(\s+@\d+)?", RegexOptions.Compiled);
+		private static Regex rxPrototypeListParser = new Regex(@"(?<command>[A-Za-z_][0-9A-Za-z_]*)\s+(?<flags>\d{1,5})\s+(?<timeout>\d{1,8})", RegexOptions.Compiled);
+
 		#endregion
 
 		#region Static Properties
@@ -2246,7 +2325,7 @@ namespace Blk.Engine
 					return false;
 			}
 			*/
-			return Regex.IsMatch(s, @"(" + RxControlCommandNames + @")\s+[10](\s+@\d+)?");
+			return rxControlResponseParser.IsMatch(s);
 		}
 
 		/// <summary>
@@ -2257,7 +2336,17 @@ namespace Blk.Engine
 		public static bool IsControlCommand(Command cmd)
 		{
 			//return Regex.IsMatch(cmd.StringToSend, @"^(" + RxControlCommandNames + @")(\s+@\d+)?$") && !cmd.HasParams;
-			return Regex.IsMatch(cmd.StringToSend, @"^(" + RxControlCommandNames + @")(\s+@\d+)?$") && !cmd.HasParams;
+			return rxControlCommandParser.IsMatch(cmd.StringToSend) && !cmd.HasParams;
+		}
+
+		/// <summary>
+		/// Check if given command name object matches a control command/response
+		/// </summary>
+		/// <param name="commandName">String to check</param>
+		/// <returns>true if given string is control command name, false otherwise</returns>
+		public static bool IsControlCommandName(string commandName)
+		{
+			return rxControlCommandNameParser.IsMatch(commandName);
 		}
 
 		/// <summary>
@@ -2267,7 +2356,6 @@ namespace Blk.Engine
 		/// <returns>true if given Response object is control response, false otherwise</returns>
 		public static bool IsControlResponse(Response rsp)
 		{
-
 			return Regex.IsMatch(rsp.StringToSend, @"^" + RxControlCommandNames + @")\s+[10](\s+@\d+)?$") && !rsp.HasParams;
 		}
 

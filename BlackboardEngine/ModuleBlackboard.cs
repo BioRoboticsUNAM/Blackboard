@@ -39,7 +39,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Stores the list of subscriptions to not-yet-created blackboard variables
 		/// </summary>
-		private SortedList<string, List<SharedVariableSubscription>> pendingSubscriptions;
+		private Dictionary<string, List<SharedVariableSubscription>> pendingSubscriptions;
 
 		/// <summary>
 		/// Regular expression used to parse SetupModule command arguments
@@ -109,7 +109,7 @@ namespace Blk.Engine
 			sharedVariables.Add(svReadyModules = new ReadyModulesSharedVariable(this));
 			sharedVariables.Add(svVariableList = new VariableListSharedVariable(this));
 
-			pendingSubscriptions = new SortedList<string,List<SharedVariableSubscription>>();
+			pendingSubscriptions = new Dictionary<string,List<SharedVariableSubscription>>();
 			// Add default blackboard commands
 			//this.Prototypes.Add(pttAlive);
 			//this.Prototypes.Add(pttBin);
@@ -407,6 +407,10 @@ namespace Blk.Engine
 
 					case "mystat":
 						MystatCommand(c);
+						break;
+
+					case "prototypes":
+						PrototypesCommand(c);
 						break;
 
 					case "querymodule":
@@ -815,12 +819,13 @@ namespace Blk.Engine
 
 			sb.Append(" supportedcommands=");
 			sb.Append('{');
-			for (i = 0; i < module.Prototypes.Count - 1; ++i)
+			IPrototype[] prototypes = module.Prototypes.ToArray();
+			for (i = 0; i < prototypes.Length - 1; ++i)
 			{
-				sb.Append(module.Prototypes[i].Command);
+				sb.Append(prototypes[i].Command);
 				sb.Append(',');
 			}
-			sb.Append(module.Prototypes[i].Command);
+			sb.Append(prototypes[i].Command);
 			sb.Append('}');
 
 			command.Parameters = sb.ToString();
@@ -1315,10 +1320,8 @@ namespace Blk.Engine
 				sharedVariables["connected"].ReportSubscribers(sender);
 			if (!sender.IsConnected)
 			{
-				for(int i = 0; i < sharedVariables.Count; ++i)
-				{
-					this.sharedVariables[i].Subscriptions.Remove(sender);
-				}
+				foreach (SharedVariable sv in this.sharedVariables)
+					sv.Subscriptions.Remove(sender);
 			}
 		}
 

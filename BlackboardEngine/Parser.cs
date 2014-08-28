@@ -70,7 +70,7 @@ namespace Blk.Engine
 		{
 			if ((cc < 0) || (cc >= s.Length))
 				return;
-			while (IsSpace(s[cc])) ++cc;
+			while ((cc < s.Length) && IsSpace(s[cc])) ++cc;
 		}
 
 		/// <summary>
@@ -98,7 +98,7 @@ namespace Blk.Engine
 				++cc;
 			}
 			length = Math.Min(cc - bcc, s.Length - bcc);
-			if (s[cc] != '"') return false;
+			if ((cc >= s.Length) || (s[cc] != '"')) return false;
 			++cc;
 			if (length < 0)
 				return false;

@@ -15,7 +15,9 @@ namespace Blk.Gui
 		{
 			string pName = Process.GetCurrentProcess().ProcessName;
 			Process[] p = Process.GetProcessesByName(pName);
+#if !DEBUG
 			if (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) return;
+#endif
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 				FrmBlackboard frmBlackboard = new FrmBlackboard();
@@ -25,8 +27,8 @@ namespace Blk.Gui
 
 		private static void parseArgs(FrmBlackboard frmBlackboard, string[] args)
 		{
-			if (File.Exists(Application.StartupPath + "\\bb.xml")) frmBlackboard.ConfigFile = Application.StartupPath + "\\bb.xml";
-			if (frmBlackboard.LogFile == "") frmBlackboard.LogFile = Application.StartupPath + "\\log.log.xml";
+			if (File.Exists(Path.Combine(Application.StartupPath, "bb.xml"))) frmBlackboard.ConfigFile = Path.Combine(Application.StartupPath, "bb.xml");
+			if (frmBlackboard.LogFile == "") frmBlackboard.LogFile = Path.Combine(Application.StartupPath, "log.log.xml");
 			if ((args.Length < 1) || !File.Exists(args[0])) return;
 			frmBlackboard.ConfigFile = args[0];			
 

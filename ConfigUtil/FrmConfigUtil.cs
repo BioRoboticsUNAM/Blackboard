@@ -14,6 +14,7 @@ using Robotics.API;
 
 using SharedVariable = Blk.Engine.SharedVariables.SharedVariable;
 using Module = Blk.Engine.ModuleClient;
+using Blk.Api;
 
 namespace ConfigUtil
 {
@@ -192,10 +193,10 @@ namespace ConfigUtil
 				ConfigurationHelper.Blackboard.Modules.Remove(module);
 			if (lstBBModules.Items.Contains(module))
 				lstBBModules.Items.Remove(module);
-			for (int i = 0; i < module.Prototypes.Count; ++i)
+			foreach (IPrototype proto in module.Prototypes)
 			{
-				if (prototypes.ContainsKey(module.Prototypes[i].Command))
-					prototypes.Remove(module.Prototypes[i].Command);
+				if (prototypes.ContainsKey(proto.Command))
+					prototypes.Remove(proto.Command);
 			}
 		}
 
@@ -240,8 +241,8 @@ namespace ConfigUtil
 			//nudTestTimeOut.Value = Blackboard.TestTimeOut;
 			for (int i = 0; i < ConfigurationHelper.Blackboard.Modules.Count; ++i)
 				lstBBModules.Items.Add(ConfigurationHelper.Blackboard.Modules[i]);
-			for (int i = 0; i < ConfigurationHelper.Blackboard.VirtualModule.SharedVariables.Count; ++i)
-				lstBBVars.Items.Add(ConfigurationHelper.Blackboard.VirtualModule.SharedVariables[i]);
+			foreach(SharedVariable sv in ConfigurationHelper.Blackboard.VirtualModule.SharedVariables)
+				lstBBVars.Items.Add(sv);
 			lstBBModules.SelectedIndex = -1;
 			lstBBVars.SelectedIndex = -1;
 			tpLeftTabs.Enabled = true;
@@ -269,18 +270,18 @@ namespace ConfigUtil
 			dgvModuleCommands.Rows.Clear();
 			//selectedModule.Prototypes.Sort();
 
-			for (int i = 0; i < selectedModule.Prototypes.Count; ++i)
+			foreach (IPrototype proto in selectedModule.Prototypes)
 			{
 				int n = dgvModuleCommands.Rows.Add();
 				DataGridViewRow r = dgvModuleCommands.Rows[n];
 
-				r.Cells["colCommandName"].Value = selectedModule.Prototypes[i].Command;
-				r.Cells["colPriority"].Value = selectedModule.Prototypes[i].HasPriority;
-				r.Cells["colAnswer"].Value = selectedModule.Prototypes[i].ResponseRequired;
-				r.Cells["colParameters"].Value = selectedModule.Prototypes[i].ParamsRequired;
-				r.Cells["colTimeout"].Value = selectedModule.Prototypes[i].Timeout;
+				r.Cells["colCommandName"].Value = proto.Command;
+				r.Cells["colPriority"].Value = proto.HasPriority;
+				r.Cells["colAnswer"].Value = proto.ResponseRequired;
+				r.Cells["colParameters"].Value = proto.ParamsRequired;
+				r.Cells["colTimeout"].Value = proto.Timeout;
 
-				r.Tag = selectedModule.Prototypes[i];
+				r.Tag = proto;
 			}
 			dgvModuleCommands.Visible = true;
 			dgvModuleCommands.Enabled = true;

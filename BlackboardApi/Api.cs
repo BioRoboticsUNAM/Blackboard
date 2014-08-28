@@ -128,6 +128,12 @@ namespace Blk.Api
 	public delegate void BlackboardStatusChangedEH(IBlackboard blackboard);
 
 	/// <summary>
+	/// Represents the method that will handle the PrototypeCollectionStatusChanged event of a IPrototypeCollection object.
+	/// </summary>
+	/// <param name="collection">Collection which raised the event</param>
+	public delegate void PrototypeCollectionStatusChangedEH(IPrototypeCollection collection);
+
+	/// <summary>
 	/// Represents the method that will handle the CommandReceived event of a IModule object.
 	/// </summary>
 	/// <param name="sender">The module where the command has arrived</param>

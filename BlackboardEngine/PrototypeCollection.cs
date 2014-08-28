@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Blk.Api;
 
 namespace Blk.Engine
@@ -14,7 +15,8 @@ namespace Blk.Engine
 		#region Variables
 
 		private IModuleClient owner;
-		private List<IPrototype> prototypes;
+		private Dictionary<string, IPrototype> prototypes;
+		private ReaderWriterLock rwLock;
 
 		#endregion
 
@@ -29,7 +31,8 @@ namespace Blk.Engine
 		{
 			if (owner == null) throw new ArgumentException("Owner cannot be null");
 			this.owner = owner;
-			this.prototypes = new List<IPrototype>();
+			this.prototypes = new Dictionary<string, IPrototype>();
+			this.rwLock = new ReaderWriterLock();
 		}
 
 		/// <summary>
@@ -60,7 +63,14 @@ namespace Blk.Engine
 		/// </summary>
 		public int Count
 		{
-			get { return prototypes.Count; }
+			get
+			{
+				int count;
+				this.rwLock.AcquireReaderLock(-1);
+				count = prototypes.Count;
+				this.rwLock.ReleaseReaderLock();
+				return count;
+			}
 		}
 
 		/// <summary>
@@ -78,17 +88,6 @@ namespace Blk.Engine
 		#region Indexers
 
 		/// <summary>
-		/// Gets the element at the specified index position
-		/// </summary>
-		/// <param name="i">The zero based index of the element to get or set</param>
-		/// <returns>The module at position i</returns>
-		public IPrototype this[int i]
-		{
-			get { return prototypes[i]; }
-			set { prototypes[i] = value; }
-		}
-
-		/// <summary>
 		/// Gets the element with the specified name
 		/// </summary>
 		/// <param name="commandName">The name of the module element to get or set</param>
@@ -97,17 +96,40 @@ namespace Blk.Engine
 		{
 			get
 			{
-				int ix;
-				if ((ix = IndexOf(commandName)) == -1) throw new ArgumentException("The prototype is not currently a member of the collection");
-				return prototypes[ix];
+				this.rwLock.AcquireReaderLock(-1);
+				if (!prototypes.ContainsKey(commandName))
+				{
+					this.rwLock.ReleaseReaderLock();
+					throw new ArgumentException("The prototype is not currently a member of the collection");
+				}
+				IPrototype proto = this.prototypes[commandName];
+				this.rwLock.ReleaseReaderLock();
+				return proto;
 			}
 			set
 			{
-				int ix;
-				if ((ix = IndexOf(commandName)) == -1) throw new ArgumentException("The prototype is not currently a member of the collection");
-				prototypes[ix] = value;
+				if (value == null)
+					throw new ArgumentNullException();
+				this.rwLock.AcquireWriterLock(-1);
+				if (value.Parent != owner)
+					value.Parent = owner;
+				if (!prototypes.ContainsKey(commandName))
+					prototypes.Add(value.Command, value);
+				else
+					prototypes[commandName] = value;
+				this.rwLock.ReleaseWriterLock();
+				OnPrototypeCollectionStatusChanged();
 			}
 		}
+
+		#endregion
+
+		#region Events
+
+		/// <summary>
+		/// Occurs when the content of the collection changes
+		/// </summary>
+		public event PrototypeCollectionStatusChangedEH PrototypeCollectionStatusChanged;
 
 		#endregion
 
@@ -120,48 +142,19 @@ namespace Blk.Engine
 		/// <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
 		public bool Contains(string commandName)
 		{
-			int i;
-			for (i = 0; i < prototypes.Count; ++i)
-			{
-				if (prototypes[i].Command.ToUpper() == commandName.ToUpper())
-					return true;
-			}
-			return false;
+			this.rwLock.AcquireReaderLock(-1);
+			bool result = this.prototypes.ContainsKey(commandName);
+			this.rwLock.ReleaseReaderLock();
+			return result; 
 		}
 
 		/// <summary>
-		/// Retrieves the index of a specified Prototype object in the collection
+		/// Rises the PrototypeCollectionStatusChanged event
 		/// </summary>
-		/// <param name="m">The Prototype for which the index is returned</param>
-		/// <returns>The index of the specified Prototype. If the Prototype is not currently a member of the collection, it returns -1</returns>
-		public virtual int IndexOf(IPrototype m)
+		protected void OnPrototypeCollectionStatusChanged()
 		{
-			return prototypes.IndexOf(m);
-		}
-
-		/// <summary>
-		/// Retrieves the index of a specified Prototype object in the collection
-		/// </summary>
-		/// <param name="commandName">The name of the Prototype for which the index is returned</param>
-		/// <returns>The index of the Movule with the specified name If the Prototype is not currently a member of the collection, it returns -1</returns>
-		public virtual int IndexOf(string commandName)
-		{
-			if (!Contains(commandName)) return -1;
-			for (int i = 0; i < prototypes.Count; ++i)
-			{
-				if (prototypes[i].Command.ToUpper() == commandName.ToUpper())
-					return i;
-			}
-			return -1;
-		}
-
-		/// <summary>
-		/// Removes a Prototype, at the specified index location, from the PrototypeCollection object
-		/// </summary>
-		/// <param name="index">The ordinal index of the Prototype to be removed from the collection</param>
-		public virtual void RemoveAt(int index)
-		{
-			prototypes.RemoveAt(index);
+			if (this.PrototypeCollectionStatusChanged != null)
+				this.PrototypeCollectionStatusChanged(this);
 		}
 
 		#region ICollection<IPrototype> Members
@@ -172,9 +165,17 @@ namespace Blk.Engine
 		/// <param name="item">The Prototype to add to the collection</param>
 		public void Add(IPrototype item)
 		{
+			this.rwLock.AcquireWriterLock(-1);
 			item.Parent = owner;
-			prototypes.Add(item);
-			prototypes.Sort();
+			if (prototypes.ContainsKey(item.Command))
+			{
+				if (prototypes[item.Command] != item)
+					prototypes[item.Command] = item;
+			}
+			else
+				prototypes.Add(item.Command, item);
+			this.rwLock.ReleaseWriterLock();
+			OnPrototypeCollectionStatusChanged();
 		}
 
 		/// <summary>
@@ -182,9 +183,12 @@ namespace Blk.Engine
 		/// </summary>
 		public void Clear()
 		{
-			for (int i = 0; i < prototypes.Count; ++i)
-				prototypes[i].Parent = null;
+			this.rwLock.AcquireWriterLock(-1);
+			foreach (IPrototype proto in prototypes.Values)
+				proto.Parent = null;
 			prototypes.Clear();
+			this.rwLock.ReleaseWriterLock();
+			OnPrototypeCollectionStatusChanged();
 		}
 
 		/// <summary>
@@ -194,7 +198,11 @@ namespace Blk.Engine
 		/// <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
 		public bool Contains(IPrototype item)
 		{
-			return prototypes.Contains(item);
+			if (item == null) return false;
+			this.rwLock.AcquireReaderLock(-1);
+			bool result = this.prototypes.ContainsKey(item.Command);
+			this.rwLock.ReleaseReaderLock();
+			return result; 
 		}
 
 		/// <summary>
@@ -204,7 +212,13 @@ namespace Blk.Engine
 		/// <param name="arrayIndex">The zero-based relative index in array where copying begins</param>
 		public void CopyTo(IPrototype[] array, int arrayIndex)
 		{
-			prototypes.CopyTo(array, arrayIndex);
+			this.rwLock.AcquireReaderLock(-1);
+			foreach (IPrototype proto in prototypes.Values)
+			{
+				if(arrayIndex < array.Length)
+					array[arrayIndex++] = proto;
+			}
+			this.rwLock.ReleaseReaderLock();
 		}
 
 		/// <summary>
@@ -214,8 +228,77 @@ namespace Blk.Engine
 		/// <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
 		public bool Remove(IPrototype item)
 		{
-			item.Parent = null;
-			return prototypes.Remove(item);
+			if (item == null)
+				return false;
+			return Remove(item.Command);
+		}
+
+		/// <summary>
+		/// Removes the specified Prototype from the parent Module's PrototypeCollection object
+		/// </summary>
+		/// <param name="commandName">The Prototype's name to be removed</param>
+		/// <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
+		public bool Remove(string commandName)
+		{
+			if (String.IsNullOrEmpty(commandName))
+				return false;
+			this.rwLock.AcquireWriterLock(-1);
+			if (!this.prototypes.ContainsKey(commandName))
+			{
+				this.rwLock.ReleaseWriterLock();
+				return false;
+			}
+			bool result = this.prototypes.Remove(commandName);
+			this.rwLock.ReleaseWriterLock();
+			OnPrototypeCollectionStatusChanged();
+			return result;
+		}
+		
+		/// <summary>
+		/// Copies the content of the collection to a fixed length array
+		/// </summary>
+		/// <returns>A copy of the content of the collection</returns>
+		public IPrototype[] ToArray()
+		{
+			this.rwLock.AcquireReaderLock(-1);
+			IPrototype[] pArray = new IPrototype[this.prototypes.Count];
+			int ix = 0;
+			foreach (IPrototype p in this.prototypes.Values)
+				pArray[ix++] = p;
+			this.rwLock.ReleaseReaderLock();
+			Array.Sort(pArray);
+			return pArray;
+		}
+
+		/// <summary>
+		/// Copies the content of the collection to a fixed length array
+		/// </summary>
+		/// <param name="includeSystemPrototypes">Indicates if system prototypes will be included or excluded</param>
+		/// <returns>A copy of the content of the collection</returns>
+		public IPrototype[] ToArray(bool includeSystemPrototypes)
+		{
+			if(includeSystemPrototypes)
+				return this.ToArray();
+
+			this.rwLock.AcquireReaderLock(-1);
+			int count = 0;
+			foreach (IPrototype p in this.prototypes.Values)
+			{
+				if ((p is Prototype) && ((Prototype)p).IsSystem)
+					continue;
+				++count;
+			}
+			IPrototype[] pArray = new IPrototype[count];
+			int ix = 0;
+			foreach (IPrototype p in this.prototypes.Values)
+			{
+				if ((p is Prototype) && ((Prototype)p).IsSystem)
+					continue;
+				pArray[ix++] = p;
+			}
+			this.rwLock.ReleaseReaderLock();
+			Array.Sort(pArray);
+			return pArray;
 		}
 
 		#endregion
@@ -227,7 +310,10 @@ namespace Blk.Engine
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		public IEnumerator<IPrototype> GetEnumerator()
 		{
-			return prototypes.GetEnumerator();
+			this.rwLock.AcquireReaderLock(-1);
+			IEnumerator<IPrototype> e = this.prototypes.Values.GetEnumerator();
+			this.rwLock.ReleaseReaderLock();
+			return e;
 		}
 
 		#endregion
@@ -240,7 +326,10 @@ namespace Blk.Engine
 		/// <returns>The enumerator to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return prototypes.GetEnumerator();
+			this.rwLock.AcquireReaderLock(-1);
+			IEnumerator e = this.prototypes.Values.GetEnumerator();
+			this.rwLock.ReleaseReaderLock();
+			return e;
 		}
 
 		#endregion
