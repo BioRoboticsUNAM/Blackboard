@@ -287,6 +287,7 @@ namespace Blk.Engine
 				client = null;
 			}
 			client = new SocketTcpClient(ServerAddresses[0], Port);
+			client.ConnectionMode = TcpClientConnectionMode.Normal;
 			client.ConnectionTimeOut = 1000;
 			client.NoDelay = true;
 			client.Connected += new TcpClientConnectedEventHandler(client_Connected);
