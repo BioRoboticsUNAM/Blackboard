@@ -65,6 +65,7 @@ namespace Blk.Engine.SharedVariables
 		/// </summary>
 		public void ReportSubscribers()
 		{
+			OnWritten();
 			ReportSubscribers(this.Owner);
 		}
 

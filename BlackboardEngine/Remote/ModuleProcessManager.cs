@@ -83,6 +83,23 @@ namespace Blk.Engine.Remote
 		}
 
 		/// <summary>
+		/// Checks if the process of the specified module is running
+		/// </summary>
+		/// <param name="module">The module to check</param>
+		/// <returns>The number of running instances of the module</returns>
+		public int CheckModule(IModuleClientTcp module)
+		{
+			lock (oLock)
+			{
+				if (!module.IsLocal)
+				{
+					return RemoteCheck(module);
+				}
+				return processManager.RunningProcessesCount(module.ProcessInfo);
+			}
+		}
+
+		/// <summary>
 		/// Closes a module
 		/// </summary>
 		/// <param name="mc">The IModuleClientTcp object which contains the information about the module to close</param>
@@ -157,6 +174,83 @@ namespace Blk.Engine.Remote
 						KillLocalModule(module);
 						break;
 				}
+			}
+		}
+
+		/// <summary>
+		/// Request the number of running instances of a module on remote computer
+		/// </summary>
+		/// <param name="mc">The module to check</param>
+		/// <returns>The number of running instances of the module</returns>
+		private int RemoteCheck(IModuleClientTcp mc)
+		{
+			RemoteCheckRequest request;
+			RemoteCheckResponse response;
+			SocketTcpClient client;
+			AutoResetEvent dataReceivedEvent;
+			string serialized;
+
+			Log.WriteLine(5, "Checking instances of module '" + mc.Name + "': on remote computer.");
+			client = null;
+			foreach (IPAddress ip in mc.ServerAddresses)
+			{
+				client = new SocketTcpClient(ip, 2300);
+				if (client.TryConnect())
+					break;
+			}
+			if ((client == null) || !client.IsConnected)
+			{
+				Log.WriteLine(5, "Can not check module '" + mc.Name + "': unable to connect to remote computer.");
+				return -1;
+			}
+
+			dataReceivedEvent = new AutoResetEvent(false);
+			client.DataReceived += new TcpDataReceivedEventHandler(delegate(TcpPacket packet)
+			{
+				response = RemoteCheckResponse.FromXml(packet.DataString);
+				dataReceivedEvent.Set();
+			});
+
+			try
+			{
+				request = new RemoteCheckRequest(mc.Name, mc.ProcessInfo);
+				serialized = RemoteCheckRequest.ToXml(request);
+				client.Send(serialized);
+				response = null;
+				dataReceivedEvent.WaitOne(10000);
+				if (response == null)
+				{
+					Log.WriteLine(5, "Can't check module '" + mc.Name + "': no response received");
+					client.Disconnect();
+					return -1;
+				}
+				if (response.ModuleName != request.ModuleName)
+				{
+					Log.WriteLine(5, "Can't check module '" + mc.Name + "': invalid response");
+					client.Disconnect();
+					return -1;
+				}
+				if (!response.Success)
+				{
+					Log.WriteLine(5, "Can't check module '" + mc.Name + "': " + response.Message);
+					client.Disconnect();
+					return -1;
+				}
+				Log.WriteLine(5, "Check module '" + mc.Name + "': Success");
+				client.Disconnect();
+				return response.Instances;
+			}
+			catch (Exception ex)
+			{
+				Log.WriteLine(5, "Can't check module '" + mc.Name + "': " + ex.Message);
+				return -1;
+			}
+			finally
+			{
+				if ((client != null) && client.IsConnected)
+					client.Disconnect();
+				if (client.Socket != null)
+					client.Socket.Close();
 			}
 		}
 

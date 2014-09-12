@@ -71,6 +71,8 @@
     <Compile Include="PrototypeCollection.cs" />
     <Compile Include="Remote\ModuleProcessManager.cs" />
     <Compile Include="Remote\ProcessManager.cs" />
+    <Compile Include="Remote\RemoteCheckRequest.cs" />
+    <Compile Include="Remote\RemoteCheckResponse.cs" />
     <Compile Include="Remote\RemoteShutdownRequest.cs" />
     <Compile Include="Remote\RemoteShutdownResponse.cs" />
     <Compile Include="Remote\RemoteStartupRequest.cs" />

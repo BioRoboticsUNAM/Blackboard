@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Robotics;
 using Blk.Api;
 using Blk.Engine;
+using Blk.Engine.Remote;
 using Blk.Engine.SharedVariables;
 
 namespace Raspboard
@@ -41,6 +42,16 @@ namespace Raspboard
 		/// </summary>
 		private ConsoleManager consoleManager;
 
+		/// <summary>
+		/// Stores the list of delegates used while tracing variables
+		/// </summary>
+		private Dictionary<string, SharedVariableWrittenEventHandler> tracers;
+
+		/// <summary>
+		/// A process manager used to start and stop the process of the modules
+		/// </summary>
+		private ModuleProcessManager procMan;
+
 		#endregion
 
 		#region Consutructor
@@ -48,7 +59,9 @@ namespace Raspboard
 		public Kernel(Blackboard blk)
 		{
 			this.blackboard = blk;
+			this.procMan = new ModuleProcessManager((Robotics.Utilities.LogWriter)blackboard.Log);
 			this.commands = new Dictionary<string, StringEventHandler>();
+			this.tracers = new Dictionary<string, SharedVariableWrittenEventHandler>();
 			this.rxCommandSplitter = new Regex(@"^(?<cmd>\w+)(\s+(?<par>.*))?$");
 			RegisterCommands();
 			RegisterSystemPrototypes();
@@ -99,8 +112,14 @@ namespace Raspboard
 				// completionTree.AddWord("list " + m.Name + " commands");
 				completionTree.AddWord("info " + m.Name);
 				completionTree.AddWord("sim " + m.Name);
+				completionTree.AddWord("proc check " + m.Name);
+				completionTree.AddWord("proc close " + m.Name);
+				completionTree.AddWord("proc kill " + m.Name);
+				completionTree.AddWord("proc launch " + m.Name);
+				completionTree.AddWord("proc restart " + m.Name);
+				completionTree.AddWord("proc start " + m.Name);
 				// completionTree.AddWord("put " + m.Name);
-				foreach(IPrototype proto in m.Prototypes)
+				foreach (IPrototype proto in m.Prototypes)
 				{
 					string par = proto.ParamsRequired ? " \"0\"" : String.Empty;
 					//completionTree.AddWord(String.Format("put {0} {1}{2}", m.Name, proto.Command, par));
@@ -116,21 +135,24 @@ namespace Raspboard
 			{
 				completionTree.AddWord("cat " + sv.Name);
 				completionTree.AddWord("read " + sv.Name);
+				completionTree.AddWord("trace " + sv.Name);
 			}
 		}
 
 		public void RegisterCommands()
 		{
-			commands.Add("cat",  new StringEventHandler(ReadCommand));
+			commands.Add("cat", new StringEventHandler(ReadCommand));
 			commands.Add("exit", new StringEventHandler(QuitCommand));
 			commands.Add("help", new StringEventHandler(HelpCommand));
 			commands.Add("info", new StringEventHandler(InfoCommand));
 			commands.Add("list", new StringEventHandler(ListCommand));
-			commands.Add("log",  new StringEventHandler(LogCommand));
-			commands.Add("put",  new StringEventHandler(PutCommand));
+			commands.Add("log", new StringEventHandler(LogCommand));
+			commands.Add("put", new StringEventHandler(PutCommand));
+			commands.Add("proc", new StringEventHandler(ProcCommand));
 			commands.Add("quit", new StringEventHandler(QuitCommand));
 			commands.Add("read", new StringEventHandler(ReadCommand));
-			commands.Add("sim",  new StringEventHandler(SimCommand));
+			commands.Add("sim", new StringEventHandler(SimCommand));
+			commands.Add("trace", new StringEventHandler(TraceCommand));
 		}
 
 		private void RegisterSystemPrototypes()
@@ -138,6 +160,15 @@ namespace Raspboard
 			this.systemPrototypes = new Dictionary<string, int>();
 			foreach (IPrototype p in blackboard.VirtualModule.Prototypes)
 				systemPrototypes.Add(p.Command, 0);
+		}
+
+		private void TraceVariable(SharedVariable sv)
+		{
+			string s = String.Format("[Tracer] {0}{1} {2} = {3}",
+				sv.Type, sv.IsArray ? "[]" : String.Empty,
+				sv.Name,
+				sv.ReadStringData());
+			this.consoleManager.Report(s);
 		}
 
 		#endregion
@@ -160,7 +191,7 @@ namespace Raspboard
 			}
 			IModuleClient m = this.blackboard.Modules[s];
 			WriteModule(m);
-			if(!String.IsNullOrEmpty(m.Alias) && (m.Alias != m.Name))
+			if (!String.IsNullOrEmpty(m.Alias) && (m.Alias != m.Name))
 				Console.WriteLine("Alias:  {0}", m.Alias);
 			if (!m.Enabled) return;
 
@@ -186,7 +217,7 @@ namespace Raspboard
 					sb.Append(a.ToString());
 					sb.Append(", ");
 				}
-				if(sb.Length > 2)
+				if (sb.Length > 2)
 					sb.Length -= 2;
 				Console.WriteLine("TCP Port:  {0}", tcpModule.Port);
 				Console.WriteLine("Addresses: {0}", sb.ToString());
@@ -211,6 +242,7 @@ namespace Raspboard
 			Console.ForegroundColor = color;
 			WriteModulePrototypes(m);
 			Console.WriteLine();
+
 		}
 
 		public void ListCommand(string s)
@@ -259,7 +291,62 @@ namespace Raspboard
 				this.consoleManager.DisableLog();
 			else
 				this.consoleManager.EnableLog(verbosity);
-		}		
+			SharedVariable sv = blackboard.VirtualModule.SharedVariables[""];
+			sv.ToString();
+		}
+
+		public void ProcCommand(string s)
+		{
+			Match m;
+			IModuleClientTcp module;
+
+			if (String.IsNullOrEmpty(s) || !(m = rxCommandSplitter.Match(s)).Success)
+			{
+				WriteCommandOptions("proc", "check <module name>", "close <module name>", "kill", "launch <module name>", "restart <module name>", "start <module name>");
+				return;
+			}
+
+			string action = m.Result("${cmd}");
+			string moduleName = m.Result("${par}");
+			if (!this.blackboard.Modules.Contains(moduleName))
+			{
+				Console.WriteLine("Unknown module {0}", s);
+				return;
+			}
+			module = this.blackboard.Modules[moduleName] as IModuleClientTcp;
+			if (module == null)
+			{
+				Console.WriteLine("Module {0} does not support this operation", module.Name);
+				return;
+			}
+
+			switch (action.ToLower())
+			{
+				case "check":
+					ProcCheck(module);
+					return;
+
+				case "close":
+					ProcClose(module);
+					return;
+
+				case "kill":
+					ProcKill(module);
+					return;
+
+				case "launch":
+					ProcLaunch(module);
+					return;
+
+				case "restart":
+					ProcRestart(module);
+					return;
+
+				case "start":
+					ProcStart(module);
+					return;
+			}
+		}
 
 		public void PutCommand(string s)
 		{
@@ -319,6 +406,29 @@ namespace Raspboard
 			}
 		}
 
+		public void TraceCommand(string s)
+		{
+			if (!this.blackboard.VirtualModule.SharedVariables.Contains(s))
+			{
+				Console.WriteLine("Unknown shared variable {0}", s);
+				return;
+			}
+			SharedVariable sv = this.blackboard.VirtualModule.SharedVariables[s];
+			ConsoleColor color = Console.ForegroundColor;
+			if (!tracers.ContainsKey(sv.Name) || (tracers[sv.Name] == null))
+			{
+				tracers[sv.Name] = new SharedVariableWrittenEventHandler(TraceVariable);
+				sv.Written += tracers[sv.Name];
+				Console.WriteLine("[Tracer] {0}{1} {2} tracer enabled.", sv.Type, sv.IsArray ? "[]" : String.Empty, sv.Name);
+			}
+			else
+			{
+				sv.Written -= tracers[sv.Name];
+				tracers[sv.Name] = null;
+				Console.WriteLine("[Tracer] {0}{1} {2} tracer disabled.", sv.Type, sv.IsArray ? "[]" : String.Empty, sv.Name);
+			}
+		}
+
 		#endregion
 
 		#region List Commands
@@ -358,6 +468,145 @@ namespace Raspboard
 			}
 			Console.ForegroundColor = color;
 			Console.WriteLine();
+		}
+
+		#endregion
+
+		#region Proc Commands
+
+		private void ProcCheck(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || (String.IsNullOrEmpty(pi.ProcessName)))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Checking running instances for module {0}... ", module.Name);
+			try
+			{
+				int count = this.procMan.CheckModule(module);
+				if (count >= 0)
+					Console.WriteLine("Done! There are {0} instances of {1} being executed.", count, module.Name);
+				else
+					Console.WriteLine("Failed!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
+		}
+
+		private void ProcClose(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || (String.IsNullOrEmpty(pi.ProcessName)))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Attempting to close module {0}... ", module.Name);
+			try
+			{
+				this.procMan.ShutdownModule(module, ModuleShutdownMethod.CloseThenKill);
+				Console.WriteLine("Done!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
+		}
+
+		private void ProcKill(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || (String.IsNullOrEmpty(pi.ProcessName)))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Attempting to kill module {0}... ", module.Name);
+			try
+			{
+				this.procMan.ShutdownModule(module, ModuleShutdownMethod.KillOnly);
+				Console.WriteLine("Done!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
+		}
+
+		private void ProcLaunch(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || String.IsNullOrEmpty(pi.ProcessName) || String.IsNullOrEmpty(pi.ProgramPath))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Attempting to launch module {0}... ", module.Name);
+			try
+			{
+				this.procMan.LaunchModule(module, ModuleStartupMethod.LaunchIfNotRunning);
+				Console.WriteLine("Done!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
+		}
+
+		private void ProcRestart(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || String.IsNullOrEmpty(pi.ProcessName) || String.IsNullOrEmpty(pi.ProgramPath))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Attempting to restart module {0}... ", module.Name);
+			try
+			{
+				this.procMan.LaunchModule(module, ModuleStartupMethod.KillThenLaunch);
+				Console.WriteLine("Done!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
+		}
+
+		private void ProcStart(IModuleClientTcp module)
+		{
+			IModuleProcessInfo pi = module.ProcessInfo;
+			if ((pi == null) || String.IsNullOrEmpty(pi.ProgramPath))
+			{
+				WriteError("No process information found for module {0}", module);
+				return;
+			}
+
+			Console.Write("Attempting to start module {0}... ", module.Name);
+			try
+			{
+				this.procMan.LaunchModule(module, ModuleStartupMethod.LaunchAlways);
+				Console.WriteLine("Done!");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine();
+				WriteError("Failed: " + ex.Message);
+			}
 		}
 
 		#endregion
@@ -437,6 +686,22 @@ namespace Raspboard
 			Console.Write("{0} ", p.ResponseRequired ? "R" : " ");
 			Console.Write("{0} ", p.ParamsRequired ? "P" : " ");
 			Console.WriteLine("\ttimeout: {0}ms", p.Timeout.ToString().PadLeft(6, ' '));
+		}
+
+		private void WriteError(string s)
+		{
+			ConsoleColor color = Console.ForegroundColor;
+			Console.ForegroundColor = ConsoleColor.DarkRed;
+			Console.WriteLine(s);
+			Console.ForegroundColor = color;
+		}
+
+		private void WriteError(string format, params object[] args)
+		{
+			ConsoleColor color = Console.ForegroundColor;
+			Console.ForegroundColor = ConsoleColor.DarkRed;
+			Console.WriteLine(format, args);
+			Console.ForegroundColor = color;
 		}
 
 		#endregion

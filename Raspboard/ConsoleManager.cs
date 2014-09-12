@@ -59,9 +59,18 @@ namespace Raspboard
 		/// </summary>
 		private ConsoleLogWriter log;
 
+		/// <summary>
+		/// Object used to synchronize the access to the console
+		/// </summary>
+		private static object consoleLock;
+
 		#endregion
 
 		#region Constructor
+
+		static ConsoleManager() {
+			ConsoleManager.consoleLock = new Object();
+		}
 
 		public ConsoleManager(Blackboard blk, Kernel kernel, ConsoleLogWriter log)
 		{
@@ -83,6 +92,11 @@ namespace Raspboard
 
 		public string Prompt { get { return "blk> "; } }
 
+		/// <summary>
+		/// Gets an object used to synchronize the access to the console
+		/// </summary>
+		public static object ConsoleLock { get { return ConsoleManager.consoleLock; } }
+
 		#endregion
 
 		#region Methods
@@ -96,25 +110,31 @@ namespace Raspboard
 		public void DisableLog()
 		{
 			this.log.ConsoleVerbosityThreshold = 0;
-			Console.WriteLine();
-			ConsoleColor color = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine("Log mode: DISABLED");
-			Console.ForegroundColor = color;
-			Console.WriteLine();
-			WritePrompt();
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.WriteLine();
+				ConsoleColor color = Console.ForegroundColor;
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.WriteLine("Log mode: DISABLED");
+				Console.ForegroundColor = color;
+				Console.WriteLine();
+				WritePrompt();
+			}
 		}
 
 		public void EnableLog(int verbosity)
 		{
-			Console.WriteLine();
-			ConsoleColor color = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.Clear();
-			Console.WriteLine("Log mode: enabled");
-			Console.WriteLine("Press F1 to exit log mode");
-			Console.ForegroundColor = color;
-			Console.WriteLine();
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.WriteLine();
+				ConsoleColor color = Console.ForegroundColor;
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.Clear();
+				Console.WriteLine("Log mode: enabled");
+				Console.WriteLine("Press F1 to exit log mode");
+				Console.ForegroundColor = color;
+				Console.WriteLine();
+			}
 			this.log.ConsoleVerbosityThreshold = verbosity;
 			this.blackboard.Log.VerbosityTreshold = verbosity;
 		}
@@ -125,12 +145,20 @@ namespace Raspboard
 			if (kernel.Execute(command)) return;
 			string sufix = completionTree.CompleteWord(command);
 			if (!String.IsNullOrEmpty(sufix))
-				Console.WriteLine("\tUnknown command. Did you meant: {0}{1}?", command, sufix);
+			{
+				lock (ConsoleManager.ConsoleLock)
+				{
+					Console.WriteLine("\tUnknown command. Did you meant: {0}{1}?", command, sufix);
+				}
+			}
 		}
 
 		private void FixCursor()
 		{
-			Console.CursorLeft = Prompt.Length + currentPos;
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.CursorLeft = Prompt.Length + currentPos;
+			}
 		}
 
 		private void HandleChar(char c)
@@ -218,18 +246,21 @@ namespace Raspboard
 
 		private void Insert(char c)
 		{
-			if (currentPos < currentLine.Length)
+			lock (ConsoleManager.ConsoleLock)
 			{
-				currentLine = currentLine.Insert(currentPos, c.ToString());
-				Console.Write(currentLine.Substring(currentPos));
+				if (currentPos < currentLine.Length)
+				{
+					currentLine = currentLine.Insert(currentPos, c.ToString());
+					Console.Write(currentLine.Substring(currentPos));
+				}
+				else
+				{
+					currentLine += c;
+					Console.Write(c);
+				}
+				++currentPos;
+				FixCursor();
 			}
-			else
-			{
-				currentLine += c;
-				Console.Write(c);
-			}
-			++currentPos;
-			FixCursor();
 		}
 
 		private void Insert(string s)
@@ -241,7 +272,10 @@ namespace Raspboard
 			else
 			{
 				currentLine += s;
-				Console.Write(s);
+				lock (ConsoleManager.ConsoleLock)
+				{
+					Console.Write(s);
+				}
 			}
 			currentPos += s.Length;
 			FixCursor();
@@ -265,36 +299,58 @@ namespace Raspboard
 			HandleChar(cki.KeyChar);			
 		}
 
+		public void Report(string s)
+		{
+			if (this.log.ConsoleVerbosityThreshold != 0)
+				return;
+
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.WriteLine("\r{0}", s);
+				WritePrompt(true);
+				Console.Write(this.currentLine);
+			}
+		}
+
 		private void WriteAlternatives(string prefix)
 		{
 			string[] alternatives = this.completionTree.GetAlternatives(prefix);
 			if (alternatives == null)
 				return;
 
-			ConsoleColor color = Console.ForegroundColor;
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine();
-			foreach (string alternative in alternatives)
-				Console.WriteLine(alternative);
-			Console.ForegroundColor = color;
-			Console.WriteLine();
-			WritePrompt();
-			Console.Write(currentLine);
+			lock (ConsoleManager.ConsoleLock)
+			{
+				ConsoleColor color = Console.ForegroundColor;
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.WriteLine();
+				foreach (string alternative in alternatives)
+					Console.WriteLine(alternative);
+				Console.ForegroundColor = color;
+				Console.WriteLine();
+				WritePrompt();
+				Console.Write(currentLine);
+			}
 		}
 
 		public void WritePrompt()
 		{
-			Console.Write(Prompt);
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.Write(Prompt);
+			}
 		}
 
 		public void WritePrompt(bool clearLine)
 		{
-			if (clearLine)
+			lock (ConsoleManager.ConsoleLock)
 			{
-				Console.Write("\r{0}", Prompt.PadRight(Console.BufferWidth - 1, ' '));
-				Console.CursorLeft = Prompt.Length;
+				if (clearLine)
+				{
+					Console.Write("\r{0}", Prompt.PadRight(Console.BufferWidth - 1, ' '));
+					Console.CursorLeft = Prompt.Length;
+				}
+				else Console.Write(Prompt);
 			}
-			else Console.Write(Prompt);
 		}
 
 		#region Key handling Methods
@@ -304,16 +360,22 @@ namespace Raspboard
 			string next = history.Next();
 			currentLine = next;
 			currentPos = currentLine.Length;
-			WritePrompt(true);
-			Console.Write(next);
+			lock (ConsoleManager.ConsoleLock)
+			{
+				WritePrompt(true);
+				Console.Write(next);
+			}
 		}
 
 		private void ArrowLeft()
 		{
 			if (currentPos > 0)
 				--currentPos;
-			if (Console.CursorLeft > 5)
-				--Console.CursorLeft;
+			lock (ConsoleManager.ConsoleLock)
+			{
+				if (Console.CursorLeft > 5)
+					--Console.CursorLeft;
+			}
 		}
 
 		private void ArrowRight()
@@ -321,7 +383,10 @@ namespace Raspboard
 			if (currentPos >= currentLine.Length)
 				return;
 			++currentPos;
-			++Console.CursorLeft;
+			lock (ConsoleManager.ConsoleLock)
+			{
+				++Console.CursorLeft;
+			}
 		}
 
 		private void ArrowUp()
@@ -331,8 +396,11 @@ namespace Raspboard
 			{
 				currentLine = prev;
 				currentPos = currentLine.Length;
-				WritePrompt(true);
-				Console.Write(prev);
+				lock (ConsoleManager.ConsoleLock)
+				{
+					WritePrompt(true);
+					Console.Write(prev);
+				}
 			}
 		}
 
@@ -341,45 +409,55 @@ namespace Raspboard
 			if (currentPos < 1)
 				return;
 
-			--Console.CursorLeft;
-			--currentPos;
-			currentLine = currentLine.Remove(currentPos, 1);
-			int cPos = Console.CursorLeft;
-			string tail = currentLine.Substring(currentPos);
-			Console.Write("{0} ", tail);
-			Console.CursorLeft = cPos;
+			lock (ConsoleManager.ConsoleLock)
+			{
+				--Console.CursorLeft;
+				--currentPos;
+				currentLine = currentLine.Remove(currentPos, 1);
+				int cPos = Console.CursorLeft;
+				string tail = currentLine.Substring(currentPos);
+				Console.Write("{0} ", tail);
+				Console.CursorLeft = cPos;
+			}
 		}
 
 		private void NewLineChar(char c)
 		{
 			if ((c == '\n') && (Environment.NewLine.Length > 1))
 				return;
-			Console.WriteLine();
-			ExecuteCommand(currentLine);
-			currentLine = String.Empty;
-			currentPos = 0;
-			if(this.log.ConsoleVerbosityThreshold == 0)
-				WritePrompt();
+			lock (ConsoleManager.ConsoleLock)
+			{
+				Console.WriteLine();
+				ExecuteCommand(currentLine);
+				currentLine = String.Empty;
+				currentPos = 0;
+				if (this.log.ConsoleVerbosityThreshold == 0)
+					WritePrompt();
+			}
 		}
 
 		private void Delete()
 		{
 			if (currentPos >= currentLine.Length)
 				return;
-			int cPos = Console.CursorLeft;
-			if (currentPos == currentLine.Length)
+
+			lock (ConsoleManager.ConsoleLock)
 			{
-				Console.Write(' ');
-				currentLine = currentLine.Remove(currentPos);
+				int cPos = Console.CursorLeft;
+				if (currentPos == currentLine.Length)
+				{
+					Console.Write(' ');
+					currentLine = currentLine.Remove(currentPos);
+				}
+				else
+				{
+					string tail = currentLine.Substring(currentPos + 1);
+					currentLine = currentLine.Remove(currentPos) + tail;
+					Console.Write("{0} ", tail);
+				}
+
+				Console.CursorLeft = cPos;
 			}
-			else
-			{
-				string tail = currentLine.Substring(currentPos + 1);
-				currentLine = currentLine.Remove(currentPos) + tail;
-				Console.Write("{0} ", tail);
-			}
-			
-			Console.CursorLeft = cPos;
 		}
 
 		#endregion

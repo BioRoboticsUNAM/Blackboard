@@ -11,6 +11,12 @@ using Blk.Api.SharedVariables;
 namespace Blk.Engine.SharedVariables
 {
 	/// <summary>
+	/// Represents the method that will handle the Written event of a SharedVariable object
+	/// </summary>
+	/// <param name="sv">The SharedVariable object tht rises the Written event</param>
+	public delegate void SharedVariableWrittenEventHandler(SharedVariable sv);
+
+	/// <summary>
 	/// Represents a stored shared variable
 	/// </summary>
 	public class SharedVariable : ISharedVariable
@@ -454,6 +460,12 @@ namespace Blk.Engine.SharedVariables
 		#endregion
 
 		#region Events
+
+		/// <summary>
+		/// Occurs when the value of the shared variable is updated (the shared variable is written)
+		/// </summary>
+		public event SharedVariableWrittenEventHandler Written;
+
 		#endregion
 
 		#region Methods
@@ -606,7 +618,7 @@ namespace Blk.Engine.SharedVariables
 			this.data = nData;
 			rwLock.ReleaseWriterLock();
 #endif
-
+			OnWritten();
 			ReportSubscribers(writer);
 
 			return true;
@@ -676,6 +688,7 @@ namespace Blk.Engine.SharedVariables
 			// The response object
 			Response response;
 
+			OnWritten();
 			lock (subscriptions)
 			{
 
@@ -730,6 +743,21 @@ namespace Blk.Engine.SharedVariables
 		public override string ToString()
 		{
 			return base.ToString();
+		}
+
+		/// <summary>
+		/// Rises the Written event
+		/// </summary>
+		protected virtual void OnWritten()
+		{
+			if (this.Written != null)
+			{
+				try
+				{
+					this.Written(this);
+				}
+				catch { }
+			}
 		}
 
 		#region EventHandlers

@@ -10,15 +10,17 @@ namespace Raspboard
 		{
 			switch (command)
 			{
-				case "cat":  Cat(); break;
+				case "cat": Cat(); break;
 				case "exit": Quit(); break;
 				case "help": HelpOnHelp(); break;
 				case "info": Info(); break;
 				case "list": List(); break;
 				case "put": Put(); break;
+				case "proc": Proc(); break;
 				case "quit": Quit(); break;
 				case "read": Read(); break;
-				case "sim":  Sim(); break;
+				case "sim": Sim(); break;
+				case "trace": Trace(); break;
 
 				default:
 					MainHelp(commands);
@@ -63,6 +65,16 @@ namespace Raspboard
 			WriteCommandHelp("put <module> <message>", "Injects message into the system via the specified module");
 		}
 
+		private static void Proc()
+		{
+			WriteCommandHelp("proc check <module>", "Checks if the process corresponding to the specified module is running");
+			WriteCommandHelp("proc close <module>", "Attempts to close the process corresponding to the specified module");
+			WriteCommandHelp("proc kill <module>", "Attempts to close the process corresponding to the specified module");
+			WriteCommandHelp("proc launch <module>", "Checks if the process corresponding to the specified module is running. If the process is not running, is started");
+			WriteCommandHelp("proc restart <module>", "Checks if the process corresponding to the specified module is running. If the process is running, attempts to kill it and start it again");
+			WriteCommandHelp("proc start <module>", "Attempts to start the process corresponding to the specified module");
+		}
+
 		private static void Quit()
 		{
 			WriteCommandHelp("quit", "Shuts down the blackboard and exits");
@@ -76,6 +88,11 @@ namespace Raspboard
 		private static void Sim()
 		{
 			WriteCommandHelp("sim <module>", "Toggles simulation for the specified module");
+		}
+
+		private static void Trace()
+		{
+			WriteCommandHelp("trace <variable>", "Toggles notifications for the specified shared variable. When enabled, displays the content every time the variable is written");
 		}
 
 		private static void WriteCommandHelp(string command, string text)
@@ -106,17 +123,20 @@ namespace Raspboard
 			Console.Write("{0}{1} ", command, parts[0]);
 			for (int i = 1; i < parts.Length; ++i)
 			{
-				if ((Console.CursorLeft + parts[i].Length) >= Console.BufferWidth){
+				if ((Console.CursorLeft + parts[i].Length) >= Console.BufferWidth)
+				{
 					Console.WriteLine();
 					Console.Write(padding);
 				}
 				Console.Write("{0} ", parts[i]);
 			}
 			Console.WriteLine();
+
 		}
 
 		private static void MainHelp(IEnumerable<string> commands)
 		{
+
 			List<string> cmdList = new List<string>(commands);
 			cmdList.Sort();
 			Console.WriteLine("Type help <command> for detailed help about a specific command.");
