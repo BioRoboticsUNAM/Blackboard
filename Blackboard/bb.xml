@@ -53,6 +53,24 @@
 			</commands>
 		</module>
 
+		<module name="VIDEO-CAPTURE">
+			<ip>127.0.0.1</ip>
+			<port>2001</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="vc_start" answer="false" timeout="100" priority="True" />
+			</commands>
+		</module>
+
+		<module name="VIDEO-PLAYER">
+			<ip>127.0.0.1</ip>
+			<port>2002</port>
+			<aliveCheck>true</aliveCheck>
+			<commands>
+				<command name="vp_start" answer="false" timeout="100" priority="True" />
+			</commands>
+		</module>
+
 		<module name="SIMHMN-CTRL">
 			<ip>127.0.0.1</ip>
 			<port>2018</port>
@@ -157,6 +175,7 @@
 
 		<module name="SP-REC">
 			<ip>127.0.0.1</ip>
+			<ip>192.168.190.120</ip>
 			<port>2020</port>
 			<aliveCheck>true</aliveCheck>
 			<!--<simulate>true</simulate>//-->
@@ -165,6 +184,7 @@
 				<command name="spr_status" answer="True" timeout="2000" priority="True" />
 				<command name="spr_grammar" answer="True" parameters="False" timeout="5000" priority="True" />
 				<command name="spr_words" answer="True" timeout="2000" priority="True" />
+				<command name="spr_audiofile" answer="True" parameters="False" timeout="5000" priority="True" />
 			</commands>
 		</module>
 

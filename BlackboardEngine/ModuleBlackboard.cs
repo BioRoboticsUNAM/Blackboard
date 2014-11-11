@@ -746,7 +746,7 @@ namespace Blk.Engine
 			MachineStatus ms;
 			Command cmd;
 
-			if (!IPAddress.TryParse(command.Parameters, out ip) || msc.Contains(ip))
+			if (!IPAddress.TryParse(command.Parameters, out ip) || !msc.Contains(ip))
 			{
 				SendResponse(command, false);
 				return;
@@ -878,10 +878,17 @@ namespace Blk.Engine
 					break;
 
 				case "module":
-					if ((parts.Length < 2) || !parent.Modules.Contains(parts[1]) || !(parent.Modules[parts[1]] is ModuleClient))
-						SendResponse(command, false);
-					((ModuleClient)parent.Modules[parts[1]]).Restart();
-					SendResponse(command, true);
+					try
+					{
+						if ((parts.Length < 2) || !parent.Modules.Contains(parts[1]) || !(parent.Modules[parts[1]] is ModuleClient))
+						{
+							SendResponse(command, false);
+							return;
+						}
+						((ModuleClient)parent.Modules[parts[1]]).Restart();
+						SendResponse(command, true);
+					}
+					catch { SendResponse(command, false); }
 					break;
 			}
 		}

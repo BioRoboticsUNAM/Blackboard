@@ -207,11 +207,9 @@ namespace Blk.Engine
 		/// <param name="item">The MachineStatus to add to the collection</param>
 		public void Add(MachineStatus item)
 		{
+			statusList.Add(item);
 			if (MachineStatusAdded != null)
-			{
 				MachineStatusAdded(item);
-				statusList.Add(item);
-			}
 			//statusList.Sort();
 		}
 

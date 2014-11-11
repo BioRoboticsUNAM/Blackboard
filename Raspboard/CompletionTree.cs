@@ -39,7 +39,7 @@ namespace Raspboard
 			return CompleteWord(prefix, out node);
 		}
 
-		 private string CompleteWord(string prefix, out CompletionTreeNode node)
+		private string CompleteWord(string prefix, out CompletionTreeNode node)
 		{
 			StringBuilder sb = new StringBuilder(100);
 			
@@ -69,6 +69,8 @@ namespace Raspboard
 		public string[] GetAlternatives(string prefix)
 		{
 			string s;
+			string alternative;
+			CompletionTreeNode aNode;
 			CompletionTreeNode node;
 			List<string> alternatives;
 
@@ -80,7 +82,11 @@ namespace Raspboard
 			foreach (CompletionTreeNode child in node.Children.Values)
 			{
 				s = prefix + child.Value.ToString();
-				alternatives.Add(s + CompleteWord(s));
+				alternative = s + CompleteWord(s, out aNode);
+				if(aNode.EndOfWord)
+					alternatives.Add(alternative);
+				else
+					alternatives.AddRange(GetAlternatives(alternative));
 			}
 			alternatives.Sort();
 			return alternatives.ToArray();

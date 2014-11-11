@@ -15,6 +15,7 @@ namespace Raspboard
 				case "help": HelpOnHelp(); break;
 				case "info": Info(); break;
 				case "list": List(); break;
+				case "log": Log(); break;
 				case "put": Put(); break;
 				case "proc": Proc(); break;
 				case "quit": Quit(); break;
@@ -56,6 +57,11 @@ namespace Raspboard
 			WriteCommandHelp("list commands", "Displays the list of all commands registered in the system, sorted by module ");
 			WriteCommandHelp("list <module> commands", "Displays the list of all commands registered for the specified module ");
 			WriteCommandHelp("list vars", "Displays the list of all the shared variables");
+		}
+
+		private static void Log()
+		{
+			WriteCommandHelp("log <verbosity> ", "Switch to log mode with the specified verbosity. Press F1 to exit log mode and return to command-line mode.");
 		}
 
 		private static void Put()

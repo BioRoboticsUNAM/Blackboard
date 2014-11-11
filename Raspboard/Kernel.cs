@@ -291,8 +291,8 @@ namespace Raspboard
 				this.consoleManager.DisableLog();
 			else
 				this.consoleManager.EnableLog(verbosity);
-			SharedVariable sv = blackboard.VirtualModule.SharedVariables[""];
-			sv.ToString();
+			//SharedVariable sv = blackboard.VirtualModule.SharedVariables[""];
+			//sv.ToString();
 		}
 
 		public void ProcCommand(string s)

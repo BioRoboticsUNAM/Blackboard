@@ -425,6 +425,8 @@ namespace Blk.Engine
 			get
 			{
 				if(busy) return TimeSpan.Zero;
+				if (lastActivityTime.Year == 1)
+					return new TimeSpan(0, 0, -1);
 				return DateTime.Now - lastActivityTime;
 			}
 		}
