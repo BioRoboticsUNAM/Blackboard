@@ -35,7 +35,6 @@ namespace Blk.Gui
 			this.dlgOpenSettingsFile = new System.Windows.Forms.OpenFileDialog();
 			this.dlgSaveLog = new System.Windows.Forms.SaveFileDialog();
 			this.mnuStartSequence = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.ttToolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.scTop = new System.Windows.Forms.SplitContainer();
 			this.btnStartStop = new System.Windows.Forms.Button();
 			this.gbGeneralActions = new System.Windows.Forms.GroupBox();
@@ -1557,7 +1556,6 @@ namespace Blk.Gui
 		private System.Windows.Forms.TextBox txtModuleAlias;
 		private System.Windows.Forms.TextBox txtModuleAuthor;
 		private System.Windows.Forms.Label lblModuleAuthor;
-		private System.Windows.Forms.ToolTip ttToolTip;
 		private InteractionTool interactionTool;
 		private System.Windows.Forms.TextBox txtModuleExeArgs;
 		private System.Windows.Forms.TextBox txtModuleExePath;

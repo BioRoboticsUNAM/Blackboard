@@ -460,7 +460,6 @@ namespace Blk.Engine
 		private void MainSimulatedThread()
 		{
 			DateTime sendNextAliveTime = DateTime.Now;
-			Thread thisThread;
 
 			stopMainThread = false;
 			running = true;
@@ -497,7 +496,7 @@ namespace Blk.Engine
 
 			if (Monitor.TryEnter(mainTheadLockObject))
 			{
-				thisThread = mainThread;
+				// Thread thisThread = mainThread;
 				mainThread = null;
 				Monitor.PulseAll(mainTheadLockObject);
 				Monitor.Exit(mainTheadLockObject);

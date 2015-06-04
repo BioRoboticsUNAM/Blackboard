@@ -27,8 +27,6 @@ namespace Raspboard
 		/// </summary>
 		protected bool appendDate;
 
-		private StringBuilder waitingHadle;
-
 		/// <summary>
 		/// The default priority for messages
 		/// </summary>
@@ -72,7 +70,6 @@ namespace Raspboard
 		public ConsoleLogWriter(string logFile)
 		{
 			this.pending = new ProducerConsumer<StringToken>(100);
-			this.waitingHadle = new StringBuilder(1024);
 			this.OpenLogFileStream(logFile, out this.logFile);
 
 			this.appendDate = false;

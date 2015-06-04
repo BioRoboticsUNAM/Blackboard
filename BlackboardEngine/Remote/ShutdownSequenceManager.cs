@@ -242,7 +242,6 @@ namespace Blk.Engine.Remote
 		public void ShutdownModules(ModuleShutdownMethod method)
 		{
 			IModuleClientTcp mc;
-			bool result;
 
 			if ((method == ModuleShutdownMethod.None) || (moduleSequence.Count < 1))
 				return;
@@ -269,7 +268,8 @@ namespace Blk.Engine.Remote
 					//if (true)
 					{
 						//Parent.Log.WriteLine(5, "Can not start module '" + moduleSequence[i] + "': unable to start remote process.");
-						result = RemoteShutdown(mc, method);
+						// bool result = RemoteShutdown(mc, method);
+						RemoteShutdown(mc, method);
 						continue;
 					}
 

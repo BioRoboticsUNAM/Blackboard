@@ -133,8 +133,6 @@ namespace Blk.Engine.Remote
 		/// <param name="method">The method used for startup</param>
 		public void LaunchModule(IModuleClientTcp module, ModuleStartupMethod method)
 		{
-			bool result;
-
 			if ((method == ModuleStartupMethod.None) || (module == null) || (module.ProcessInfo == null))
 				return;
 
@@ -142,9 +140,10 @@ namespace Blk.Engine.Remote
 			{
 				if (!module.IsLocal)
 				{
-					result = RemoteStartup(module, method);
+					// bool result = RemoteStartup(module, method);
 					//if (result && (method == ModuleStartupMethod.LaunchAndWaitReady))
 					//	WaitModuleReady(module);
+					RemoteStartup(module, method);
 					return;
 				}
 
@@ -417,8 +416,6 @@ namespace Blk.Engine.Remote
 		/// <param name="method">The method used for startup</param>
 		public void ShutdownModule(IModuleClientTcp module, ModuleShutdownMethod method)
 		{
-			bool result;
-
 			if ((method == ModuleShutdownMethod.None) || (module == null) || (module.ProcessInfo == null))
 				return;
 
@@ -427,7 +424,8 @@ namespace Blk.Engine.Remote
 				Log.WriteLine(4, "Executing shutdown sequence...");
 				if (!module.IsLocal)
 				{
-					result = RemoteShutdown(module, method);
+					// bool result = RemoteShutdown(module, method);
+					RemoteShutdown(module, method);
 					return;
 				}
 

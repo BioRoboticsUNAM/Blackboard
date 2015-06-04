@@ -1343,7 +1343,7 @@ namespace Blk.Engine
 					this.parent.AddPrototype(this, proto);
 					Parent.Log.WriteLine(3, "[" + this.name + "] Added prototype for command:" + proto.ToString());
 				}
-				catch(Exception ex) { }
+				catch{ }
 			}
 		}
 
@@ -2081,7 +2081,6 @@ namespace Blk.Engine
 		protected virtual void MainThreadTask()
 		{
 			DateTime sendNextAliveTime = DateTime.Now;
-			Stopwatch sw = new Stopwatch();
 
 			MainThreadStartupTasks();
 		  	ExecuteStartupActions();
@@ -2169,8 +2168,6 @@ namespace Blk.Engine
 		/// </summary>
 		private void StopAndClearMainThread()
 		{
-			Thread thisThread;
-
 			this.running = false;
 			this.Busy = false;
 			OnStopped();
@@ -2180,7 +2177,7 @@ namespace Blk.Engine
 
 			if (Monitor.TryEnter(mainTheadLockObject))
 			{
-				thisThread = mainThread;
+				// Thread thisThread = mainThread;
 				this.mainThread = null;
 				Monitor.PulseAll(mainTheadLockObject);
 				Monitor.Exit(mainTheadLockObject);
@@ -2193,7 +2190,6 @@ namespace Blk.Engine
 		private void MainSimulatedThread()
 		{
 			DateTime sendNextAliveTime = DateTime.Now;
-			Thread thisThread;
 
 			stopMainThread = false;
 			running = true;
@@ -2230,7 +2226,7 @@ namespace Blk.Engine
 
 			if (Monitor.TryEnter(mainTheadLockObject))
 			{
-				thisThread = mainThread;
+				// Thread thisThread = mainThread;
 				mainThread = null;
 				Monitor.PulseAll(mainTheadLockObject);
 				Monitor.Exit(mainTheadLockObject);

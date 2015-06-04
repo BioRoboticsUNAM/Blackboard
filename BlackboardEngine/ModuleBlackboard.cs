@@ -1159,7 +1159,6 @@ namespace Blk.Engine
 		// /// <param name="sender">Unused</param>
 		protected override void MainThreadTask()
 		{
-			Thread thisThread;
 			StatusChangedEH busyEH;
 			StatusChangedEH readyEH;
 			ModuleConnectionEH connectedStatusEH;
@@ -1228,7 +1227,7 @@ namespace Blk.Engine
 
 			#region Stop and Clear Thread
 
-			thisThread = mainThread;
+			// Thread thisThread = mainThread;
 			mainThread = null;
 
 			#endregion

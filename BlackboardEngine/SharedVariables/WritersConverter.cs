@@ -41,7 +41,8 @@ namespace Blk.Engine.SharedVariables
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			bool result = base.CanConvertFrom(context, sourceType);
+			// bool result = base.CanConvertFrom(context, sourceType);
+			base.CanConvertFrom(context, sourceType);
 			return (sourceType == typeof(string));
 			//return false;
 		}

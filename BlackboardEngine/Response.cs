@@ -313,6 +313,8 @@ namespace Blk.Engine
 
 		#region Static Variables
 
+		/*
+
 		private static Regex rxResponseFromBlackboard =
 			new Regex(@"(?<src>[\w\-]+)(\s+(?<dest>[\w\-]+))?\s+(?<cmd>[A-Za-z_]+)(\s+""(?<params>[^""]*)"")?\s+(?<result>[10])(\s+@(?<id>\d+))?", RegexOptions.Compiled);
 		private static Regex rxResponseFromEndpoint =
@@ -321,6 +323,8 @@ namespace Blk.Engine
 			new Regex(@"((?<dest>[\w\-]+)\s+)?(?<cmd>[A-Za-z_]+)(\s+""(?<params>[^""]*)"")?\s+(?<result>[10])(\s+@(?<id>\d+))?", RegexOptions.Compiled);
 		private static Regex rxResponseFromSrcDest =
 			new Regex(@"(?<cmd>[A-Za-z_]+)(\s+""(?<params>[^""]*)"")?\s+(?<result>[10])(\s+@(?<id>\d+))?", RegexOptions.Compiled);
+
+		*/
 
 		#endregion
 

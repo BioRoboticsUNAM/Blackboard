@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C# Express 2008
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackboardApi", "BlackboardApi\BlackboardApi.csproj", "{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blackboard", "Blackboard\Blackboard.csproj", "{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}"
@@ -17,26 +17,29 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0CA0E010-29CB-4160-811D-4554BA479669}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0CA0E010-29CB-4160-811D-4554BA479669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CA0E010-29CB-4160-811D-4554BA479669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CA0E010-29CB-4160-811D-4554BA479669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4731ACD8-BCC9-4475-8E53-3930AFC6B415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9023BCCF-C92A-4465-AC34-2BBD32AFC4FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B3BC973D-2217-48CB-9B3A-5D12AAAC2465}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B3BC973D-2217-48CB-9B3A-5D12AAAC2465}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3BC973D-2217-48CB-9B3A-5D12AAAC2465}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3BC973D-2217-48CB-9B3A-5D12AAAC2465}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8BF79AA-DC53-4A63-8D9A-5F5EB0EE536B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Blackboard\Blackboard.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

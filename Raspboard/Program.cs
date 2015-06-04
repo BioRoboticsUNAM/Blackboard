@@ -258,8 +258,6 @@ namespace Raspboard
 		{
 			get
 			{
-				string pName = Process.GetCurrentProcess().ProcessName;
-				Process[] p = Process.GetProcessesByName(pName);
 #if DEBUG
 				return true;
 #else

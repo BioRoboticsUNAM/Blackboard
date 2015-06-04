@@ -222,7 +222,7 @@ namespace Blk.Engine
 		{
 			get 
 			{
-				if ((startupTime == null) || (autoStopTime < TimeSpan.Zero)) return TimeSpan.Zero;
+				if (autoStopTime < TimeSpan.Zero) return TimeSpan.Zero;
 				return startupTime.Add(autoStopTime) - DateTime.Now;
 			}
 		}
@@ -381,7 +381,7 @@ namespace Blk.Engine
 		{
 			get
 			{
-				if ((startupTime == null) || (testTimeOut < TimeSpan.Zero)) return TimeSpan.Zero;
+				if (testTimeOut < TimeSpan.Zero) return TimeSpan.Zero;
 				TimeSpan timeLeft = startupTime.Add(testTimeOut) - DateTime.Now;
 				if (timeLeft < TimeSpan.Zero) return TimeSpan.Zero;
 				return timeLeft;
@@ -396,7 +396,7 @@ namespace Blk.Engine
 			get { return testTimeOut; }
 			set
 			{
-				if ((value == null) || (value <= TimeSpan.Zero)) throw new ArgumentException("Value cannot be negative nor null");
+				if (value <= TimeSpan.Zero) throw new ArgumentException("Value cannot be negative nor null");
 				testTimeOut = value;
 			}
 		}

@@ -296,7 +296,6 @@ namespace Blk.Engine.SharedVariables
 		{
 			rwLock.AcquireReaderLock(-1);
 			List<ISharedVariable> vars = new List<ISharedVariable>(this.variables.Count);
-			int i = 0;
 			foreach (SharedVariable sv in variables.Values)
 				vars.Add(sv);
 			rwLock.ReleaseReaderLock();

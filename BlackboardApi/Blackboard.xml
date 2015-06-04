@@ -4,103 +4,379 @@
         <name>Blackboard.Api</name>
     </assembly>
     <members>
-        <member name="T:Blk.Api.SharedVariables.ModuleApplicationPlugin">
+        <member name="T:Blk.Api.BlackboardRunningStatus">
             <summary>
-            Serves as base class for a module application which connects with the blackboard as a Plugin
+            	Enumerates the running status of the blackboard
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.Stopped">
+            <summary>
+            	Blackboard is stopped
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.Running">
+            <summary>
+            	Blackboard is running normally
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.Starting">
+            <summary>
+            	Blackboard is starting up modules
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.Stopping">
+            <summary>
+            	Blackboard is stopping off modules
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.Restarting">
+            <summary>
+            	Blackboard is restarting modules
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.BlackboardRunningStatus.RestartingTest">
+            <summary>
+            	Blackboard is restarting the test
+            	</summary>
+        </member>
+        <member name="T:Blk.Api.ResponseFailReason">
+            <summary>
+            Enumerates the reasons for which a command was not executed generating a failed response
             </summary>
         </member>
-        <member name="T:Blk.Api.IPrototype">
+        <member name="F:Blk.Api.ResponseFailReason.None">
             <summary>
-            Represents a prototype for commands
+            The response was succeded
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.Command">
+        <member name="F:Blk.Api.ResponseFailReason.ExecutedButNotSucceded">
             <summary>
-            Name of the command that this prototype represent 
+            The command was executed in the destination module but was not succeded
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.HasPriority">
+        <member name="F:Blk.Api.ResponseFailReason.TimedOut">
             <summary>
-            Gets a value indicating if the command has priority over other commands
+            Generated failed response due to timeout
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.Priority">
+        <member name="F:Blk.Api.ResponseFailReason.ModuleDisconnected">
             <summary>
-            Gets a value indicating the priority of the command
+            The module is disconected
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.ParamsRequired">
+        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestarting">
             <summary>
-            Gets a value indicating if parameters are required
+            Blackboard is restarting. Message has not sent
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.ResponseRequired">
+        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestartingTest">
             <summary>
-            True if a response is required, false otherwise
+            Blackboard is restarting the test. Message has not sent
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.Timeout">
+        <member name="F:Blk.Api.ResponseFailReason.Unknown">
             <summary>
-            The maximum amount of time to wait for a response in milliseconds
+            Unknown reason
             </summary>
         </member>
-        <member name="P:Blk.Api.IPrototype.Parent">
+        <member name="T:Blk.Api.SentStatus">
             <summary>
-            Gets the Module this prototype is bind to
+            	Sent Status	for	classes	derived	from CommandBase Class
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.NotSentYet">
+            <summary>
+            	The	Command/Response has not been sent yet
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.SentSuccessfull">
+            <summary>
+            	Send operation succeded
+            	</summary>
+        </member>
+        <member name="F:Blk.Api.SentStatus.SentFailed">
+            <summary>
+            	Send operation failed
+            	</summary>
+        </member>
+        <member name="T:Blk.Api.SimulationType">
+            <summary>
+            Enumerates the simulations types a Module support
             </summary>
         </member>
-        <member name="T:Blk.Api.IModuleClientTcp">
+        <member name="F:Blk.Api.SimulationType.SimulationDisabled">
             <summary>
-            Represents a blackboard module interface which connects to a remote module via TCP/IP
+            Simulation is disabled
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SimulationType.EnabledExact">
+            <summary>
+            Simulates and responses match the commands successfully
+            </summary>
+        </member>
+        <member name="F:Blk.Api.SimulationType.EnabledWithError">
+            <summary>
+            Simulates and responses match the commands
+            </summary>
+        </member>
+        <member name="T:Blk.Api.BlackboardClientCnnEH">
+            <summary>
+            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
+            </summary>
+            <param name="ip">The ip Address of the client</param>
+        </member>
+        <member name="T:Blk.Api.BlackboardStatusChangedEH">
+            <summary>
+            Represents the method that will handle the StatusChanged event of a Blackboard object.
+            </summary>
+            <param name="blackboard">Blackboard which raised the event</param>
+        </member>
+        <member name="T:Blk.Api.PrototypeCollectionStatusChangedEH">
+            <summary>
+            Represents the method that will handle the PrototypeCollectionStatusChanged event of a IPrototypeCollection object.
+            </summary>
+            <param name="collection">Collection which raised the event</param>
+        </member>
+        <member name="T:Blk.Api.CommandReceivedEH">
+            <summary>
+            Represents the method that will handle the CommandReceived event of a IModule object.
+            </summary>
+            <param name="sender">The module where the command has arrived</param>
+            <param name="c">Command received</param>
+        </member>
+        <member name="T:Blk.Api.IModuleAddRemoveEH">
+            <summary>
+            Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
+            </summary>
+            <param name="module">
+            </param>
+        </member>
+        <member name="T:Blk.Api.MessageIOEH">
+            <summary>
+            Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
+            </summary>
+            <param name="message">Message received/sent</param>
+        </member>
+        <member name="T:Blk.Api.ResponseRedirectedEH">
+            <summary>
+            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
+            </summary>
+            <param name="command">Command tried to be executed</param>
+            <param name="response">Response to command redirected</param>
+            <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
+        </member>
+        <member name="T:Blk.Api.ResponseReceivedEH">
+            <summary>
+            Represents the method that will handle the ResponseReceived event of a IModule object.
+            </summary>
+            <param name="sender">The module where the response has arrived</param>
+            <param name="r">Response received</param>
+        </member>
+        <member name="T:Blk.Api.StatusChangedEH">
+            <summary>
+            Represent the method that will handle the change of the status of a IModule object.
+            </summary>
+            <param name="sender">The IModule which status has changed</param>
+        </member>
+        <member name="T:Blk.Api.IBlackboard">
+            <summary>
+            Implements a blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.AutoStopTime">
+            <summary>
+            Gets or sets the amount of time to wait before stop automatically the blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.AutoStopTimeLeft">
+            <summary>
+            Gets the remaining time for AutoStop
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.ClientsConnected">
+            <summary>
+            Gets the number of clients connected to de Blackboard Server
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.Log">
+            <summary>
+            Gets or sets a textwriter to write in all operations
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.Modules">
+            <summary>
+            Gets the modules managed by the Blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.PendingCommands">
+            <summary>
+            Gets an array of commands pending to send
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.PluginManager">
+            <summary>
+            Gets the plugins which interacts with the Blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.Port">
+            <summary>
+            Gets the port when the blackboard accept incomming connections
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.RunningStatus">
+            <summary>
+            Gets the Runnin Status of this blackboard instance
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.VirtualModule">
+            <summary>
+            Gets or sets the the virtual module that handles blackboard commands
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.SendAttempts">
+            <summary>
+            Gets or sets the number of attempts while redirecting a response
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.TestTimeLeft">
+            <summary>
+            Gets the remaining time for perform Test-Timeout actions
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.TestTimeOut">
+            <summary>
+            Gets or sets the amount of time to wait before perform Test-Timeout actions
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.ModuleLoadDelay">
+            <summary>
+            Gets or sets the time delay between loads of each module in milliseconds
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.VerbosityLevel">
+            <summary>
+            Gets or sets how uch data is sent to the console
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboard.WaitingCommands">
+            <summary>
+            Gets an array of commands waiting for response
+            </summary>
+        </member>
+        <member name="E:Blk.Api.IBlackboard.ClientConnected">
+            <summary>
+            Raises when a client connects to Blackboard TCPServer
+            </summary>
+        </member>
+        <member name="E:Blk.Api.IBlackboard.ClientDisconnected">
+            <summary>
+            Raises when a client disconnects from Blackboard TCPServer
+            </summary>
+        </member>
+        <member name="E:Blk.Api.IBlackboard.StatusChanged">
+            <summary>
+            Raises when this blackboard changes its status
+            </summary>
+        </member>
+        <member name="E:Blk.Api.IBlackboard.ResponseRedirected">
+            <summary>
+            Raises when a Response for a received command is redirected
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.BeginStart">
+            <summary>
+            Asynchronously starts the Blackboard.
+            If the Blackboard is running, it has no effect.
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.BeginStop">
+            <summary>
+            Asynchronously stops the Blackboard.
+            If the Blackboard is not running, it has no effect.
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.Restart">
+            <summary>
+            Restarts the blackboard.
+            This action restart the timers
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.RestartTest">
+            <summary>
+            Requests to restart the test.
+            This action does not restart the timers
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.RestartTimer">
+            <summary>
+            Sets the startup time to current time
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.Inject(System.String)">
+            <summary>
+            Injects a message to the blackboard unparsed message queue
+            </summary>
+            <param name="textToInject">Message string to inject</param>
+            <returns>true if injection was successfull, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.FindDestinationModule(System.String,Blk.Api.IModuleClient@)">
+            <summary>
+            Look for a module in the blackboard that supports specified command
+            </summary>
+            <param name="commandName">The name of the command to look for</param>
+            <param name="destination">When this method returns, contains the Module that supports the command
+            specified, if the conversion succeeded, or null if no module supports the command.
+            The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
+            This parameter is passed uninitialized</param>
+            <returns>true if a destination module was found, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.IBlackboard.FindDestinationModule(System.String,Blk.Api.IModuleClient@,Blk.Api.IPrototype@)">
+            <summary>
+            Look for a module in the blackboard that supports specified command
+            </summary>
+            <param name="commandName">The name of the command to look for</param>
+            <param name="destination">When this method returns, contains the Module that supports the command
+            specified, if the conversion succeeded, or null if no module supports the command.
+            The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
+            This parameter is passed uninitialized</param>
+            <param name="prototype">When this method returns, contains the Prototype for the command
+            specified, if the conversion succeeded, or null if no module supports the command.
+            The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
+            This parameter is passed uninitialized</param>
+            <returns>true if a destination module was found, false otherwise</returns>
+        </member>
+        <member name="T:Blk.Api.IBlackboardPlugin">
+            <summary>
+            Represents a plugin for the blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboardPlugin.Blackboard">
+            <summary>
+            The blackboard this Plugin is bound to
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IBlackboardPlugin.AttachBlackboard(Blk.Api.IBlackboard)">
+            <summary>
+            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
+            </summary>
+            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
+        </member>
+        <member name="T:Blk.Api.IBlackboardPluginManager">
+            <summary>
+            Represents a PluginManager interfaced with a Blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IBlackboardPluginManager.Owner">
+            <summary>
+            The blackboard this IPluginManager is bound to
             </summary>
         </member>
         <member name="T:Blk.Api.IModuleClient">
             <summary>
             Provides the base connection interface for modules.
             </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.BeginStop">
-            <summary>
-            Asynchronously stops the socket connection and command management system.
-            If the IModuleConnector is not running, it has no effect.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.Start">
-            <summary>
-            Starts the socket connection and command management system.
-            If the IModuleConnector is already running, it has no effect.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.Stop">
-            <summary>
-            Stops the socket connection and command management system.
-            If the IModuleConnector is not running, it has no effect.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.Send(Blk.Api.ITextCommand)">
-            <summary>
-            Sends a command to the module
-            </summary>
-            <param name="command">Response to send</param>
-            <returns>true if the command has been sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.Send(Blk.Api.ITextResponse)">
-            <summary>
-            Synchronusly sends a command response to the module
-            </summary>
-            <param name="response">Response to send</param>
-            <returns>true if the response has been sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.WaitReady">
-            <summary>
-            Blocks the thread call untill the module becomes ready
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.WaitReady(System.Int32)">
-            <summary>
-            Blocks the thread call untill the module becomes ready or the specified time elapses
-            </summary>
-            <param name="timeout">The amount of time in milliseconds to wait the module become ready</param>
         </member>
         <member name="P:Blk.Api.IModuleClient.Alias">
             <summary>
@@ -127,7 +403,7 @@
             <summary>
             Gets the idle time of the module
             </summary>
-            <remarks>The idle time of a module is the amount of time elapsed since the last activity 
+            <remarks>The idle time of a module is the amount of time elapsed since the last activity
             of the module. Tipucally this time reflects the time elapsed since the last received command/response
             If the module is busy the idle time is TimeSpan.Zero</remarks>
         </member>
@@ -236,6 +512,75 @@
             Occurs when the status of a IModule object stops working
             </summary>
         </member>
+        <member name="M:Blk.Api.IModuleClient.BeginStop">
+            <summary>
+            Asynchronously stops the socket connection and command management system.
+            If the IModuleConnector is not running, it has no effect.
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.Start">
+            <summary>
+            Starts the socket connection and command management system.
+            If the IModuleConnector is already running, it has no effect.
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.Stop">
+            <summary>
+            Stops the socket connection and command management system.
+            If the IModuleConnector is not running, it has no effect.
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.Send(Blk.Api.ITextCommand)">
+            <summary>
+            Sends a command to the module
+            </summary>
+            <param name="command">Response to send</param>
+            <returns>true if the command has been sent, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.Send(Blk.Api.ITextResponse)">
+            <summary>
+            Synchronusly sends a command response to the module
+            </summary>
+            <param name="response">Response to send</param>
+            <returns>true if the response has been sent, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.WaitReady">
+            <summary>
+            Blocks the thread call untill the module becomes ready
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClient.WaitReady(System.Int32)">
+            <summary>
+            Blocks the thread call untill the module becomes ready or the specified time elapses
+            </summary>
+            <param name="timeout">The amount of time in milliseconds to wait the module become ready</param>
+        </member>
+        <member name="T:Blk.Api.IModuleBlackboard">
+            <summary>
+            Implements a ModuleBlackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleBlackboard.SharedVariables">
+            <summary>
+            Gets the list of shared variables
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IModuleClientPlugin">
+            <summary>
+            Represents a ModuleClient for interfacing module applications running as plugins
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleClientPlugin.Receive(System.String)">
+            <summary>
+            Receives a message and enqueues it for processing and redirection
+            </summary>
+            <param name="message">The message to receive</param>
+        </member>
+        <member name="T:Blk.Api.IModuleClientTcp">
+            <summary>
+            Represents a blackboard module interface which connects to a remote module via TCP/IP
+            </summary>
+        </member>
         <member name="P:Blk.Api.IModuleClientTcp.Port">
             <summary>
             Gets the port where to connect to the Application Module
@@ -251,32 +596,565 @@
             Gets a collection of IP Addresses of the computers where the Application Module's can be running
             </summary>
         </member>
-        <member name="T:Blk.Api.IBlackboardPlugin">
+        <member name="T:Blk.Api.IModuleCollection">
             <summary>
-            Represents a plugin for the blackboard
+            Provides a collection container that enables Blackboard instances to maintain a list of their modules
             </summary>
         </member>
-        <member name="M:Blk.Api.IBlackboardPlugin.AttachBlackboard(Blk.Api.IBlackboard)">
+        <member name="P:Blk.Api.IModuleCollection.Owner">
+            <summary>
+            Gets the blackboard to which the ModuleCollection object belongs
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleCollection.Item(System.Int32)">
+            <summary>
+            Gets the element at the specified index position
+            </summary>
+            <param name="i">The zero based index of the element to get or set</param>
+            <returns>The module at position i</returns>
+        </member>
+        <member name="P:Blk.Api.IModuleCollection.Item(System.String)">
+            <summary>
+            Gets the element with the specified name
+            </summary>
+            <param name="moduleName">The name of the module element to get or set</param>
+            <returns>The module with specified name</returns>
+        </member>
+        <member name="E:Blk.Api.IModuleCollection.ModuleAdded">
+            <summary>
+            Raises when a IModule is addedd to the ModuleCollection
+            </summary>
+        </member>
+        <member name="E:Blk.Api.IModuleCollection.ModuleRemoved">
+            <summary>
+            Raises when a IModule is removed from the ModuleCollection
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModuleCollection.Contains(System.String)">
+            <summary>
+            Determines whether the specified Blackboard is in the parent Blackboard's ModuleCollection object
+            </summary>
+            <param name="moduleName">The name of the Module to search for in the collection</param>
+            <returns>true if the specified Module exists in the collection; otherwise, false</returns>
+        </member>
+        <member name="M:Blk.Api.IModuleCollection.IndexOf(Blk.Api.IModuleClient)">
+            <summary>
+            Retrieves the index of a specified Module object in the collection
+            </summary>
+            <param name="m">The Module for which the index is returned</param>
+            <returns>The index of the specified Module. If the Module is not currently a member of the collection, it returns -1</returns>
+        </member>
+        <member name="M:Blk.Api.IModuleCollection.IndexOf(System.String)">
+            <summary>
+            Retrieves the index of a specified Module object in the collection
+            </summary>
+            <param name="moduleName">The name of the Module for which the index is returned</param>
+            <returns>The index of the Movule with the specified name If the Module is not currently a member of the collection, it returns -1</returns>
+        </member>
+        <member name="M:Blk.Api.IModuleCollection.RemoveAt(System.Int32)">
+            <summary>
+            Removes a Module, at the specified index location, from the ModuleCollection object
+            </summary>
+            <param name="index">The ordinal index of the Module to be removed from the collection</param>
+        </member>
+        <member name="T:Blk.Api.IModulePlugin">
+            <summary>
+            Represents a plugin which will act as a module
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModulePlugin.Blackboard">
+            <summary>
+            Gets the blackboard this Plugin is bound to
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModulePlugin.CommandManager">
+            <summary>
+            When overriden in a derived class, gives access to the command manager which
+            manages the commands of this ModulePlugin
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModulePlugin.Connector">
+            <summary>
+            Gets the connector object used to communicate with blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModulePlugin.ModuleName">
+            <summary>
+            Gets the name of the module that this IMessageSource object interfaces.
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
             <summary>
             Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
             </summary>
             <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
         </member>
-        <member name="P:Blk.Api.IBlackboardPlugin.Blackboard">
+        <member name="M:Blk.Api.IModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
+            <summary>
+            Attaches a IModuleClient object which will be used to communicate with blackboard
+            </summary>
+            <param name="moduleClient">
+            </param>
+        </member>
+        <member name="T:Blk.Api.IModuleProcessInfo">
+            <summary>
+            Encapsulates the data required to start a module
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleProcessInfo.ProcessName">
+            <summary>
+            Gets the name of the process asociated to this module (used for launch operations)
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleProcessInfo.ProgramPath">
+            <summary>
+            Gets the path of the program used to launch this module (used for launch operations)
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleProcessInfo.ProgramArgs">
+            <summary>
+            Gets the arguments used to run this module (used for launch operations)
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IModuleSimulationOptions">
+            <summary>
+            Encapsulates simlation options for a Module
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.Type">
+            <summary>
+            Gets the type of the simulation
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.SuccessRatio">
+            <summary>
+            Gets or sets a value between 0 and 1 that indicates the success ratio of a simulated response. A value greater than 1 disables the simulation.
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IModuleSimulationOptions.SimulationEnabled">
+            <summary>
+            gets a value indicating if the simulation is enabled
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IPrototype">
+            <summary>
+            Represents a prototype for commands
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.Command">
+            <summary>
+            Name of the command that this prototype represent
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.HasPriority">
+            <summary>
+            Gets a value indicating if the command has priority over other commands
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.Priority">
+            <summary>
+            Gets a value indicating the priority of the command
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.ParamsRequired">
+            <summary>
+            Gets a value indicating if parameters are required
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.ResponseRequired">
+            <summary>
+            True if a response is required, false otherwise
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.Timeout">
+            <summary>
+            The maximum amount of time to wait for a response in milliseconds
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototype.Parent">
+            <summary>
+            Gets the Module this prototype is bind to
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IServerAddressCollection">
+            <summary>
+            Manages several IP addresses to connect to a IP address
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IServerAddressCollection.Owner">
+            <summary>
+            Gets the module to which the ServerAddressCollection object belongs
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IServerAddressCollection.Item(System.Int32)">
+            <summary>
+            Gets the element at the specified index position
+            </summary>
+            <param name="i">The zero based index of the element to get or set</param>
+            <returns>The IP address at position i</returns>
+        </member>
+        <member name="M:Blk.Api.IServerAddressCollection.AddRange(System.Collections.Generic.IEnumerable{System.Net.IPAddress})">
+            <summary>
+            Adds the elements of the specified collection to the end of the ServerAddressCollection skipping duplicates
+            </summary>
+            <param name="collection">The collection whose elements should be added to the end of the ServerAddressCollection</param>
+        </member>
+        <member name="M:Blk.Api.IServerAddressCollection.IndexOf(System.Net.IPAddress)">
+            <summary>
+            Retrieves the index of a specified IP address object in the collection
+            </summary>
+            <param name="address">The IP address for which the index is returned</param>
+            <returns>The index of the specified IP address. If the IP address is not currently a member of the collection, it returns -1</returns>
+        </member>
+        <member name="M:Blk.Api.IServerAddressCollection.RemoveAt(System.Int32)">
+            <summary>
+            Removes a IP address, at the specified index location, from the ServerAddressCollection object
+            </summary>
+            <param name="index">The ordinal index of the IP address to be removed from the collection</param>
+        </member>
+        <member name="M:Blk.Api.IServerAddressCollection.ToArray">
+            <summary>
+            Copies the elements of the collection to a new array
+            </summary>
+        </member>
+        <member name="T:Blk.Api.IPrototypeCollection">
+            <summary>
+            Provides a collection container that enables Modules instances to maintain a list of their Message IPrototypes
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototypeCollection.Owner">
+            <summary>
+            Gets the module to which the IPrototypeCollection object belongs
+            </summary>
+        </member>
+        <member name="P:Blk.Api.IPrototypeCollection.Item(System.String)">
+            <summary>
+            Gets the element with the specified name
+            </summary>
+            <param name="commandName">The name of the module element to get or set</param>
+            <returns>The module with specified name</returns>
+        </member>
+        <member name="E:Blk.Api.IPrototypeCollection.PrototypeCollectionStatusChanged">
+            <summary>
+            Occurs when the content of the collection changes
+            </summary>
+        </member>
+        <member name="M:Blk.Api.IPrototypeCollection.Contains(System.String)">
+            <summary>
+            Determines whether the specified IPrototype is in the parent Module's IPrototypeCollection object
+            </summary>
+            <param name="commandName">The name of the IPrototype to search for in the collection</param>
+            <returns>true if the specified IPrototype exists in the collection; otherwise, false</returns>
+        </member>
+        <member name="M:Blk.Api.IPrototypeCollection.ToArray">
+            <summary>
+            Copies the content of the collection to a fixed length array
+            </summary>
+            <returns>A copy of the content of the collection</returns>
+        </member>
+        <member name="M:Blk.Api.IPrototypeCollection.Remove(System.String)">
+            <summary>
+            Removes the specified Prototype from the parent Module's PrototypeCollection object
+            </summary>
+            <param name="commandName">The Prototype's name to be removed</param>
+            <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
+        </member>
+        <member name="T:Blk.Api.ModulePlugin">
+            <summary>
+            Serves as base class for implementing a plugin which will act as a module
+            </summary>
+        </member>
+        <member name="F:Blk.Api.ModulePlugin.blackboard">
             <summary>
             The blackboard this Plugin is bound to
             </summary>
+        </member>
+        <member name="F:Blk.Api.ModulePlugin.connector">
+            <summary>
+            The connector object used to communicate with blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.Blackboard">
+            <summary>
+            Gets the blackboard this Plugin is bound to
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.CommandManager">
+            <summary>
+            When overriden in a derived class, gives access to the command manager which
+            manages the commands of this ModulePlugin
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.Connector">
+            <summary>
+            Gets the connector object used to communicate with blackboard
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.Initialized">
+            <summary>
+            Gets a value indicaing if the plugin has been initialized
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.IsRunning">
+            <summary>
+            Gets a value indicating if the Plugin is running
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.ModuleName">
+            <summary>
+            Gets the name of the module that this IMessageSource object interfaces.
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ModulePlugin.Name">
+            <summary>
+            Gets the name of the Plugin
+            </summary>
+        </member>
+        <member name="M:Blk.Api.ModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
+            <summary>
+            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
+            </summary>
+            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
+        </member>
+        <member name="M:Blk.Api.ModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
+            <summary>
+            Attaches a IModuleClient object which will be used to communicate with blackboard
+            </summary>
+            <param name="moduleClient">
+            </param>
+        </member>
+        <member name="M:Blk.Api.ModulePlugin.Initialize">
+            <summary>
+            Initializes the plugin
+            </summary>
+        </member>
+        <member name="M:Blk.Api.ModulePlugin.Start">
+            <summary>
+            Starts the Plugin
+            </summary>
+        </member>
+        <member name="M:Blk.Api.ModulePlugin.Stop">
+            <summary>
+            Stops the Plugin
+            </summary>
+        </member>
+        <member name="T:Blk.Api.PluginConnector">
+            <summary>
+            Implements message communication with blackboard via plugin interface
+            </summary>
+        </member>
+        <member name="F:Blk.Api.PluginConnector.moduleClient">
+            <summary>
+            The IModuleClient intance with which this instance communicates
+            </summary>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.#ctor(Blk.Api.IModuleClientPlugin)">
+            <summary>
+            Initializes a new instance of PluginConnector
+            </summary>
+            <param name="moduleClient">The module client in the blackboard to connect with</param>
+        </member>
+        <member name="P:Blk.Api.PluginConnector.ModuleClient">
+            <summary>
+            Gets the IModuleClient instance with which this instance communicates
+            </summary>
+        </member>
+        <member name="P:Blk.Api.PluginConnector.IsConnected">
+            <summary>
+            Gets a value indicating if the connector is connected to the message source
+            </summary>
+        </member>
+        <member name="P:Blk.Api.PluginConnector.ModuleName">
+            <summary>
+            Returns the ModuleName property of the asociated IConnectionManager object
+            </summary>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.Parse(Blk.Api.ITextMessage)">
+            <summary>
+            Parses a received message
+            </summary>
+            <param name="message">String received</param>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.ReceiveResponse(Robotics.API.Response)">
+            <summary>
+            Redirects a received response from the command manager
+            </summary>
+            <param name="response">The received response</param>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Command)">
+            <summary>
+            Sends a command to the Blackboard
+            </summary>
+            <param name="command">Command to be sent</param>
+            <returns>true if the command was sent, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Response)">
+            <summary>
+            Sends a response to the Blackboard
+            </summary>
+            <param name="response">Response to be sent</param>
+            <returns>true if the response was sent, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.Start">
+            <summary>
+            Starts the parser
+            </summary>
+        </member>
+        <member name="M:Blk.Api.PluginConnector.Stop">
+            <summary>
+            Stops the parser
+            </summary>
+        </member>
+        <member name="T:Blk.Api.SharedVariables.ISharedVariable">
+            <summary>
+            Represents a stored shared variable
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.AllowedWriters">
+            <summary>
+            Gets the list of names of modules which are allowed to write to the var
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.CreationTime">
+            <summary>
+            Gets the creation time of the shared variable
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Dynamic">
+            <summary>
+            Gets a value indicating if the SharedVariable can be dynamically resized
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.IsArray">
+            <summary>
+            Gets a value indicating if the variable is an array
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Name">
+            <summary>
+            Gets the name of the SharedVariable
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Owner">
+            <summary>
+            Gets the IModule object which this SharedVariable object is bound to
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Size">
+            <summary>
+            Gets the size of the SharedVariable
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Type">
+            <summary>
+            Gets the type of the variable
+            </summary>
+        </member>
+        <member name="M:Blk.Api.SharedVariables.ISharedVariable.GetInfo">
+            <summary>
+            Gets a standard SharedVariableInfo for serialization
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="T:Blk.Api.SharedVariables.ISharedVariableCollection">
+            <summary>
+            Provides a collection container that enables ModuleBlackboard instances to maintain a list of their shared variables
+            allowing multiple readers and single writer on the collection
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.NameList">
+            <summary>
+            Gets the list of names of the variables in the collection separated by commas
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.Count">
+            <summary>
+            Gets the number of elements in the ISharedVariableCollection object.
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.IsReadOnly">
+            <summary>
+            Gets a value indicating whether the ISharedVariableCollection object is read-only
+            </summary>
+        </member>
+        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.Item(System.String)">
+            <summary>
+            Gets the element with the specified name
+            </summary>
+            <param name="variableName">The name of the element to get</param>
+            <returns>The variable with specified name</returns>
+        </member>
+        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.Contains(Blk.Api.SharedVariables.ISharedVariable)">
+            <summary>
+            Determines whether the specified element is in the collection
+            </summary>
+            <param name="item">The ISharedVariable to search for in the collection</param>
+            <returns>true if the specified ISharedVariable exists in the collection; otherwise, false</returns>
+        </member>
+        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.Contains(System.String)">
+            <summary>
+            Determines whether the specified element is in the collection
+            </summary>
+            <param name="variableName">The name of the shared variable to search for in the collection</param>
+            <returns>true if the specified SharedVariable exists in the collection; otherwise, false</returns>
+        </member>
+        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.GetVariableNames">
+            <summary>
+            Returns the list of variable names
+            </summary>
+            <returns>The list of variable names</returns>
+        </member>
+        <member name="T:Blk.Api.ITextCommand">
+            <summary>
+            Represents a command
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ITextCommand.SentTime">
+            <summary>
+            Gets or Sets the time when the command was sent.
+            Initially contains the time when the command was created
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ITextCommand.Elapsed">
+            <summary>
+            Gets the time elapsed since the command was created or sent
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ITextCommand.TimeLeft">
+            <summary>
+            Gets the amount of time left to wait for a response
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ITextCommand.MillisecondsLeft">
+            <summary>
+            Gets the amount of milliseconds left to wait for a response
+            </summary>
+        </member>
+        <member name="P:Blk.Api.ITextCommand.Response">
+            <summary>
+            Gets or sets the response asociated to this Command object
+            </summary>
+        </member>
+        <member name="M:Blk.Api.ITextCommand.IsMatch(Blk.Api.ITextResponse)">
+            <summary>
+            Gets a value indicating if provided Response is a response for current command
+            </summary>
+            <param name="response">Response to check</param>
+            <returns>true if provided Response is a response for command, false otherwise</returns>
+        </member>
+        <member name="M:Blk.Api.ITextCommand.SendResponse(Blk.Api.ITextResponse)">
+            <summary>
+            Asignates the provided Response as Response for the current Command and this Command as CommandResponded for the provided response.
+            After asignation the Response is sent to its Destination module which must match this Command Source module
+            </summary>
+            <param name="response">Response to asign</param>
+            <returns>true if response was asigned and sent successfully, false otherwise</returns>
         </member>
         <member name="T:Blk.Api.ITextMessage">
             <summary>
             Implements a command between Blackboard and Modules
             </summary>
-        </member>
-        <member name="M:Blk.Api.ITextMessage.Send">
-            <summary>
-            Sends itself trough its Destination IModule
-            </summary>
-            <returns>true if the command has been sent, false otherwise</returns>
         </member>
         <member name="P:Blk.Api.ITextMessage.Command">
             <summary>
@@ -333,369 +1211,11 @@
             Gets a string which can be sent to a module
             </summary>
         </member>
-        <member name="T:Blk.Api.SharedVariables.ISharedVariableCollection">
+        <member name="M:Blk.Api.ITextMessage.Send">
             <summary>
-            Provides a collection container that enables ModuleBlackboard instances to maintain a list of their shared variables
-            allowing multiple readers and single writer on the collection
+            Sends itself trough its Destination IModule
             </summary>
-        </member>
-        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.Contains(Blk.Api.SharedVariables.ISharedVariable)">
-            <summary>
-            Determines whether the specified element is in the collection
-            </summary>
-            <param name="item">The ISharedVariable to search for in the collection</param>
-            <returns>true if the specified ISharedVariable exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.Contains(System.String)">
-            <summary>
-            Determines whether the specified element is in the collection
-            </summary>
-            <param name="variableName">The name of the shared variable to search for in the collection</param>
-            <returns>true if the specified SharedVariable exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="M:Blk.Api.SharedVariables.ISharedVariableCollection.GetVariableNames">
-            <summary>
-            Returns the list of variable names
-            </summary>
-            <returns>The list of variable names</returns>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.NameList">
-            <summary>
-            Gets the list of names of the variables in the collection separated by commas
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.Count">
-            <summary>
-            Gets the number of elements in the ISharedVariableCollection object.
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.IsReadOnly">
-            <summary>
-            Gets a value indicating whether the ISharedVariableCollection object is read-only
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariableCollection.Item(System.String)">
-            <summary>
-            Gets the element with the specified name
-            </summary>
-            <param name="variableName">The name of the element to get</param>
-            <returns>The variable with specified name</returns>
-        </member>
-        <member name="T:Blk.Api.IModuleSimulationOptions">
-            <summary>
-            Encapsulates simlation options for a Module
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.Type">
-            <summary>
-            Gets the type of the simulation
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.SuccessRatio">
-            <summary>
-            Gets or sets a value between 0 and 1 that indicates the success ratio of a simulated response. A value greater than 1 disables the simulation.
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleSimulationOptions.SimulationEnabled">
-            <summary>
-            gets a value indicating if the simulation is enabled
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IModuleProcessInfo">
-            <summary>
-            Encapsulates the data required to start a module
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleProcessInfo.ProcessName">
-            <summary>
-            Gets the name of the process asociated to this module (used for launch operations)
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleProcessInfo.ProgramPath">
-            <summary>
-            Gets the path of the program used to launch this module (used for launch operations)
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleProcessInfo.ProgramArgs">
-            <summary>
-            Gets the arguments used to run this module (used for launch operations)
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IModuleClientPlugin">
-            <summary>
-            Represents a ModuleClient for interfacing module applications running as plugins
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClientPlugin.Receive(System.String)">
-            <summary>
-            Receives a message and enqueues it for processing and redirection
-            </summary>
-            <param name="message">The message to receive</param>
-        </member>
-        <member name="T:Blk.Api.IBlackboardPluginManager">
-            <summary>
-            Represents a PluginManager interfaced with a Blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboardPluginManager.Owner">
-            <summary>
-            The blackboard this IPluginManager is bound to
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IBlackboard">
-            <summary>
-            Implements a blackboard
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.BeginStart">
-            <summary>
-            Asynchronously starts the Blackboard.
-            If the Blackboard is running, it has no effect.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.BeginStop">
-            <summary>
-            Asynchronously stops the Blackboard.
-            If the Blackboard is not running, it has no effect.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.Restart">
-            <summary>
-            Restarts the blackboard.
-            This action restart the timers
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.RestartTest">
-            <summary>
-            Requests to restart the test.
-            This action does not restart the timers
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.RestartTimer">
-            <summary>
-            Sets the startup time to current time
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.Inject(System.String)">
-            <summary>
-            Injects a message to the blackboard unparsed message queue
-            </summary>
-            <param name="textToInject">Message string to inject</param>
-            <returns>true if injection was successfull, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.FindDestinationModule(System.String,Blk.Api.IModuleClient@)">
-            <summary>
-            Look for a module in the blackboard that supports specified command
-            </summary>
-            <param name="commandName">The name of the command to look for</param>
-            <param name="destination">When this method returns, contains the Module that supports the command
-            specified, if the conversion succeeded, or null if no module supports the command.
-            The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
-            This parameter is passed uninitialized</param>
-            <returns>true if a destination module was found, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.IBlackboard.FindDestinationModule(System.String,Blk.Api.IModuleClient@,Blk.Api.IPrototype@)">
-            <summary>
-            Look for a module in the blackboard that supports specified command
-            </summary>
-            <param name="commandName">The name of the command to look for</param>
-            <param name="destination">When this method returns, contains the Module that supports the command
-            specified, if the conversion succeeded, or null if no module supports the command.
-            The search fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
-            This parameter is passed uninitialized</param>
-            <param name="prototype">When this method returns, contains the Prototype for the command
-            specified, if the conversion succeeded, or null if no module supports the command.
-            The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
-            This parameter is passed uninitialized</param>
-            <returns>true if a destination module was found, false otherwise</returns>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.AutoStopTime">
-            <summary>
-            Gets or sets the amount of time to wait before stop automatically the blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.AutoStopTimeLeft">
-            <summary>
-            Gets the remaining time for AutoStop
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.ClientsConnected">
-            <summary>
-            Gets the number of clients connected to de Blackboard Server
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.Log">
-            <summary>
-            Gets or sets a textwriter to write in all operations
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.Modules">
-            <summary>
-            Gets the modules managed by the Blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.PendingCommands">
-            <summary>
-            Gets an array of commands pending to send
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.PluginManager">
-            <summary>
-            Gets the plugins which interacts with the Blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.Port">
-            <summary>
-            Gets the port when the blackboard accept incomming connections
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.RunningStatus">
-            <summary>
-            Gets the Runnin Status of this blackboard instance
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.VirtualModule">
-            <summary>
-            Gets or sets the the virtual module that handles blackboard commands
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.SendAttempts">
-            <summary>
-            Gets or sets the number of attempts while redirecting a response
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.TestTimeLeft">
-            <summary>
-            Gets the remaining time for perform Test-Timeout actions
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.TestTimeOut">
-            <summary>
-            Gets or sets the amount of time to wait before perform Test-Timeout actions
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.ModuleLoadDelay">
-            <summary>
-            Gets or sets the time delay between loads of each module in milliseconds
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.VerbosityLevel">
-            <summary>
-            Gets or sets how uch data is sent to the console
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboard.WaitingCommands">
-            <summary>
-            Gets an array of commands waiting for response
-            </summary>
-        </member>
-        <member name="E:Blk.Api.IBlackboard.ClientConnected">
-            <summary>
-            Raises when a client connects to Blackboard TCPServer
-            </summary>
-        </member>
-        <member name="E:Blk.Api.IBlackboard.ClientDisconnected">
-            <summary>
-            Raises when a client disconnects from Blackboard TCPServer
-            </summary>
-        </member>
-        <member name="E:Blk.Api.IBlackboard.StatusChanged">
-            <summary>
-            Raises when this blackboard changes its status
-            </summary>
-        </member>
-        <member name="E:Blk.Api.IBlackboard.ResponseRedirected">
-            <summary>
-            Raises when a Response for a received command is redirected
-            </summary>
-        </member>
-        <member name="T:Blk.Api.ITextCommand">
-            <summary>
-            Represents a command
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ITextCommand.IsMatch(Blk.Api.ITextResponse)">
-            <summary>
-            Gets a value indicating if provided Response is a response for current command
-            </summary>
-            <param name="response">Response to check</param>
-            <returns>true if provided Response is a response for command, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.ITextCommand.SendResponse(Blk.Api.ITextResponse)">
-            <summary>
-            Asignates the provided Response as Response for the current Command and this Command as CommandResponded for the provided response.
-            After asignation the Response is sent to its Destination module which must match this Command Source module
-            </summary>
-            <param name="response">Response to asign</param>
-            <returns>true if response was asigned and sent successfully, false otherwise</returns>
-        </member>
-        <member name="P:Blk.Api.ITextCommand.SentTime">
-            <summary>
-            Gets or Sets the time when the command was sent.
-            Initially contains the time when the command was created
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ITextCommand.Elapsed">
-            <summary>
-            Gets the time elapsed since the command was created or sent
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ITextCommand.TimeLeft">
-            <summary>
-            Gets the amount of time left to wait for a response
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ITextCommand.MillisecondsLeft">
-            <summary>
-            Gets the amount of milliseconds left to wait for a response
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ITextCommand.Response">
-            <summary>
-            Gets or sets the response asociated to this Command object
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IServerAddressCollection">
-            <summary>
-            Manages several IP addresses to connect to a IP address
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IServerAddressCollection.AddRange(System.Collections.Generic.IEnumerable{System.Net.IPAddress})">
-            <summary>
-            Adds the elements of the specified collection to the end of the ServerAddressCollection skipping duplicates
-            </summary>
-            <param name="collection">The collection whose elements should be added to the end of the ServerAddressCollection</param>
-        </member>
-        <member name="M:Blk.Api.IServerAddressCollection.IndexOf(System.Net.IPAddress)">
-            <summary>
-            Retrieves the index of a specified IP address object in the collection
-            </summary>
-            <param name="address">The IP address for which the index is returned</param>
-            <returns>The index of the specified IP address. If the IP address is not currently a member of the collection, it returns -1</returns>
-        </member>
-        <member name="M:Blk.Api.IServerAddressCollection.RemoveAt(System.Int32)">
-            <summary>
-            Removes a IP address, at the specified index location, from the ServerAddressCollection object
-            </summary>
-            <param name="index">The ordinal index of the IP address to be removed from the collection</param>
-        </member>
-        <member name="M:Blk.Api.IServerAddressCollection.ToArray">
-            <summary>
-            Copies the elements of the collection to a new array
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IServerAddressCollection.Owner">
-            <summary>
-            Gets the module to which the ServerAddressCollection object belongs
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IServerAddressCollection.Item(System.Int32)">
-            <summary>
-            Gets the element at the specified index position
-            </summary>
-            <param name="i">The zero based index of the element to get or set</param>
-            <returns>The IP address at position i</returns>
+            <returns>true if the command has been sent, false otherwise</returns>
         </member>
         <member name="T:Blk.Api.ITextResponse">
             <summary>
@@ -725,527 +1245,12 @@
         </member>
         <member name="P:Blk.Api.ITextResponse.FailReason">
             <summary>
-            Gets the reason for which the command was not executed generating a failed response 
+            Gets the reason for which the command was not executed generating a failed response
             </summary>
         </member>
-        <member name="T:Blk.Api.IModuleCollection">
+        <member name="T:Blk.Api.SharedVariables.ModuleApplicationPlugin">
             <summary>
-            Provides a collection container that enables Blackboard instances to maintain a list of their modules
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleCollection.Contains(System.String)">
-            <summary>
-            Determines whether the specified Blackboard is in the parent Blackboard's ModuleCollection object
-            </summary>
-            <param name="moduleName">The name of the Module to search for in the collection</param>
-            <returns>true if the specified Module exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="M:Blk.Api.IModuleCollection.IndexOf(Blk.Api.IModuleClient)">
-            <summary>
-            Retrieves the index of a specified Module object in the collection
-            </summary>
-            <param name="m">The Module for which the index is returned</param>
-            <returns>The index of the specified Module. If the Module is not currently a member of the collection, it returns -1</returns>
-        </member>
-        <member name="M:Blk.Api.IModuleCollection.IndexOf(System.String)">
-            <summary>
-            Retrieves the index of a specified Module object in the collection
-            </summary>
-            <param name="moduleName">The name of the Module for which the index is returned</param>
-            <returns>The index of the Movule with the specified name If the Module is not currently a member of the collection, it returns -1</returns>
-        </member>
-        <member name="M:Blk.Api.IModuleCollection.RemoveAt(System.Int32)">
-            <summary>
-            Removes a Module, at the specified index location, from the ModuleCollection object
-            </summary>
-            <param name="index">The ordinal index of the Module to be removed from the collection</param>
-        </member>
-        <member name="P:Blk.Api.IModuleCollection.Owner">
-            <summary>
-            Gets the blackboard to which the ModuleCollection object belongs
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleCollection.Item(System.Int32)">
-            <summary>
-            Gets the element at the specified index position
-            </summary>
-            <param name="i">The zero based index of the element to get or set</param>
-            <returns>The module at position i</returns>
-        </member>
-        <member name="P:Blk.Api.IModuleCollection.Item(System.String)">
-            <summary>
-            Gets the element with the specified name
-            </summary>
-            <param name="moduleName">The name of the module element to get or set</param>
-            <returns>The module with specified name</returns>
-        </member>
-        <member name="E:Blk.Api.IModuleCollection.ModuleAdded">
-            <summary>
-            Raises when a IModule is addedd to the ModuleCollection
-            </summary>
-        </member>
-        <member name="E:Blk.Api.IModuleCollection.ModuleRemoved">
-            <summary>
-            Raises when a IModule is removed from the ModuleCollection
-            </summary>
-        </member>
-        <member name="T:Blk.Api.BlackboardRunningStatus">
-            <summary>
-            Enumerates the running status of the blackboard
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.Stopped">
-            <summary>
-            Blackboard is stopped
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.Running">
-            <summary>
-            Blackboard is running normally
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.Starting">
-            <summary>
-            Blackboard is starting up modules
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.Stopping">
-            <summary>
-            Blackboard is stopping off modules
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.Restarting">
-            <summary>
-            Blackboard is restarting modules
-            </summary>
-        </member>
-        <member name="F:Blk.Api.BlackboardRunningStatus.RestartingTest">
-            <summary>
-            Blackboard is restarting the test
-            </summary>
-        </member>
-        <member name="T:Blk.Api.ResponseFailReason">
-            <summary>
-            Enumerates the reasons for which a command was not executed generating a failed response 
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.None">
-            <summary>
-            The response was succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.ExecutedButNotSucceded">
-            <summary>
-            The command was executed in the destination module but was not succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.TimedOut">
-            <summary>
-            Generated failed response due to timeout
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.ModuleDisconnected">
-            <summary>
-            The module is disconected
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestarting">
-            <summary>
-            Blackboard is restarting. Message has not sent
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.BlackboardRestartingTest">
-            <summary>
-            Blackboard is restarting the test. Message has not sent
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ResponseFailReason.Unknown">
-            <summary>
-            Unknown reason
-            </summary>
-        </member>
-        <member name="T:Blk.Api.SentStatus">
-            <summary>
-            Sent Status	for	classes	derived	from CommandBase Class
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.NotSentYet">
-            <summary>
-            The	Command/Response has not been sent yet
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.SentSuccessfull">
-            <summary>
-            Send operation succeded
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SentStatus.SentFailed">
-            <summary>
-            Send operation failed
-            </summary>
-        </member>
-        <member name="T:Blk.Api.SimulationType">
-            <summary>
-            Enumerates the simulations types a Module support
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.SimulationDisabled">
-            <summary>
-            Simulation is disabled
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.EnabledExact">
-            <summary>
-            Simulates and responses match the commands successfully
-            </summary>
-        </member>
-        <member name="F:Blk.Api.SimulationType.EnabledWithError">
-            <summary>
-            Simulates and responses match the commands
-            </summary>
-        </member>
-        <member name="T:Blk.Api.BlackboardClientCnnEH">
-            <summary>
-            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-            </summary>
-            <param name="ip">The ip Address of the client</param>
-        </member>
-        <member name="T:Blk.Api.BlackboardStatusChangedEH">
-            <summary>
-            Represents the method that will handle the StatusChanged event of a Blackboard object.
-            </summary>
-            <param name="blackboard">Blackboard which raised the event</param>
-        </member>
-        <member name="T:Blk.Api.PrototypeCollectionStatusChangedEH">
-            <summary>
-            Represents the method that will handle the PrototypeCollectionStatusChanged event of a IPrototypeCollection object.
-            </summary>
-            <param name="collection">Collection which raised the event</param>
-        </member>
-        <member name="T:Blk.Api.CommandReceivedEH">
-            <summary>
-            Represents the method that will handle the CommandReceived event of a IModule object.
-            </summary>
-            <param name="sender">The module where the command has arrived</param>
-            <param name="c">Command received</param>
-        </member>
-        <member name="T:Blk.Api.IModuleAddRemoveEH">
-            <summary>
-            Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
-            </summary>
-            <param name="module"></param>
-        </member>
-        <member name="T:Blk.Api.MessageIOEH">
-            <summary>
-            Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
-            </summary>
-            <param name="message">Message received/sent</param>
-        </member>
-        <member name="T:Blk.Api.ResponseRedirectedEH">
-            <summary>
-            Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-            </summary>
-            <param name="command">Command tried to be executed</param>
-            <param name="response">Response to command redirected</param>
-            <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
-        </member>
-        <member name="T:Blk.Api.ResponseReceivedEH">
-            <summary>
-            Represents the method that will handle the ResponseReceived event of a IModule object.
-            </summary>
-            <param name="sender">The module where the response has arrived</param>
-            <param name="r">Response received</param>
-        </member>
-        <member name="T:Blk.Api.StatusChangedEH">
-            <summary>
-            Represent the method that will handle the change of the status of a IModule object.
-            </summary>
-            <param name="sender">The IModule which status has changed</param>
-        </member>
-        <member name="T:Blk.Api.PluginConnector">
-            <summary>
-            Implements message communication with blackboard via plugin interface
-            </summary>
-        </member>
-        <member name="F:Blk.Api.PluginConnector.moduleClient">
-            <summary>
-            The IModuleClient intance with which this instance communicates
-            </summary>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.#ctor(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Initializes a new instance of PluginConnector
-            </summary>
-            <param name="moduleClient">The module client in the blackboard to connect with</param>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Parse(Blk.Api.ITextMessage)">
-            <summary>
-            Parses a received message
-            </summary>
-            <param name="message">String received</param>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.ReceiveResponse(Robotics.API.Response)">
-            <summary>
-            Redirects a received response from the command manager
-            </summary>
-            <param name="response">The received response</param>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Command)">
-            <summary>
-            Sends a command to the Blackboard
-            </summary>
-            <param name="command">Command to be sent</param>
-            <returns>true if the command was sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Response)">
-            <summary>
-            Sends a response to the Blackboard
-            </summary>
-            <param name="response">Response to be sent</param>
-            <returns>true if the response was sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Start">
-            <summary>
-            Starts the parser
-            </summary>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Stop">
-            <summary>
-            Stops the parser
-            </summary>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.ModuleClient">
-            <summary>
-            Gets the IModuleClient instance with which this instance communicates
-            </summary>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.IsConnected">
-            <summary>
-            Gets a value indicating if the connector is connected to the message source
-            </summary>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.ModuleName">
-            <summary>
-            Returns the ModuleName property of the asociated IConnectionManager object
-            </summary>
-        </member>
-        <member name="T:Blk.Api.ModulePlugin">
-            <summary>
-            Serves as base class for implementing a plugin which will act as a module
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IModulePlugin">
-            <summary>
-            Represents a plugin which will act as a module
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
-            <summary>
-            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
-            </summary>
-            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
-        </member>
-        <member name="M:Blk.Api.IModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Attaches a IModuleClient object which will be used to communicate with blackboard
-            </summary>
-            <param name="moduleClient"></param>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.Blackboard">
-            <summary>
-            Gets the blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.CommandManager">
-            <summary>
-            When overriden in a derived class, gives access to the command manager which
-            manages the commands of this ModulePlugin
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.Connector">
-            <summary>
-            Gets the connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.ModuleName">
-            <summary>
-            Gets the name of the module that this IMessageSource object interfaces.
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ModulePlugin.blackboard">
-            <summary>
-            The blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ModulePlugin.connector">
-            <summary>
-            The connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
-            <summary>
-            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
-            </summary>
-            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Attaches a IModuleClient object which will be used to communicate with blackboard
-            </summary>
-            <param name="moduleClient"></param>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Initialize">
-            <summary>
-            Initializes the plugin
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Start">
-            <summary>
-            Starts the Plugin
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Stop">
-            <summary>
-            Stops the Plugin
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Blackboard">
-            <summary>
-            Gets the blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.CommandManager">
-            <summary>
-            When overriden in a derived class, gives access to the command manager which
-            manages the commands of this ModulePlugin
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Connector">
-            <summary>
-            Gets the connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Initialized">
-            <summary>
-            Gets a value indicaing if the plugin has been initialized
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.IsRunning">
-            <summary>
-            Gets a value indicating if the Plugin is running
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.ModuleName">
-            <summary>
-            Gets the name of the module that this IMessageSource object interfaces.
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Name">
-            <summary>
-            Gets the name of the Plugin
-            </summary>
-        </member>
-        <member name="T:Blk.Api.SharedVariables.ISharedVariable">
-            <summary>
-            Represents a stored shared variable
-            </summary>
-        </member>
-        <member name="M:Blk.Api.SharedVariables.ISharedVariable.GetInfo">
-            <summary>
-            Gets a standard SharedVariableInfo for serialization
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.AllowedWriters">
-            <summary>
-            Gets the list of names of modules which are allowed to write to the var
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.CreationTime">
-            <summary>
-            Gets the creation time of the shared variable
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Dynamic">
-            <summary>
-            Gets a value indicating if the SharedVariable can be dynamically resized
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.IsArray">
-            <summary>
-            Gets a value indicating if the variable is an array
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Name">
-            <summary>
-            Gets the name of the SharedVariable
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Owner">
-            <summary>
-            Gets the IModule object which this SharedVariable object is bound to
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Size">
-            <summary>
-            Gets the size of the SharedVariable
-            </summary>
-        </member>
-        <member name="P:Blk.Api.SharedVariables.ISharedVariable.Type">
-            <summary>
-            Gets the type of the variable
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IModuleBlackboard">
-            <summary>
-            Implements a ModuleBlackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleBlackboard.SharedVariables">
-            <summary>
-            Gets the list of shared variables
-            </summary>
-        </member>
-        <member name="T:Blk.Api.IPrototypeCollection">
-            <summary>
-            Provides a collection container that enables Modules instances to maintain a list of their Message IPrototypes
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IPrototypeCollection.Contains(System.String)">
-            <summary>
-            Determines whether the specified IPrototype is in the parent Module's IPrototypeCollection object
-            </summary>
-            <param name="commandName">The name of the IPrototype to search for in the collection</param>
-            <returns>true if the specified IPrototype exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="M:Blk.Api.IPrototypeCollection.ToArray">
-            <summary>
-            Copies the content of the collection to a fixed length array
-            </summary>
-            <returns>A copy of the content of the collection</returns>
-        </member>
-        <member name="M:Blk.Api.IPrototypeCollection.Remove(System.String)">
-            <summary>
-            Removes the specified Prototype from the parent Module's PrototypeCollection object
-            </summary>
-            <param name="commandName">The Prototype's name to be removed</param>
-            <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="P:Blk.Api.IPrototypeCollection.Owner">
-            <summary>
-            Gets the module to which the IPrototypeCollection object belongs
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IPrototypeCollection.Item(System.String)">
-            <summary>
-            Gets the element with the specified name
-            </summary>
-            <param name="commandName">The name of the module element to get or set</param>
-            <returns>The module with specified name</returns>
-        </member>
-        <member name="E:Blk.Api.IPrototypeCollection.PrototypeCollectionStatusChanged">
-            <summary>
-            Occurs when the content of the collection changes
+            Serves as base class for a module application which connects with the blackboard as a Plugin
             </summary>
         </member>
     </members>

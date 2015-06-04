@@ -13,8 +13,6 @@ namespace Blk.Gui
 		[STAThread]
 		static void Main(string[] args)
 		{
-			string pName = Process.GetCurrentProcess().ProcessName;
-			Process[] p = Process.GetProcessesByName(pName);
 #if !DEBUG
 			if (Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Length > 1) return;
 #endif

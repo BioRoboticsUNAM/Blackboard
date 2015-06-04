@@ -31,11 +31,13 @@ namespace Blk.Engine
 		/// </summary>
 		private readonly ProducerConsumer<string> dataReceived;
 
+		/*
 		/// <summary>
 		/// Regular expression used to parse SetupModule command arguments
 		/// </summary>
 		private static readonly Regex rxSetupModule =
 			new Regex(@"(?<moduleName>[A-Z][A-Z\-]+[A-Z])\s+ip\s*=\s*(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+port\s*=\s*(?<port>\d{4,5})", RegexOptions.Compiled);
+		*/
 
 		#endregion
 
