@@ -56,14 +56,12 @@
     <Compile Include="Message.cs" />
     <Compile Include="ModuleClient.cs" />
     <Compile Include="ModuleBlackboard.cs" />
-    <Compile Include="ModuleClientPlugin.cs" />
     <Compile Include="ModuleClientTcp.cs" />
     <Compile Include="ModuleCollection.cs" />
     <Compile Include="ModuleConverter.cs" />
     <Compile Include="ModuleProcessInfo.cs" />
     <Compile Include="ModuleSimulationOptions.cs" />
     <Compile Include="Parser.cs" />
-    <Compile Include="BlackboardPluginManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Prototype.cs" />

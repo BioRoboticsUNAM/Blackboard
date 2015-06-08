@@ -213,11 +213,6 @@
             Gets an array of commands pending to send
             </summary>
         </member>
-        <member name="P:Blk.Api.IBlackboard.PluginManager">
-            <summary>
-            Gets the plugins which interacts with the Blackboard
-            </summary>
-        </member>
         <member name="P:Blk.Api.IBlackboard.Port">
             <summary>
             Gets the port when the blackboard accept incomming connections
@@ -346,32 +341,6 @@
             The conversion fails if the s parameter is a null reference (Nothing in Visual Basic) or is not of the correct format.
             This parameter is passed uninitialized</param>
             <returns>true if a destination module was found, false otherwise</returns>
-        </member>
-        <member name="T:Blk.Api.IBlackboardPlugin">
-            <summary>
-            Represents a plugin for the blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboardPlugin.Blackboard">
-            <summary>
-            The blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IBlackboardPlugin.AttachBlackboard(Blk.Api.IBlackboard)">
-            <summary>
-            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
-            </summary>
-            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
-        </member>
-        <member name="T:Blk.Api.IBlackboardPluginManager">
-            <summary>
-            Represents a PluginManager interfaced with a Blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IBlackboardPluginManager.Owner">
-            <summary>
-            The blackboard this IPluginManager is bound to
-            </summary>
         </member>
         <member name="T:Blk.Api.IModuleClient">
             <summary>
@@ -565,17 +534,6 @@
             Gets the list of shared variables
             </summary>
         </member>
-        <member name="T:Blk.Api.IModuleClientPlugin">
-            <summary>
-            Represents a ModuleClient for interfacing module applications running as plugins
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClientPlugin.Receive(System.String)">
-            <summary>
-            Receives a message and enqueues it for processing and redirection
-            </summary>
-            <param name="message">The message to receive</param>
-        </member>
         <member name="T:Blk.Api.IModuleClientTcp">
             <summary>
             Represents a blackboard module interface which connects to a remote module via TCP/IP
@@ -656,45 +614,6 @@
             Removes a Module, at the specified index location, from the ModuleCollection object
             </summary>
             <param name="index">The ordinal index of the Module to be removed from the collection</param>
-        </member>
-        <member name="T:Blk.Api.IModulePlugin">
-            <summary>
-            Represents a plugin which will act as a module
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.Blackboard">
-            <summary>
-            Gets the blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.CommandManager">
-            <summary>
-            When overriden in a derived class, gives access to the command manager which
-            manages the commands of this ModulePlugin
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.Connector">
-            <summary>
-            Gets the connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModulePlugin.ModuleName">
-            <summary>
-            Gets the name of the module that this IMessageSource object interfaces.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
-            <summary>
-            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
-            </summary>
-            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
-        </member>
-        <member name="M:Blk.Api.IModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Attaches a IModuleClient object which will be used to communicate with blackboard
-            </summary>
-            <param name="moduleClient">
-            </param>
         </member>
         <member name="T:Blk.Api.IModuleProcessInfo">
             <summary>
@@ -858,152 +777,6 @@
             </summary>
             <param name="commandName">The Prototype's name to be removed</param>
             <returns>true if the specified Prototype exists in the collection; otherwise, false</returns>
-        </member>
-        <member name="T:Blk.Api.ModulePlugin">
-            <summary>
-            Serves as base class for implementing a plugin which will act as a module
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ModulePlugin.blackboard">
-            <summary>
-            The blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="F:Blk.Api.ModulePlugin.connector">
-            <summary>
-            The connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Blackboard">
-            <summary>
-            Gets the blackboard this Plugin is bound to
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.CommandManager">
-            <summary>
-            When overriden in a derived class, gives access to the command manager which
-            manages the commands of this ModulePlugin
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Connector">
-            <summary>
-            Gets the connector object used to communicate with blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Initialized">
-            <summary>
-            Gets a value indicaing if the plugin has been initialized
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.IsRunning">
-            <summary>
-            Gets a value indicating if the Plugin is running
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.ModuleName">
-            <summary>
-            Gets the name of the module that this IMessageSource object interfaces.
-            </summary>
-        </member>
-        <member name="P:Blk.Api.ModulePlugin.Name">
-            <summary>
-            Gets the name of the Plugin
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.AttachBlackboard(Blk.Api.IBlackboard)">
-            <summary>
-            Attaches a Blackboard object to the plugin. If a blackboard is already attached, it throws an exception
-            </summary>
-            <param name="blackboard">The blackboard object which will be used to initialize the plugin</param>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.AttachClient(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Attaches a IModuleClient object which will be used to communicate with blackboard
-            </summary>
-            <param name="moduleClient">
-            </param>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Initialize">
-            <summary>
-            Initializes the plugin
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Start">
-            <summary>
-            Starts the Plugin
-            </summary>
-        </member>
-        <member name="M:Blk.Api.ModulePlugin.Stop">
-            <summary>
-            Stops the Plugin
-            </summary>
-        </member>
-        <member name="T:Blk.Api.PluginConnector">
-            <summary>
-            Implements message communication with blackboard via plugin interface
-            </summary>
-        </member>
-        <member name="F:Blk.Api.PluginConnector.moduleClient">
-            <summary>
-            The IModuleClient intance with which this instance communicates
-            </summary>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.#ctor(Blk.Api.IModuleClientPlugin)">
-            <summary>
-            Initializes a new instance of PluginConnector
-            </summary>
-            <param name="moduleClient">The module client in the blackboard to connect with</param>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.ModuleClient">
-            <summary>
-            Gets the IModuleClient instance with which this instance communicates
-            </summary>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.IsConnected">
-            <summary>
-            Gets a value indicating if the connector is connected to the message source
-            </summary>
-        </member>
-        <member name="P:Blk.Api.PluginConnector.ModuleName">
-            <summary>
-            Returns the ModuleName property of the asociated IConnectionManager object
-            </summary>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Parse(Blk.Api.ITextMessage)">
-            <summary>
-            Parses a received message
-            </summary>
-            <param name="message">String received</param>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.ReceiveResponse(Robotics.API.Response)">
-            <summary>
-            Redirects a received response from the command manager
-            </summary>
-            <param name="response">The received response</param>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Command)">
-            <summary>
-            Sends a command to the Blackboard
-            </summary>
-            <param name="command">Command to be sent</param>
-            <returns>true if the command was sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Send(Robotics.API.Response)">
-            <summary>
-            Sends a response to the Blackboard
-            </summary>
-            <param name="response">Response to be sent</param>
-            <returns>true if the response was sent, false otherwise</returns>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Start">
-            <summary>
-            Starts the parser
-            </summary>
-        </member>
-        <member name="M:Blk.Api.PluginConnector.Stop">
-            <summary>
-            Stops the parser
-            </summary>
         </member>
         <member name="T:Blk.Api.SharedVariables.ISharedVariable">
             <summary>
@@ -1246,11 +1019,6 @@
         <member name="P:Blk.Api.ITextResponse.FailReason">
             <summary>
             Gets the reason for which the command was not executed generating a failed response
-            </summary>
-        </member>
-        <member name="T:Blk.Api.SharedVariables.ModuleApplicationPlugin">
-            <summary>
-            Serves as base class for a module application which connects with the blackboard as a Plugin
             </summary>
         </member>
     </members>

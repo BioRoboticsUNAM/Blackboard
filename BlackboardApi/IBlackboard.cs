@@ -50,11 +50,6 @@ namespace Blk.Api
 		ITextCommand[] PendingCommands { get; }
 
 		/// <summary>
-		/// Gets the plugins which interacts with the Blackboard
-		/// </summary>
-		IBlackboardPluginManager PluginManager { get; }
-
-		/// <summary>
 		/// Gets the port when the blackboard accept incomming connections
 		/// </summary>
 		int Port { get; set; }

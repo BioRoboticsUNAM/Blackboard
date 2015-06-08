@@ -11,8 +11,8 @@ PREFIX = Blackboard
 SOLUTION     = $(PREFIX).sln
 PATH_DEBUG   = bin/Debug
 PATH_RELEASE = bin/Release
-BIN_DEBUG    = $(PATH_DEBUG)/$(PREFIX).exe
-BIN_RELEASE  = $(PATH_RELEASE)/$(PREFIX).exe
+BIN_DEBUG    = "Blackboard/$(PATH_DEBUG)/$(PREFIX).exe"
+BIN_RELEASE  = "Blackboard/$(PATH_RELEASE)/$(PREFIX).exe"
 XBUILDFLAGS  = /verbosity:minimal /p:Platform="Any CPU"
 DEBUG        = $(XBUILDFLAGS) /p:OutputPath="$(PATH_DEBUG)" /p:Configuration=Debug
 RELEASE      = $(XBUILDFLAGS) /p:OutputPath="$(PATH_RELEASE)" /p:Configuration=Release
