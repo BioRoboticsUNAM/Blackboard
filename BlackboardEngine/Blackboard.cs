@@ -59,6 +59,10 @@ namespace Blk.Engine
 		/// Indicates when a RestartTest is requested
 		/// </summary>
 		private bool restartTestRequested;
+		/// <summary>
+		/// Plugins repository
+		/// </summary>
+		private BlackboardPluginManager pluginManager;
 
 		/// <summary>
 		/// Manages the excecution sequence of the module programs
@@ -183,6 +187,7 @@ namespace Blk.Engine
 			this.autoStopTime = TimeSpan.MinValue;
 			this.startupSequence = new StartupSequenceManager(this);
 			this.shutdownSequence = new ShutdownSequenceManager(this);
+			this.pluginManager = new BlackboardPluginManager(this);
 
 			this.mainThreadRunningEvent = new ManualResetEvent(false);
 			this.parserThreadRunningEvent = new ManualResetEvent(false);
@@ -267,6 +272,14 @@ namespace Blk.Engine
 		ITextCommand[] IBlackboard.PendingCommands
 		{
 			get { return commandsPending.ToArray(); }
+		}
+
+		/// <summary>
+		/// Gets the Plugins repository where blackboard plugins are stored
+		/// </summary>
+		public IBlackboardPluginManager PluginManager
+		{
+			get { return this.pluginManager; }
 		}
 
 		/// <summary>
@@ -1364,6 +1377,7 @@ namespace Blk.Engine
 			int i;
 			int retrySendCount = 0;
 			List<ModuleClient> modulesPendingToStop;
+			IAsyncResult stopPluginsAsyncResult = null;
 			//Response[] aResponses;
 			//Command c;
 			//Response r;
@@ -1372,6 +1386,8 @@ namespace Blk.Engine
 			RunningStatus = BlackboardRunningStatus.Starting;
 			Log.WriteLine(4, "Main Thread: Running");
 
+			// Start Plugins
+			StartPlugins();
 			// Start Client Modules
 			StartModules();
 			// Start TCP Server and clear queues
@@ -1518,6 +1534,12 @@ namespace Blk.Engine
 
 			#endregion
 
+			#region Begin to stop Plugins
+
+			stopPluginsAsyncResult = BeginStopPlugins();
+
+			#endregion
+
 			#region Stop TCP server
 
 			// Stop TCP server
@@ -1557,6 +1579,12 @@ namespace Blk.Engine
 
 			#endregion
 
+			#region Wait for Plugins to stop
+
+			EndStopPlugins(stopPluginsAsyncResult);
+
+			#endregion
+
 			this.mainThreadRunningEvent.Reset();
 			Log.WriteLine(4, "Main Thread: Stopped");
 			RunningStatus = BlackboardRunningStatus.Stopped;
@@ -1589,6 +1617,20 @@ namespace Blk.Engine
 		}
 
 		/// <summary>
+		/// Initialize and starts the plugins
+		/// </summary>
+		private void StartPlugins()
+		{
+			if (this.pluginManager.Count > 0)
+			{
+				Log.WriteLine(4, "Initializing plugins");
+				pluginManager.InitializePlugins();
+				Log.WriteLine(4, "Starting plugins");
+				pluginManager.BeginStartPlugins(null, null);
+			}
+		}
+
+		/// <summary>
 		/// Starts the blackboard tcp server
 		/// </summary>
 		private void StartServer()
@@ -1612,6 +1654,31 @@ namespace Blk.Engine
 					foreach (ModuleClient module in modules)
 						if (!module.IsRunning) module.BeginStop();
 				}
+			}
+		}
+
+		/// <summary>
+		/// Request plugins to stop
+		/// </summary>
+		private IAsyncResult BeginStopPlugins()
+		{
+			if (this.pluginManager.Count > 0)
+			{
+				Log.WriteLine(4, "Stopping plugins");
+				return this.pluginManager.BeginStopPlugins(null, null);
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Wait until plugins has been stopped
+		/// </summary>
+		private void EndStopPlugins(IAsyncResult stopPluginsAsyncResult)
+		{
+			if ((this.pluginManager.Count > 0) && (stopPluginsAsyncResult != null))
+			{
+				this.pluginManager.EndStopPlugins(stopPluginsAsyncResult);
+				Log.WriteLine(4, "Plugins stopped");
 			}
 		}
 

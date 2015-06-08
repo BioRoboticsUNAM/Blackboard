@@ -677,6 +677,34 @@ namespace Blk.Gui
 			return true;
 		}
 
+		private void LoadPlugins()
+		{
+			string pluginsPath;
+			pluginsPath = Path.Combine(Application.StartupPath, "Plugins");
+			LoadPlugins(pluginsPath);
+		}
+
+		private void LoadPlugins(string pluginsPath)
+		{
+			try
+			{
+				if (Directory.Exists(pluginsPath))
+					blackboard.PluginManager.LoadPlugins(pluginsPath);
+			}
+#if DEBUG
+			catch (Exception ex) {
+				MessageBox.Show(ex.Message);
+			}
+#else
+			catch {}
+#endif
+			mnuiPlugins.DropDownItems.Clear();
+			foreach (IBlackboardPlugin plugin in blackboard.PluginManager)
+			{
+				mnuiPlugins.DropDownItems.Add(plugin.Name);
+			}
+		}
+
 		private void LoadSettings()
 		{
 			if (bbConfigFile == null)
@@ -911,6 +939,7 @@ namespace Blk.Gui
 			blackboard = Blackboard.FromXML(ConfigFile, log);
 			blackboard.VerbosityLevel = 1;
 			//blackboard = Blackboard.FromXML("bb.xml");
+			LoadPlugins();
 			interactionTool.Blackboard = blackboard;
 			SetupBlackboardModules();
 			SetupBlackboardEvents();
@@ -1458,6 +1487,8 @@ namespace Blk.Gui
 			if (AutoStart && File.Exists(bbConfigFile))
 				LoadBlackboard(bbConfigFile);
 			frmBbss.Show();
+
+			//LoadPluginsFromManagedDll(Path.Combine("Plugins", "PluginExample.dll"));
 		}
 
 		private void chkAutoLog_CheckedChanged(object sender, EventArgs e)
@@ -2262,5 +2293,40 @@ namespace Blk.Gui
 		#endregion
 
 		#endregion
+
+
+		/// <summary>
+		/// Loads plugins from a managed Dll file
+		/// </summary>
+		/// <param name="dll">A DllInfo object which contains information about the file which contains the plugins to load</param>
+		protected virtual void LoadPluginsFromManagedDll(string path)
+		{
+			System.Reflection.Assembly assembly;
+			Type[] types;
+			List<IBlackboardPlugin> pluginList = new List<IBlackboardPlugin>();
+			IBlackboardPlugin instance;
+
+			//assembly = System.Reflection.Assembly.LoadFrom(path);
+			assembly = System.Reflection.Assembly.LoadFile(Path.Combine(Application.StartupPath, path));
+
+			if (assembly.ManifestModule.Name == "Robotics.dll")
+				return;
+			types = assembly.GetTypes();
+
+			foreach (Type type in types)
+			{
+				if ((type.GetInterface("IBlackboardPlugin") == null) || type.IsAbstract)
+					continue;
+
+				//try
+				//{
+				//instance = (Plugin)Activator.CreateInstance(type);
+				instance = (IBlackboardPlugin)assembly.CreateInstance(type.FullName);
+				//instance = (Plugin) AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(dll.FilePath, type.FullName);
+				pluginList.Add(instance);
+				//}
+				//catch { continue; }
+			}
+		}
 	}
 }

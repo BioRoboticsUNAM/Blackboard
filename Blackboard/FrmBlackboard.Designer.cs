@@ -145,6 +145,7 @@ namespace Blk.Gui
 			this.mnuiBlackboard_Separator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.mnuiBlackboard_Exit = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuiModules = new System.Windows.Forms.ToolStripMenuItem();
+			this.mnuiPlugins = new System.Windows.Forms.ToolStripMenuItem();
 			this.cbModuleShutdownMode = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.btnSutdownSequence = new System.Windows.Forms.Button();
@@ -1218,7 +1219,8 @@ namespace Blk.Gui
 			// 
 			this.mainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuiBlackboard,
-            this.mnuiModules});
+            this.mnuiModules,
+            this.mnuiPlugins});
 			this.mainMenu.Location = new System.Drawing.Point(0, 0);
 			this.mainMenu.Name = "mainMenu";
 			this.mainMenu.Size = new System.Drawing.Size(838, 24);
@@ -1339,6 +1341,12 @@ namespace Blk.Gui
 			this.mnuiModules.Name = "mnuiModules";
 			this.mnuiModules.Size = new System.Drawing.Size(65, 20);
 			this.mnuiModules.Text = "&Modules";
+			// 
+			// mnuiPlugins
+			// 
+			this.mnuiPlugins.Name = "mnuiPlugins";
+			this.mnuiPlugins.Size = new System.Drawing.Size(58, 20);
+			this.mnuiPlugins.Text = "&Plugins";
 			// 
 			// cbModuleShutdownMode
 			// 
@@ -1563,6 +1571,7 @@ namespace Blk.Gui
 		private System.Windows.Forms.ToolStripMenuItem mnuiBlackboard_StartStop;
 		private System.Windows.Forms.ToolStripSeparator mnuiBlackboard_Separator1;
 		private System.Windows.Forms.ToolStripMenuItem mnuiBlackboard_Exit;
+		private System.Windows.Forms.ToolStripMenuItem mnuiPlugins;
 		private System.Windows.Forms.ToolStripSeparator mnuiBlackboard_Separator2;
 		private System.Windows.Forms.ToolStripMenuItem mnuiBlackboard_Reload;
 		private System.Windows.Forms.ToolStripMenuItem mnuiBlackboard_Restart;
