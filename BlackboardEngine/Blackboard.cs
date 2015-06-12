@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Net;
-using System.Net.Sockets;
 using System.IO;
 using System.Xml;
 
@@ -12,6 +11,7 @@ using Blk.Engine.Actions;
 using Blk.Engine.Remote;
 using Blk.Engine.SharedVariables;
 using Robotics;
+using Robotics.Sockets;
 using Robotics.Utilities;
 
 
@@ -75,7 +75,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Connection socket to the Blackboard
 		/// </summary>
-		private SocketTcpServer server;
+		private TcpServer server;
 		/// <summary>
 		/// Port where to accept incomming connections
 		/// </summary>
@@ -169,8 +169,8 @@ namespace Blk.Engine
 			this.prototypesLock = new ReaderWriterLock();
 			//modules.ModuleAdded += new ModuleClientAddRemoveEH(modules_ModuleAdded);
 			//modules.ModuleRemoved += new ModuleClientAddRemoveEH(modules_ModuleRemoved);
-			this.modules.ModuleAdded += new IModuleAddRemoveEH(modules_ModuleAdded);
-			this.modules.ModuleRemoved += new IModuleAddRemoveEH(modules_ModuleRemoved);
+			this.modules.ModuleAdded += new Action<IModuleClient>(modules_ModuleAdded);
+			this.modules.ModuleRemoved += new Action<IModuleClient>(modules_ModuleRemoved);
 			this.commandsPending = new ProducerConsumer<Command>(1000);
 			this.commandsWaiting = new List<Command>(100);
 			this.responses = new List<Response>(100);
@@ -439,11 +439,11 @@ namespace Blk.Engine
 		/// <summary>
 		/// Raises when a client connects to Blackboard TCPServer
 		/// </summary>
-		public event TcpClientConnectedEventHandler ClientConnected;
+		public event EventHandler<TcpServer, IPEndPoint> ClientConnected;
 		/// <summary>
 		/// Raises when a client disconnects from Blackboard TCPServer
 		/// </summary>
-		public event TcpClientDisconnectedEventHandler ClientDisconnected;
+		public event EventHandler<TcpServer, IPEndPoint> ClientDisconnected;
 		/// <summary>
 		/// Raises when a Blackboard Module connects to the remote module
 		/// </summary>
@@ -455,7 +455,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Raises when this blackboard changes its status
 		/// </summary>
-		public event BlackboardStatusChangedEH StatusChanged;
+		public event Action<IBlackboard> StatusChanged;
 		/// <summary>
 		/// Raises when a Response for a received command is redirected
 		/// </summary>
@@ -654,10 +654,10 @@ namespace Blk.Engine
 		/// </summary>
 		private void SetupServer()
 		{
-			server = new SocketTcpServer(port);
-			server.ClientConnected += new TcpClientConnectedEventHandler(server_ClientConnected);
-			server.ClientDisconnected += new TcpClientDisconnectedEventHandler(server_ClientDisconnected);
-			server.DataReceived += new TcpDataReceivedEventHandler(server_DataReceived);
+			server = new TcpServer(port);
+			server.ClientConnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientConnected);
+			server.ClientDisconnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientDisconnected);
+			server.DataReceived += new EventHandler<TcpServer, TcpPacket>(server_DataReceived);
 		}
 
 		#endregion
@@ -1686,10 +1686,10 @@ namespace Blk.Engine
 			IPrototype[] aProto = module.Prototypes.ToArray();
 			foreach (IPrototype proto in aProto)
 				AddPrototype(module, proto);
-			module.CommandReceived += new CommandReceivedEH(module_CommandReceived);
-			module.ResponseReceived += new ResponseReceivedEH(module_ResponseReceived);
-			module.Started += new StatusChangedEH(module_Started);
-			module.Stopped += new StatusChangedEH(module_Stopped);
+			module.CommandReceived += new EventHandler<IModuleClient, ITextCommand>(module_CommandReceived);
+			module.ResponseReceived += new EventHandler<IModuleClient, ITextResponse>(module_ResponseReceived);
+			module.Started += new Action<IModuleClient>(module_Started);
+			module.Stopped += new Action<IModuleClient>(module_Stopped);
 			Log.WriteLine(1, "Added module: " + module.Name);
 		}
 
@@ -1708,8 +1708,8 @@ namespace Blk.Engine
 			IPrototype[] aProto = module.Prototypes.ToArray();
 			foreach (IPrototype proto in aProto)
 				RemovePrototype(proto);
-			module.CommandReceived -= new CommandReceivedEH(module_CommandReceived);
-			module.ResponseReceived -= new ResponseReceivedEH(module_ResponseReceived);
+			module.CommandReceived -= new EventHandler<IModuleClient, ITextCommand>(module_CommandReceived);
+			module.ResponseReceived -= new EventHandler<IModuleClient, ITextResponse>(module_ResponseReceived);
 			Log.WriteLine(1, "Removed module: " + module.Name);
 		}
 
@@ -1779,7 +1779,7 @@ namespace Blk.Engine
 		/// Handles the received data trough blackboard Tcp Socket Server
 		/// </summary>
 		/// <param name="p">Tcp Packet received</param>
-		private void server_DataReceived(TcpPacket p)
+		private void server_DataReceived(TcpServer server, TcpPacket p)
 		{
 			if (p.IsAnsi)
 			{
@@ -1794,12 +1794,12 @@ namespace Blk.Engine
 		/// Handles the ClientConnected event when a Tcp Client connects to the blackboard
 		/// </summary>
 		/// <param name="s">Connection Socket</param>
-		private void server_ClientConnected(Socket s)
+		private void server_ClientConnected(TcpServer server, IPEndPoint ep)
 		{
-			if (ClientConnected != null) ClientConnected(s);
 			try
 			{
-				Log.WriteLine(4, "Client " + ((IPEndPoint)s.RemoteEndPoint).ToString() + " connected to Blackboard server ");
+				if (ClientConnected != null) ClientConnected(server, ep);
+				Log.WriteLine(4, "Client " + ep.ToString() + " connected to Blackboard server ");
 			}
 			catch { }
 		}
@@ -1808,11 +1808,11 @@ namespace Blk.Engine
 		/// Handles the ClientDisconnected event when a Tcp Client disconnects from the blackboard
 		/// </summary>
 		/// <param name="ep">Disconnection endpoint</param>
-		private void server_ClientDisconnected(EndPoint ep)
+		private void server_ClientDisconnected(TcpServer server, IPEndPoint ep)
 		{
-			if (ClientDisconnected != null) ClientDisconnected(ep);
 			try
 			{
+				if (ClientDisconnected != null) ClientDisconnected(server, ep);
 				Log.WriteLine(5, "Client " + (ep.ToString() + " disconnected from Blackboard server "));
 			}
 			catch { }

@@ -1,9 +1,11 @@
 using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using System.Xml;
 using Blk.Api;
+
+using Robotics;
+using Robotics.Sockets;
 
 namespace Blk.Engine.Actions
 {
@@ -131,10 +133,10 @@ namespace Blk.Engine.Actions
 		/// <returns>true if the action was executed successfully. false otherwise</returns>
 		private bool ExecuteSync()
 		{
-			SocketTcpClient client;
+			TcpClient client;
 			try
 			{
-				client = new SocketTcpClient(address, port);
+				client = new TcpClient(address, port);
 				if (!client.TryConnect()) return false;
 				client.Send(textToSend);
 				client.Disconnect();

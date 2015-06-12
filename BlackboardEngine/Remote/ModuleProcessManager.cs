@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using Blk.Engine;
+using Robotics;
+using Robotics.Sockets;
 using Robotics.Utilities;
 using Blk.Api;
 
@@ -185,7 +187,7 @@ namespace Blk.Engine.Remote
 		{
 			RemoteCheckRequest request;
 			RemoteCheckResponse response;
-			SocketTcpClient client;
+			TcpClient client;
 			AutoResetEvent dataReceivedEvent;
 			string serialized;
 
@@ -193,7 +195,7 @@ namespace Blk.Engine.Remote
 			client = null;
 			foreach (IPAddress ip in mc.ServerAddresses)
 			{
-				client = new SocketTcpClient(ip, 2300);
+				client = new TcpClient(ip, 2300);
 				if (client.TryConnect())
 					break;
 			}
@@ -204,9 +206,9 @@ namespace Blk.Engine.Remote
 			}
 
 			dataReceivedEvent = new AutoResetEvent(false);
-			client.DataReceived += new TcpDataReceivedEventHandler(delegate(TcpPacket packet)
+			client.DataReceived += new EventHandler<TcpClient, TcpPacket>(delegate(TcpClient c, TcpPacket packet)
 			{
-				response = RemoteCheckResponse.FromXml(packet.DataString);
+				response = RemoteCheckResponse.FromXml(UTF8Encoding.UTF8.GetString(packet.Data));
 				dataReceivedEvent.Set();
 			});
 
@@ -248,8 +250,6 @@ namespace Blk.Engine.Remote
 			{
 				if ((client != null) && client.IsConnected)
 					client.Disconnect();
-				if (client.Socket != null)
-					client.Socket.Close();
 			}
 		}
 
@@ -262,7 +262,7 @@ namespace Blk.Engine.Remote
 		{
 			RemoteShutdownRequest request;
 			RemoteShutdownResponse response;
-			SocketTcpClient client;
+			TcpClient client;
 			AutoResetEvent dataReceivedEvent;
 			string serialized;
 
@@ -270,7 +270,7 @@ namespace Blk.Engine.Remote
 			client = null;
 			foreach (IPAddress ip in mc.ServerAddresses)
 			{
-				client = new SocketTcpClient(ip, 2300);
+				client = new TcpClient(ip, 2300);
 				if (client.TryConnect())
 					break;
 			}
@@ -281,9 +281,9 @@ namespace Blk.Engine.Remote
 			}
 
 			dataReceivedEvent = new AutoResetEvent(false);
-			client.DataReceived += new TcpDataReceivedEventHandler(delegate(TcpPacket packet)
+			client.DataReceived += new EventHandler<TcpClient, TcpPacket>(delegate(TcpClient c, TcpPacket packet)
 			{
-				response = RemoteShutdownResponse.FromXml(packet.DataString);
+				response = RemoteShutdownResponse.FromXml(UTF8Encoding.UTF8.GetString(packet.Data));
 				dataReceivedEvent.Set();
 			});
 
@@ -326,8 +326,6 @@ namespace Blk.Engine.Remote
 			{
 				if ((client != null) && client.IsConnected)
 					client.Disconnect();
-				if (client.Socket != null)
-					client.Socket.Close();
 			}
 		}
 
@@ -340,7 +338,7 @@ namespace Blk.Engine.Remote
 		{
 			RemoteStartupRequest request;
 			RemoteStartupResponse response;
-			SocketTcpClient client;
+			TcpClient client;
 			AutoResetEvent dataReceivedEvent;
 			string serialized;
 
@@ -348,7 +346,7 @@ namespace Blk.Engine.Remote
 			client = null;
 			foreach (IPAddress ip in mc.ServerAddresses)
 			{
-				client = new SocketTcpClient(ip, 2300);
+				client = new TcpClient(ip, 2300);
 				if (client.TryConnect())
 					break;
 			}
@@ -359,9 +357,9 @@ namespace Blk.Engine.Remote
 			}
 
 			dataReceivedEvent = new AutoResetEvent(false);
-			client.DataReceived += new TcpDataReceivedEventHandler(delegate(TcpPacket packet)
+			client.DataReceived += new EventHandler<TcpClient, TcpPacket>(delegate(TcpClient c, TcpPacket packet)
 			{
-				response = RemoteStartupResponse.FromXml(packet.DataString);
+				response = RemoteStartupResponse.FromXml(UTF8Encoding.UTF8.GetString(packet.Data));
 				dataReceivedEvent.Set();
 			});
 
@@ -404,8 +402,6 @@ namespace Blk.Engine.Remote
 			{
 				if ((client != null) && client.IsConnected)
 					client.Disconnect();
-				if (client.Socket != null)
-					client.Socket.Close();
 			}
 		}
 

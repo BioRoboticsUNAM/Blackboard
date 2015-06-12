@@ -1159,8 +1159,8 @@ namespace Blk.Engine
 		// /// <param name="sender">Unused</param>
 		protected override void MainThreadTask()
 		{
-			StatusChangedEH busyEH;
-			StatusChangedEH readyEH;
+			Action<IModuleClient> busyEH;
+			Action<IModuleClient> readyEH;
 			ModuleConnectionEH connectedStatusEH;
 
 			stopMainThread = false;
@@ -1171,8 +1171,8 @@ namespace Blk.Engine
 
 			#region Setup EventHandlers
 
-			busyEH = new StatusChangedEH(module_BusyChanged);
-			readyEH = new StatusChangedEH(module_ReadyChanged);
+			busyEH = new Action<IModuleClient>(module_BusyChanged);
+			readyEH = new Action<IModuleClient>(module_ReadyChanged);
 			connectedStatusEH = new ModuleConnectionEH(module_ConnectedStatusChanged);
 			if (this.Parent != null)
 			{

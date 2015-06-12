@@ -42,12 +42,12 @@ namespace Blk.Api
 		/// <summary>
 		/// Raises when a IModule is addedd to the ModuleCollection
 		/// </summary>
-		event IModuleAddRemoveEH ModuleAdded;
+		event Action<IModuleClient> ModuleAdded;
 
 		/// <summary>
 		/// Raises when a IModule is removed from the ModuleCollection
 		/// </summary>
-		event IModuleAddRemoveEH ModuleRemoved;
+		event Action<IModuleClient> ModuleRemoved;
 
 		#endregion
 

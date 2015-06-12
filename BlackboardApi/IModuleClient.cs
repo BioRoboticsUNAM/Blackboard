@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Net;
+using Robotics;
 
 namespace Blk.Api
 {
@@ -112,42 +111,42 @@ namespace Blk.Api
 		/// <summary>
 		/// Occurs when the IsAlive property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH AliveChanged;
+		event Action<IModuleClient> AliveChanged;
 
 		/// <summary>
 		/// Occurs when the Busy property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH BusyChanged;
+		event Action<IModuleClient> BusyChanged;
 
 		/// <summary>
 		/// Occurs when a Command is received trough socket
 		/// </summary>
-		event CommandReceivedEH CommandReceived;
+		event EventHandler<IModuleClient, ITextCommand> CommandReceived;
 
 		/// <summary>
 		/// Occurs when a Response is received trough socket
 		/// </summary>
-		event ResponseReceivedEH ResponseReceived;
+		event EventHandler<IModuleClient, ITextResponse> ResponseReceived;
 
 		/// <summary>
 		/// Occurs when the Ready property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH ReadyChanged;
+		event Action<IModuleClient> ReadyChanged;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object changes
 		/// </summary>
-		event StatusChangedEH StatusChanged;
+		event Action<IModuleClient> StatusChanged;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object starts working
 		/// </summary>
-		event StatusChangedEH Started;
+		event Action<IModuleClient> Started;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object stops working
 		/// </summary>
-		event StatusChangedEH Stopped;
+		event Action<IModuleClient> Stopped;
 
 		#endregion
 

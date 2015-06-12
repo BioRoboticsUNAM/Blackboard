@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Net;
-using System.Net.Sockets;
 using System.IO;
 using System.Xml;
 
 using Robotics;
+using Robotics.Sockets;
 using Robotics.Utilities;
 
 namespace Blk.Api
@@ -113,12 +113,12 @@ namespace Blk.Api
 		/// <summary>
 		/// Raises when a client connects to Blackboard TCPServer
 		/// </summary>
-		event TcpClientConnectedEventHandler ClientConnected;
+		event EventHandler<TcpServer, IPEndPoint> ClientConnected;
 
 		/// <summary>
 		/// Raises when a client disconnects from Blackboard TCPServer
 		/// </summary>
-		event TcpClientDisconnectedEventHandler ClientDisconnected;
+		event EventHandler<TcpServer, IPEndPoint> ClientDisconnected;
 
 		/*
 		/// <summary>
@@ -135,7 +135,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Raises when this blackboard changes its status
 		/// </summary>
-		event BlackboardStatusChangedEH StatusChanged;
+		event Action<IBlackboard> StatusChanged;
 
 		/// <summary>
 		/// Raises when a Response for a received command is redirected

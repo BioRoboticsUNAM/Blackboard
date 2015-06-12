@@ -129,7 +129,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Occurs when the content of the collection changes
 		/// </summary>
-		public event PrototypeCollectionStatusChangedEH PrototypeCollectionStatusChanged;
+		public event Action<IPrototypeCollection> PrototypeCollectionStatusChanged;
 
 		#endregion
 

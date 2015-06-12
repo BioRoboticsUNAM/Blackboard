@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Robotics;
@@ -11,6 +10,7 @@ using Blk.Api;
 using Blk.Engine.Actions;
 using Blk.Engine.SharedVariables;
 using Robotics.Utilities;
+using Robotics.Sockets;
 
 namespace Blk.Engine
 {
@@ -664,12 +664,12 @@ namespace Blk.Engine
 		/// <summary>
 		/// Occurs when the IsAlive property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH AliveChanged;
+		public event Action<IModuleClient> AliveChanged;
 
 		/// <summary>
 		/// Occurs when the Busy property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH BusyChanged;
+		public event Action<IModuleClient> BusyChanged;
 
 		/// <summary>
 		/// Occurs when the Module connects to a Tcp Server
@@ -684,32 +684,32 @@ namespace Blk.Engine
 		/// <summary>
 		/// Occurs when a Command is received trough socket
 		/// </summary>
-		public event CommandReceivedEH CommandReceived;
+		public event EventHandler<IModuleClient, ITextCommand> CommandReceived;
 
 		/// <summary>
 		/// Occurs when the Ready property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH ReadyChanged;
+		public event Action<IModuleClient> ReadyChanged;
 
 		/// <summary>
 		/// Occurs when a Response is received trough socket
 		/// </summary>
-		public event ResponseReceivedEH ResponseReceived;
+		public event EventHandler<IModuleClient, ITextResponse> ResponseReceived;
 
 		/// <summary>
 		/// Occurs when the status of a Module object changes
 		/// </summary>
-		public event StatusChangedEH StatusChanged;
+		public event Action<IModuleClient> StatusChanged;
 
 		/// <summary>
 		/// Occurs when the status of a Module object starts working
 		/// </summary>
-		public event StatusChangedEH Started;
+		public event Action<IModuleClient> Started;
 
 		/// <summary>
 		/// Occurs when the status of a Module object stops working
 		/// </summary>
-		public event StatusChangedEH Stopped;
+		public event Action<IModuleClient> Stopped;
 
 		#endregion
 
