@@ -21,12 +21,17 @@ namespace Blk.Engine
 	{
 		#region Variables
 
-		#region Message flow vars
+		#region Parser vars
 
 		/// <summary>
-		/// Stores all data received trough socket
+		/// Stores all data received trough socket and produces strings from it
 		/// </summary>
-		protected ProducerConsumer<TcpPacket> dataReceived;
+		protected readonly TcpPacketParser packetParser;
+
+		/// <summary>
+		/// A thread which will be dedicated to parse messages and synchronously wait for new data
+		/// </summary>
+		private Thread parserThread;
 
 		#endregion
 
@@ -58,9 +63,10 @@ namespace Blk.Engine
 		/// <param name="name">Module name</param>
 		protected ModuleClientTcp(string name) : base (name)
 		{
-			this.dataReceived = new ProducerConsumer<TcpPacket>(100);
 			this.serverAddresses = new ServerAddressCollection(this);
 			this.port = 0;
+			this.packetParser = new TcpPacketParser(this);
+			this.packetParser.StringReceived += new Action<string>(packetParser_StringReceived);
 		}
 
 		/// <summary>
@@ -201,7 +207,7 @@ namespace Blk.Engine
 			Busy = true;
 
 			Unlock();
-			dataReceived.Clear();
+			packetParser.Stop();
 			if ((client != null) && client.IsOpen)
 			{
 				try { client.Disconnect(); }
@@ -219,7 +225,7 @@ namespace Blk.Engine
 			restartTestRequested = false;
 			Busy = true;
 			
-			dataReceived.Clear();
+			packetParser.Stop();
 			Unlock();
 			ExecuteRestartTestActions();
 
@@ -231,24 +237,7 @@ namespace Blk.Engine
 		/// </summary>
 		protected override void ParsePendingData()
 		{
-			TcpPacket packet;
-			string message;
-			int i;
-
-			do
-			{
-				packet = dataReceived.Consume(20);
-				if (packet == null)
-					return;
-				if (!packet.IsAnsi)
-					continue;
-				for (i = 0; i < packet.DataStrings.Length; ++i)
-				{
-					message = packet.DataStrings[i].Trim();
-
-					ParseMessage(message);
-				}
-			} while (!stopMainThread && dataReceived.Count > 0);
+			// Handled by packetParser_StringReceived
 		}
 
 		/// <summary>
@@ -380,7 +369,7 @@ namespace Blk.Engine
 		/// </summary>
 		protected override void MainThreadDisconnect()
 		{
-			this.dataReceived.Clear();
+			this.packetParser.Stop();
 			if ((client != null) && client.IsOpen)
 			{
 				try { client.Disconnect(); }
@@ -508,6 +497,11 @@ namespace Blk.Engine
 
 		#region Event Handler Functions
 
+		private void packetParser_StringReceived(string message)
+		{
+			ParseMessage(message);
+		}
+
 		#region Socket Event Handler Functions
 
 		/// <summary>
@@ -537,12 +531,13 @@ namespace Blk.Engine
 		/// Performs operations when the connection to remote application has ended
 		/// </summary>
 		/// <param name="ep">Disconnection endpoint</param>
-		protected void client_Disconnected(TcpClient client, EndPoint ep)
+		protected void client_Disconnected(TcpClient client, IPEndPoint ep)
 		{
 			OnDisconnected();
 			Busy = false;
 			Ready = false;
 			clearLockList = true;
+			packetParser.Stop(ep);
 			this.Parent.Log.WriteLine(9, this.Name + ": Client disconnected");
 		}
 
@@ -553,9 +548,9 @@ namespace Blk.Engine
 		protected void client_DataReceived(TcpClient client, TcpPacket p)
 		{
 			lastDataInTime = DateTime.Now;
-			dataReceived.Produce(p);
-			string dString = p.DataString;
+			packetParser.Enqueue(p);
 #if DEBUG
+			string dString = System.Text.UTF8Encoding.UTF8.GetString(p.Data, 0, Math.Min(50, p.Data.Length));
 			this.Parent.Log.WriteLine(9, this.Name + ": received " + p.Data.Length + "bytes {" + dString + "}");
 #endif
 		}
