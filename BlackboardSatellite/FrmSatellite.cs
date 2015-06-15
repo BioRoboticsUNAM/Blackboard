@@ -89,7 +89,7 @@ namespace BlackboardSatellite
 				packet = this.dataReceived.Consume(100);
 				if (packet == null)
 					continue;
-				foreach (string s in packet.DataStrings)
+				string s = System.Text.UTF8Encoding.UTF8.GetString(packet.Data);
 					Parse(s, packet.RemoteEndPoint);
 			}
 		}

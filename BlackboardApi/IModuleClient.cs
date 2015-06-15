@@ -6,7 +6,7 @@ namespace Blk.Api
 	/// <summary>
 	/// Provides the base connection interface for modules.
 	/// </summary>
-	public interface IModuleClient : IComparable<IModuleClient>
+	public interface IModuleClient : IService, IComparable<IModuleClient>
 	{
 		#region Properties
 
@@ -53,11 +53,6 @@ namespace Blk.Api
 		/// Gets a value indicating if the module is running in the same machine as the blackboard
 		/// </summary>
 		bool IsLocal { get; }
-
-		/// <summary>
-		/// Tells if the the IModule is running
-		/// </summary>
-		bool IsRunning { get; }
 
 		/// <summary>
 		/// Gets the name of the Module
@@ -157,18 +152,6 @@ namespace Blk.Api
 		/// If the IModuleConnector is not running, it has no effect.
 		/// </summary>
 		void BeginStop();
-
-		/// <summary>
-		/// Starts the socket connection and command management system.
-		/// If the IModuleConnector is already running, it has no effect.
-		/// </summary>
-		void Start();
-
-		/// <summary>
-		/// Stops the socket connection and command management system.
-		/// If the IModuleConnector is not running, it has no effect.
-		/// </summary>
-		void Stop();
 
 		/// <summary>
 		/// Sends a command to the module

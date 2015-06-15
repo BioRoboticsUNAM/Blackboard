@@ -2118,6 +2118,10 @@ namespace Blk.Engine
 					// in the ParsePendingData method.
 					// Thread.Sleep(1);
 				}
+				catch (ThreadInterruptedException)
+				{
+					continue;
+				}
 				catch (ThreadAbortException)
 				{
 					Thread.ResetAbort();

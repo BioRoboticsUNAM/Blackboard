@@ -123,18 +123,6 @@
             If the IModuleConnector is not running, it has no effect.
             </summary>
         </member>
-        <member name="M:Blk.Api.IModuleClient.Start">
-            <summary>
-            Starts the socket connection and command management system.
-            If the IModuleConnector is already running, it has no effect.
-            </summary>
-        </member>
-        <member name="M:Blk.Api.IModuleClient.Stop">
-            <summary>
-            Stops the socket connection and command management system.
-            If the IModuleConnector is not running, it has no effect.
-            </summary>
-        </member>
         <member name="M:Blk.Api.IModuleClient.Send(Blk.Api.ITextCommand)">
             <summary>
             Sends a command to the module
@@ -202,11 +190,6 @@
         <member name="P:Blk.Api.IModuleClient.IsLocal">
             <summary>
             Gets a value indicating if the module is running in the same machine as the blackboard
-            </summary>
-        </member>
-        <member name="P:Blk.Api.IModuleClient.IsRunning">
-            <summary>
-            Tells if the the IModule is running
             </summary>
         </member>
         <member name="P:Blk.Api.IModuleClient.Name">

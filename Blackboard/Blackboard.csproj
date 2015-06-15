@@ -213,7 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bb.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Images\BatteryIcons\ACPpow_24.png" />
     <None Include="Images\BatteryIcons\ACPpow_32.png" />

@@ -29,9 +29,10 @@ namespace Blk.Engine
 		protected readonly TcpPacketParser packetParser;
 
 		/// <summary>
-		/// A thread which will be dedicated to parse messages and synchronously wait for new data
+		/// Stores all messages produced by the packet parser pending to be 
+		/// processed by the main thread
 		/// </summary>
-		private Thread parserThread;
+		private ProducerConsumer<string> pendingMessages;
 
 		#endregion
 
@@ -67,6 +68,7 @@ namespace Blk.Engine
 			this.port = 0;
 			this.packetParser = new TcpPacketParser(this);
 			this.packetParser.StringReceived += new Action<string>(packetParser_StringReceived);
+			this.pendingMessages = new ProducerConsumer<string>();
 		}
 
 		/// <summary>
@@ -237,7 +239,10 @@ namespace Blk.Engine
 		/// </summary>
 		protected override void ParsePendingData()
 		{
-			// Handled by packetParser_StringReceived
+			string message = pendingMessages.Consume(100);
+			if (String.IsNullOrEmpty(message))
+				return;
+			ParseMessage(message);
 		}
 
 		/// <summary>
@@ -499,7 +504,7 @@ namespace Blk.Engine
 
 		private void packetParser_StringReceived(string message)
 		{
-			ParseMessage(message);
+			pendingMessages.Produce(message);
 		}
 
 		#region Socket Event Handler Functions
