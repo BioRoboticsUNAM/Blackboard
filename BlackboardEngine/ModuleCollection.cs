@@ -166,11 +166,11 @@ namespace Blk.Engine
 		/// <summary>
 		/// Raises when a IModule is addedd to the ModuleCollection
 		/// </summary>
-		public event IModuleAddRemoveEH ModuleAdded;
+		public event Action<IModuleClient> ModuleAdded;
 		/// <summary>
 		/// Raises when a IModule is removed from the ModuleCollection
 		/// </summary>
-		public event IModuleAddRemoveEH ModuleRemoved;
+		public event Action<IModuleClient> ModuleRemoved;
 
 		#endregion
 

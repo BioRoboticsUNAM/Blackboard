@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Net;
-using System.Net.Sockets;
 using System.IO;
 using System.Xml;
 
@@ -12,6 +11,7 @@ using Blk.Engine.Actions;
 using Blk.Engine.Remote;
 using Blk.Engine.SharedVariables;
 using Robotics;
+using Robotics.Sockets;
 using Robotics.Utilities;
 
 
@@ -75,7 +75,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Connection socket to the Blackboard
 		/// </summary>
-		private SocketTcpServer server;
+		private TcpServer server;
 		/// <summary>
 		/// Port where to accept incomming connections
 		/// </summary>
@@ -97,10 +97,6 @@ namespace Blk.Engine
 		/// </summary>
 		private int sendAttempts;
 		/// <summary>
-		/// Thread for parse messages received throug server
-		/// </summary>
-		private Thread threadMessageParser;
-		/// <summary>
 		/// Main Thread (manages startup and message redirection)
 		/// </summary>
 		private Thread mainThread;
@@ -117,17 +113,13 @@ namespace Blk.Engine
 		/// </summary>
 		private List<Response> responses;
 		/// <summary>
-		/// Stores messages received trough Blackboard server waiting to be parsed
+		/// Stores all data received trough Blackboard server and produces strings from it
 		/// </summary>
-		private ProducerConsumer<TcpPacket> dataReceived;
+		protected readonly TcpPacketParser packetParser;
 		/// <summary>
 		/// Indicates that the main thread has been started an is running
 		/// </summary>
 		private ManualResetEvent mainThreadRunningEvent;
-		/// <summary>
-		/// Indicates that the parser thread has been started an is running
-		/// </summary>
-		private ManualResetEvent parserThreadRunningEvent;
 		#endregion
 
 		#region Time Limit Vars
@@ -169,14 +161,15 @@ namespace Blk.Engine
 			this.prototypesLock = new ReaderWriterLock();
 			//modules.ModuleAdded += new ModuleClientAddRemoveEH(modules_ModuleAdded);
 			//modules.ModuleRemoved += new ModuleClientAddRemoveEH(modules_ModuleRemoved);
-			this.modules.ModuleAdded += new IModuleAddRemoveEH(modules_ModuleAdded);
-			this.modules.ModuleRemoved += new IModuleAddRemoveEH(modules_ModuleRemoved);
+			this.modules.ModuleAdded += new Action<IModuleClient>(modules_ModuleAdded);
+			this.modules.ModuleRemoved += new Action<IModuleClient>(modules_ModuleRemoved);
 			this.commandsPending = new ProducerConsumer<Command>(1000);
 			this.commandsWaiting = new List<Command>(100);
 			this.responses = new List<Response>(100);
 			this.log = new LogWriter();
 			this.log.VerbosityTreshold = verbosity;
-			this.dataReceived = new ProducerConsumer<TcpPacket>(1000);
+			this.packetParser = new TcpPacketParser(this);
+			this.packetParser.StringReceived += new Action<string>(packetParser_StringReceived);
 			this.retryQueue = new Queue<Response>(100);
 			this.sendAttempts = 0;
 			this.testTimeOut = TimeSpan.MinValue;
@@ -185,7 +178,6 @@ namespace Blk.Engine
 			this.shutdownSequence = new ShutdownSequenceManager(this);
 
 			this.mainThreadRunningEvent = new ManualResetEvent(false);
-			this.parserThreadRunningEvent = new ManualResetEvent(false);
 		}
 
 		/// <summary>
@@ -439,11 +431,11 @@ namespace Blk.Engine
 		/// <summary>
 		/// Raises when a client connects to Blackboard TCPServer
 		/// </summary>
-		public event TcpClientConnectedEventHandler ClientConnected;
+		public event EventHandler<TcpServer, IPEndPoint> ClientConnected;
 		/// <summary>
 		/// Raises when a client disconnects from Blackboard TCPServer
 		/// </summary>
-		public event TcpClientDisconnectedEventHandler ClientDisconnected;
+		public event EventHandler<TcpServer, IPEndPoint> ClientDisconnected;
 		/// <summary>
 		/// Raises when a Blackboard Module connects to the remote module
 		/// </summary>
@@ -455,7 +447,7 @@ namespace Blk.Engine
 		/// <summary>
 		/// Raises when this blackboard changes its status
 		/// </summary>
-		public event BlackboardStatusChangedEH StatusChanged;
+		public event Action<IBlackboard> StatusChanged;
 		/// <summary>
 		/// Raises when a Response for a received command is redirected
 		/// </summary>
@@ -544,7 +536,6 @@ namespace Blk.Engine
 
 			BeginStart();
 			this.mainThreadRunningEvent.WaitOne();
-			this.parserThreadRunningEvent.WaitOne();
 		}
 
 		/// <summary>
@@ -587,7 +578,7 @@ namespace Blk.Engine
 			*/
 
 			BeginStop();
-			while (!threadMessageParser.IsAlive || !mainThread.IsAlive) Thread.Sleep(1);
+			mainThread.Join(10000);
 		}
 		
 		/// <summary>
@@ -654,10 +645,10 @@ namespace Blk.Engine
 		/// </summary>
 		private void SetupServer()
 		{
-			server = new SocketTcpServer(port);
-			server.ClientConnected += new TcpClientConnectedEventHandler(server_ClientConnected);
-			server.ClientDisconnected += new TcpClientDisconnectedEventHandler(server_ClientDisconnected);
-			server.DataReceived += new TcpDataReceivedEventHandler(server_DataReceived);
+			server = new TcpServer(port);
+			server.ClientConnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientConnected);
+			server.ClientDisconnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientDisconnected);
+			server.DataReceived += new EventHandler<TcpServer, TcpPacket>(server_DataReceived);
 		}
 
 		#endregion
@@ -712,7 +703,7 @@ namespace Blk.Engine
 			// Execute RestartTest Actions
 			ExecuteRestartTestActions();
 			// Clear command list and messages queue
-			dataReceived.Clear();
+			packetParser.Stop();
 			lock (responses)
 			{
 				responses.Clear();
@@ -763,7 +754,7 @@ namespace Blk.Engine
 			// Restart modules and execute Restart Actions
 			RestartModules();
 			// Clear command list and messages queue
-			dataReceived.Clear();
+			packetParser.Stop();
 			lock(responses)
 				responses.Clear();
 			commandsPending.Clear();
@@ -1322,11 +1313,8 @@ namespace Blk.Engine
 		private void SetupThreads()
 		{
 			this.mainThread = new Thread(new ThreadStart(MainThreadTask));
-			this.threadMessageParser = new Thread(new ThreadStart(ThreadMessageParser));
 			this.mainThread.IsBackground = true;
-			this.threadMessageParser.IsBackground = true;
 			this.mainThreadRunningEvent.Reset();
-			this.parserThreadRunningEvent.Reset();
 		}
 
 		/// <summary>
@@ -1336,8 +1324,6 @@ namespace Blk.Engine
 		{
 			running = true;
 			mainThread.Start();
-			//this.mainThreadRunningEvent.WaitOne();
-			threadMessageParser.Start();
 		}
 
 		/// <summary>
@@ -1346,14 +1332,8 @@ namespace Blk.Engine
 		private void StopThreads(bool abort)
 		{
 			if (abort)
-			{
-				threadMessageParser.Abort();
 				mainThread.Abort();
-				
-			}
-			threadMessageParser.Join();
 			mainThread.Join();
-			
 		}
 		
 		/// <summary>
@@ -1382,7 +1362,6 @@ namespace Blk.Engine
 			Log.WriteLine(1, "Blackboard Started");
 			if(running)RunningStatus = BlackboardRunningStatus.Running;
             this.mainThreadRunningEvent.Set();
-            this.parserThreadRunningEvent.WaitOne();
 			this.StartupSequence.StartModules();
 
 			while (running)
@@ -1497,9 +1476,6 @@ namespace Blk.Engine
 
 			// Stop secondary threads
 			Log.WriteLine(4, "Stopping threads...");
-			this.threadMessageParser.Join(100);
-			if ((this.threadMessageParser != null) && this.threadMessageParser.IsAlive)
-				this.threadMessageParser.Abort();
 			Log.WriteLine(4, "Done!");
 
 			#endregion
@@ -1597,7 +1573,6 @@ namespace Blk.Engine
 			{
 				if ((server != null) && (server.Started))
 					server.Stop();
-				dataReceived.Clear();
 				commandsPending.Clear();
 				commandsWaiting.Clear();
 				SetupServer();
@@ -1613,54 +1588,6 @@ namespace Blk.Engine
 						if (!module.IsRunning) module.BeginStop();
 				}
 			}
-		}
-
-		/// <summary>
-		/// Thread for parse incomming messges
-		/// </summary>
-		private void ThreadMessageParser()
-		{
-			TcpPacket packet;
-			string message;
-			int i;
-
-			this.parserThreadRunningEvent.Set();
-			Log.WriteLine(4, "Message Parser Thread: Running");
-			while (running)
-			{
-				try
-				{
-					packet = dataReceived.Consume();
-					if (packet == null)
-						continue;
-					// Discard if not a text message
-					if (!packet.IsAnsi)
-						continue;
-					for (i = 0; i < packet.DataStrings.Length; ++i)
-					{
-						// Read the TEXT message
-						message = packet.DataStrings[i].Trim();
-						// Parse Text message
-						ParseMessage(message);
-					}
-				}
-				catch (ThreadInterruptedException tiex)
-				{
-					Log.WriteLine(8, "Message Parser Thread Interrupted: " + tiex.ToString());
-					continue;
-				}
-				catch (ThreadAbortException taex)
-				{
-					Log.WriteLine(8, "Message Parser Thread Aborted: " + taex.ToString());
-					return;
-				}
-				catch (Exception ex)
-				{
-					Log.WriteLine(1, ex.ToString());
-					Thread.Sleep(10);
-				}
-			}
-			Log.WriteLine(4, "Message Parser Thread: Stopped");
 		}
 
 		#endregion
@@ -1686,10 +1613,10 @@ namespace Blk.Engine
 			IPrototype[] aProto = module.Prototypes.ToArray();
 			foreach (IPrototype proto in aProto)
 				AddPrototype(module, proto);
-			module.CommandReceived += new CommandReceivedEH(module_CommandReceived);
-			module.ResponseReceived += new ResponseReceivedEH(module_ResponseReceived);
-			module.Started += new StatusChangedEH(module_Started);
-			module.Stopped += new StatusChangedEH(module_Stopped);
+			module.CommandReceived += new EventHandler<IModuleClient, ITextCommand>(module_CommandReceived);
+			module.ResponseReceived += new EventHandler<IModuleClient, ITextResponse>(module_ResponseReceived);
+			module.Started += new Action<IModuleClient>(module_Started);
+			module.Stopped += new Action<IModuleClient>(module_Stopped);
 			Log.WriteLine(1, "Added module: " + module.Name);
 		}
 
@@ -1708,8 +1635,8 @@ namespace Blk.Engine
 			IPrototype[] aProto = module.Prototypes.ToArray();
 			foreach (IPrototype proto in aProto)
 				RemovePrototype(proto);
-			module.CommandReceived -= new CommandReceivedEH(module_CommandReceived);
-			module.ResponseReceived -= new ResponseReceivedEH(module_ResponseReceived);
+			module.CommandReceived -= new EventHandler<IModuleClient, ITextCommand>(module_CommandReceived);
+			module.ResponseReceived -= new EventHandler<IModuleClient, ITextResponse>(module_ResponseReceived);
 			Log.WriteLine(1, "Removed module: " + module.Name);
 		}
 
@@ -1775,31 +1702,30 @@ namespace Blk.Engine
 
 		#endregion
 
+		private void packetParser_StringReceived(string message)
+		{
+			ParseMessage(message);
+		}
+
 		/// <summary>
 		/// Handles the received data trough blackboard Tcp Socket Server
 		/// </summary>
 		/// <param name="p">Tcp Packet received</param>
-		private void server_DataReceived(TcpPacket p)
+		private void server_DataReceived(TcpServer server, TcpPacket p)
 		{
-			if (p.IsAnsi)
-			{
-				dataReceived.Produce(p);
-				for(int i = 0; i < p.DataStrings.Length; ++i)
-					Log.WriteLine(5, "SERVER <= " + p.DataStrings[i]);
-				Log.WriteLine(6, dataReceived.Count.ToString() + " messages pending to parse");
-			}
+			packetParser.Enqueue(p);
 		}
 
 		/// <summary>
 		/// Handles the ClientConnected event when a Tcp Client connects to the blackboard
 		/// </summary>
 		/// <param name="s">Connection Socket</param>
-		private void server_ClientConnected(Socket s)
+		private void server_ClientConnected(TcpServer server, IPEndPoint ep)
 		{
-			if (ClientConnected != null) ClientConnected(s);
 			try
 			{
-				Log.WriteLine(4, "Client " + ((IPEndPoint)s.RemoteEndPoint).ToString() + " connected to Blackboard server ");
+				if (ClientConnected != null) ClientConnected(server, ep);
+				Log.WriteLine(4, "Client " + ep.ToString() + " connected to Blackboard server ");
 			}
 			catch { }
 		}
@@ -1808,11 +1734,12 @@ namespace Blk.Engine
 		/// Handles the ClientDisconnected event when a Tcp Client disconnects from the blackboard
 		/// </summary>
 		/// <param name="ep">Disconnection endpoint</param>
-		private void server_ClientDisconnected(EndPoint ep)
+		private void server_ClientDisconnected(TcpServer server, IPEndPoint ep)
 		{
-			if (ClientDisconnected != null) ClientDisconnected(ep);
+			packetParser.Stop(ep);
 			try
 			{
+				if (ClientDisconnected != null) ClientDisconnected(server, ep);
 				Log.WriteLine(5, "Client " + (ep.ToString() + " disconnected from Blackboard server "));
 			}
 			catch { }

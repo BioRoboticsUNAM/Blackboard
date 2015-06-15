@@ -1,13 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Net;
+using Robotics;
 
 namespace Blk.Api
 {
 	/// <summary>
 	/// Provides the base connection interface for modules.
 	/// </summary>
-	public interface IModuleClient : IComparable<IModuleClient>
+	public interface IModuleClient : IService, IComparable<IModuleClient>
 	{
 		#region Properties
 
@@ -54,11 +53,6 @@ namespace Blk.Api
 		/// Gets a value indicating if the module is running in the same machine as the blackboard
 		/// </summary>
 		bool IsLocal { get; }
-
-		/// <summary>
-		/// Tells if the the IModule is running
-		/// </summary>
-		bool IsRunning { get; }
 
 		/// <summary>
 		/// Gets the name of the Module
@@ -112,42 +106,42 @@ namespace Blk.Api
 		/// <summary>
 		/// Occurs when the IsAlive property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH AliveChanged;
+		event Action<IModuleClient> AliveChanged;
 
 		/// <summary>
 		/// Occurs when the Busy property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH BusyChanged;
+		event Action<IModuleClient> BusyChanged;
 
 		/// <summary>
 		/// Occurs when a Command is received trough socket
 		/// </summary>
-		event CommandReceivedEH CommandReceived;
+		event EventHandler<IModuleClient, ITextCommand> CommandReceived;
 
 		/// <summary>
 		/// Occurs when a Response is received trough socket
 		/// </summary>
-		event ResponseReceivedEH ResponseReceived;
+		event EventHandler<IModuleClient, ITextResponse> ResponseReceived;
 
 		/// <summary>
 		/// Occurs when the Ready property of a IModule object changes its value
 		/// </summary>
-		event StatusChangedEH ReadyChanged;
+		event Action<IModuleClient> ReadyChanged;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object changes
 		/// </summary>
-		event StatusChangedEH StatusChanged;
+		event Action<IModuleClient> StatusChanged;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object starts working
 		/// </summary>
-		event StatusChangedEH Started;
+		event Action<IModuleClient> Started;
 
 		/// <summary>
 		/// Occurs when the status of a IModule object stops working
 		/// </summary>
-		event StatusChangedEH Stopped;
+		event Action<IModuleClient> Stopped;
 
 		#endregion
 
@@ -158,18 +152,6 @@ namespace Blk.Api
 		/// If the IModuleConnector is not running, it has no effect.
 		/// </summary>
 		void BeginStop();
-
-		/// <summary>
-		/// Starts the socket connection and command management system.
-		/// If the IModuleConnector is already running, it has no effect.
-		/// </summary>
-		void Start();
-
-		/// <summary>
-		/// Stops the socket connection and command management system.
-		/// If the IModuleConnector is not running, it has no effect.
-		/// </summary>
-		void Stop();
 
 		/// <summary>
 		/// Sends a command to the module

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using Blk.Engine;
 using Blk.Engine.Remote;
 using Robotics;
 using Robotics.Controls;
+using Robotics.Sockets;
 using Robotics.Utilities;
 
 namespace BlackboardSatellite
@@ -22,7 +22,7 @@ namespace BlackboardSatellite
 		private ProducerConsumer<TcpPacket> dataReceived;
 		private Thread mainThread;
 		private bool running;
-		private SocketTcpServer server;
+		private TcpServer server;
 		private ProcessManager processManager;
 		private bool closeFlag;
 
@@ -64,10 +64,10 @@ namespace BlackboardSatellite
 
 		private void InitializeSockets()
 		{
-			this.server = new SocketTcpServer(2300);
-			this.server.DataReceived += new TcpDataReceivedEventHandler(server_DataReceived);
-			this.server.ClientConnected += new TcpClientConnectedEventHandler(server_ClientConnected);
-			this.server.ClientDisconnected += new TcpClientDisconnectedEventHandler(server_ClientDisconnected);
+			this.server = new TcpServer(2300);
+			this.server.DataReceived += new EventHandler<TcpServer, TcpPacket>(server_DataReceived);
+			this.server.ClientConnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientConnected);
+			this.server.ClientDisconnected += new EventHandler<TcpServer, IPEndPoint>(server_ClientDisconnected);
 			this.server.Start();
 		}
 
@@ -89,7 +89,7 @@ namespace BlackboardSatellite
 				packet = this.dataReceived.Consume(100);
 				if (packet == null)
 					continue;
-				foreach (string s in packet.DataStrings)
+				string s = System.Text.UTF8Encoding.UTF8.GetString(packet.Data);
 					Parse(s, packet.RemoteEndPoint);
 			}
 		}
@@ -200,17 +200,17 @@ namespace BlackboardSatellite
 
 		#region Socket event handlers
 
-		private void server_ClientDisconnected(System.Net.EndPoint ep)
+		private void server_ClientDisconnected(TcpServer server, IPEndPoint ep)
 		{
 			log.WriteLine("Disconnected client: " + ((ep != null) ? ep.ToString() : String.Empty));
 		}
 
-		private void server_ClientConnected(Socket s)
+		private void server_ClientConnected(TcpServer server, IPEndPoint ep)
 		{
-			log.WriteLine("Connected client: " + s.RemoteEndPoint.ToString());
+			log.WriteLine("Connected client: " + ep.ToString());
 		}
 
-		private void server_DataReceived(TcpPacket p)
+		private void server_DataReceived(TcpServer server, TcpPacket p)
 		{
 			dataReceived.Produce(p);
 			

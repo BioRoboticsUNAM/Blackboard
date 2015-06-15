@@ -118,60 +118,10 @@ namespace Blk.Api
 	/// <summary>
 	/// Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
 	/// </summary>
-	/// <param name="ip">The ip Address of the client</param>
-	public delegate void BlackboardClientCnnEH(IPAddress ip);
-
-	/// <summary>
-	/// Represents the method that will handle the StatusChanged event of a Blackboard object.
-	/// </summary>
-	/// <param name="blackboard">Blackboard which raised the event</param>
-	public delegate void BlackboardStatusChangedEH(IBlackboard blackboard);
-
-	/// <summary>
-	/// Represents the method that will handle the PrototypeCollectionStatusChanged event of a IPrototypeCollection object.
-	/// </summary>
-	/// <param name="collection">Collection which raised the event</param>
-	public delegate void PrototypeCollectionStatusChangedEH(IPrototypeCollection collection);
-
-	/// <summary>
-	/// Represents the method that will handle the CommandReceived event of a IModule object.
-	/// </summary>
-	/// <param name="sender">The module where the command has arrived</param>
-	/// <param name="c">Command received</param>
-	public delegate void CommandReceivedEH(IModuleClient sender, ITextCommand c);
-
-	/// <summary>
-	/// Represents the method that will handle the ModuleAdded and ModuleRemoved event of a ModuleCollection object.
-	/// </summary>
-	/// <param name="module"></param>
-	public delegate void IModuleAddRemoveEH(IModuleClient module);
-
-	/// <summary>
-	/// Represents the method that will handle the MessageReceived and MessageSent event of a Blackboard object.
-	/// </summary>
-	/// <param name="message">Message received/sent</param>
-	public delegate void MessageIOEH(ITextMessage message);
-
-	/// <summary>
-	/// Represents the method that will handle the ClientConnected and ClientDisconnected event of a Blackboard object.
-	/// </summary>
 	/// <param name="command">Command tried to be executed</param>
 	/// <param name="response">Response to command redirected</param>
 	/// <param name="sendResponseSuccess">Indicates if the response was sent successfully</param>
 	public delegate void ResponseRedirectedEH(ITextCommand command, ITextResponse response, bool sendResponseSuccess);
-
-	/// <summary>
-	/// Represents the method that will handle the ResponseReceived event of a IModule object.
-	/// </summary>
-	/// <param name="sender">The module where the response has arrived</param>
-	/// <param name="r">Response received</param>
-	public delegate void ResponseReceivedEH(IModuleClient sender, ITextResponse r);
-
-	/// <summary>
-	/// Represent the method that will handle the change of the status of a IModule object.
-	/// </summary>
-	/// <param name="sender">The IModule which status has changed</param>
-	public delegate void StatusChangedEH(IModuleClient sender);
 
 	#endregion
 }

@@ -93,7 +93,7 @@ namespace Blk.Gui
 		/// <summary>
 		/// Represents the SetupBlackboardModule method
 		/// </summary>
-		private IModuleAddRemoveEH dlgSetupBlackboardModule;
+		private Action<IModuleClient> dlgSetupBlackboardModule;
 		/// <summary>
 		/// Represents the MachineStatusList_MachineStatusAdded method. Used for async calls
 		/// </summary>
@@ -113,7 +113,7 @@ namespace Blk.Gui
 		/// <summary>
 		/// Represents the module_StatusChanged method. Used for async calls
 		/// </summary>
-		private StatusChangedEH dlgModuleStatusChanged;
+		private Action<IModuleClient> dlgModuleStatusChanged;
 
 #if !SPEED_UP
 		/// <summary>
@@ -173,9 +173,9 @@ namespace Blk.Gui
 			dlgMslMachineStatusRemoved = new MachineStatusAddRemoveEH(MachineStatusList_MachineStatusRemoved);
 			dlgMslMachineStatusChanged = new MachineStatusElementChangedEH(MachineStatusList_ElementChanged);
 			dlgBbStatusChanged = new VoidEventHandler(bbStatusChanged);
-			dlgModuleStatusChanged = new StatusChangedEH(module_StatusChanged);
+			dlgModuleStatusChanged = new Action<IModuleClient>(module_StatusChanged);
 			dlgShvSharedVariableAdded = new SharedVariableAddedEventHandler(SharedVariables_SharedVariableAdded);
-			dlgSetupBlackboardModule = new IModuleAddRemoveEH(SetupBlackboardModule);
+			dlgSetupBlackboardModule = new Action<IModuleClient>(SetupBlackboardModule);
 
 #if !SPEED_UP
 			this.redirectionHistoryColumn = lvwRedirectionHistory.Columns.IndexOf(chCommandSent);
@@ -926,8 +926,8 @@ namespace Blk.Gui
 		{
 			blackboard.Connected += new ModuleConnectionEH(blackboard_Connected);
 			blackboard.Disconnected += new ModuleConnectionEH(blackboard_Disconnected);
-			blackboard.StatusChanged += new BlackboardStatusChangedEH(blackboard_StatusChanged);
-			blackboard.Modules.ModuleAdded += new IModuleAddRemoveEH(BlackboardModuleAdded); ;
+			blackboard.StatusChanged += new Action<IBlackboard>(blackboard_StatusChanged);
+			blackboard.Modules.ModuleAdded += new Action<IModuleClient>(BlackboardModuleAdded); ;
 #if !SPEED_UP
 			blackboard.ResponseRedirected += new ResponseRedirectedEH(blackboard_ResponseRedirected);
 #endif
@@ -960,7 +960,7 @@ namespace Blk.Gui
 			}
 			ModuleClient mc = iModuleClient as ModuleClient;
 			if (mc == null) return;
-			mc.StatusChanged += new StatusChangedEH(module_StatusChanged);
+			mc.StatusChanged += new Action<IModuleClient>(module_StatusChanged);
 			AddModuleButton(mc);
 			AddSecondaryModuleButton(mc);
 			AddModuleMenu(mc);

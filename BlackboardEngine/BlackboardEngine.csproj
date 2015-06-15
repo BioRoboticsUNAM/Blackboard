@@ -101,6 +101,7 @@
     <Compile Include="SharedVariables\VariableListSharedVariable.cs" />
     <Compile Include="SharedVariables\WritersConverter.cs" />
     <Compile Include="StringArrayConverter.cs" />
+    <Compile Include="TcpPacketParser.cs" />
     <Compile Include="Validator.cs" />
   </ItemGroup>
   <ItemGroup>

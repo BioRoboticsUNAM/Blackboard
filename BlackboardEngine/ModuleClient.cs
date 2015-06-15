@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Robotics;
@@ -11,6 +10,7 @@ using Blk.Api;
 using Blk.Engine.Actions;
 using Blk.Engine.SharedVariables;
 using Robotics.Utilities;
+using Robotics.Sockets;
 
 namespace Blk.Engine
 {
@@ -664,12 +664,12 @@ namespace Blk.Engine
 		/// <summary>
 		/// Occurs when the IsAlive property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH AliveChanged;
+		public event Action<IModuleClient> AliveChanged;
 
 		/// <summary>
 		/// Occurs when the Busy property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH BusyChanged;
+		public event Action<IModuleClient> BusyChanged;
 
 		/// <summary>
 		/// Occurs when the Module connects to a Tcp Server
@@ -684,32 +684,32 @@ namespace Blk.Engine
 		/// <summary>
 		/// Occurs when a Command is received trough socket
 		/// </summary>
-		public event CommandReceivedEH CommandReceived;
+		public event EventHandler<IModuleClient, ITextCommand> CommandReceived;
 
 		/// <summary>
 		/// Occurs when the Ready property of a Module object changes its value
 		/// </summary>
-		public event StatusChangedEH ReadyChanged;
+		public event Action<IModuleClient> ReadyChanged;
 
 		/// <summary>
 		/// Occurs when a Response is received trough socket
 		/// </summary>
-		public event ResponseReceivedEH ResponseReceived;
+		public event EventHandler<IModuleClient, ITextResponse> ResponseReceived;
 
 		/// <summary>
 		/// Occurs when the status of a Module object changes
 		/// </summary>
-		public event StatusChangedEH StatusChanged;
+		public event Action<IModuleClient> StatusChanged;
 
 		/// <summary>
 		/// Occurs when the status of a Module object starts working
 		/// </summary>
-		public event StatusChangedEH Started;
+		public event Action<IModuleClient> Started;
 
 		/// <summary>
 		/// Occurs when the status of a Module object stops working
 		/// </summary>
-		public event StatusChangedEH Stopped;
+		public event Action<IModuleClient> Stopped;
 
 		#endregion
 
@@ -2118,6 +2118,10 @@ namespace Blk.Engine
 					// in the ParsePendingData method.
 					// Thread.Sleep(1);
 				}
+				catch (ThreadInterruptedException)
+				{
+					continue;
+				}
 				catch (ThreadAbortException)
 				{
 					Thread.ResetAbort();
@@ -2372,74 +2376,6 @@ namespace Blk.Engine
 		}
 
 		#endregion
-
-		/*
-
-		#region Static Variables
-
-		/// <summary>
-		/// Prototype for alive command/response
-		/// </summary>
-		protected static Prototype pttAlive = new Prototype("alive", true, true, 300, true);
-		/// <summary>
-		/// Prototype for bin command/response
-		/// </summary>
-		protected static Prototype pttBin = new Prototype("bin", true, true, 300, true);
-		/// <summary>
-		/// Prototype for busy command/response
-		/// </summary>
-		protected static Prototype pttBusy = new Prototype("busy", true, true, 300, true);
-		/// <summary>
-		/// Prototype for connected command/response
-		/// </summary>
-		protected static Prototype pttConnected = new Prototype("connected", true, true, 300, true);
-		/// <summary>
-		/// Prototype for ready command/response
-		/// </summary>
-		protected static Prototype pttReady = new Prototype("ready", true, true, 300, true);
-
-		#endregion
-
-		#region Static Properties
-
-		/// <summary>
-		/// Gets the Prototype object for alive command/response
-		/// </summary>
-		public static Prototype PrototypeAlive
-		{
-			get { return pttAlive; }
-		}
-		/// <summary>
-		/// Gets the Prototype object for bin command/response
-		/// </summary>
-		public static Prototype PrototypeBin
-		{
-			get { return pttBin; }
-		}
-		/// <summary>
-		/// Gets the Prototype object for busy command/response
-		/// </summary>
-		public static Prototype PrototypeBusy
-		{
-			get { return pttBusy; }
-		}
-		/// <summary>
-		/// Gets the Prototype object for connected command/response
-		/// </summary>
-		public static Prototype PrototypeConnected
-		{
-			get { return pttConnected; }
-		}
-		/// <summary>
-		/// Gets the Prototype object for ready command/response
-		/// </summary>
-		public static Prototype PrototypeReady
-		{
-			get { return pttReady; }
-		}
-
-		#endregion
-		*/
 	}
 }
 

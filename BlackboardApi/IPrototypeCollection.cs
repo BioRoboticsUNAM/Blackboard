@@ -45,7 +45,7 @@ namespace Blk.Api
 		/// <summary>
 		/// Occurs when the content of the collection changes
 		/// </summary>
-		event PrototypeCollectionStatusChangedEH PrototypeCollectionStatusChanged;
+		event Action<IPrototypeCollection> PrototypeCollectionStatusChanged;
 
 		#endregion
 
